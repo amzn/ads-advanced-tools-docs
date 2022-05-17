@@ -1,11 +1,18 @@
-## My Project
+# Amazon Ads advanced tools docs
 
-TODO: Fill this README out!
+This repository contains resources related to Amazon Ads advanced tools, including the Amazon Ads API and bulk operations. 
 
-Be sure to:
+For complete documentation on Amazon Ads advanced tools, see the [Amazon Ads Advanced Tools Center](https://advertising.amazon.com/API/docs/en-us/). This repository will be home to Postman collections, code artifacts, and other resources to supplement the documentation. 
 
-* Change the title in this README
-* Edit your repository description on GitHub
+To stay up to date on the latest additions, add yourself to this repository as a watcher. 
+
+## Contents
+
+- [Amazon Ads API Postman collection](postman)
+
+## Issues
+
+Developers are encouraged to open issues on the repository to make suggestions and report problems related to the documentation. Our team will monitor incoming issues to continuously improve the documentation.
 
 ## Security
 

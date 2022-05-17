@@ -1,0 +1,4030 @@
+{
+	"info": {
+		"name": "Amazon Ads API",
+		"description": "# Amazon Ads API Postman collection\n\nThis collection includes commonly used endpoints for the Amazon Ads API. The collection also includes pre- and post-request scripts to automate management of auth credentials.\n\nVisit the [Amazon Ads Advanced Tools Center](https://advertising.amazon.com/API/docs/en-us/) for API documentation.\n\n## Prerequisites\n\nThe following are required credentials for using this collection:\n\n*   A Login with Amazon client application approved to use the Amazon Ads API\n*   Login credentials for an Amazon user account that manages Amazon Ads accounts **or** a refresh token for the Amazon Ads API.\n\nFor information about acquiring credentials, see the [onboarding overview for the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/setting-up/overview).\n\n## Setup\n\nTo set up using an existing refresh token, follow the instructions on the [collection documentation on GitHub](https://github.com/amzn/ads-advanced-tools-docs/postman).\n\nTo set up using login credentials for an Amazon Ads account, see [Getting started using the Postman collection](https://advertising.amazon.com/API/docs/en-us/setting-up/using-postman-collection) in the Advanced Tools Center.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Auth grant login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response should return form login page\", function () {",
+									"      pm.response.to.not.be.error;",
+									"});",
+									"",
+									"console.log(`Authorization grant URL: \\n${pm.environment.get('auth_grant_url')}?scope=${pm.environment.get('permission_scope')}&response_type=code&client_id=${pm.environment.get('client_id')}&state=State&redirect_uri=${pm.environment.get('redirect_uri')}\\n`)"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const jar = pm.cookies.jar()",
+									"",
+									"jar.clear(pm.request.url, function (error) {",
+									"    ",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{auth_grant_url}}?scope={{permission_scope}}&response_type=code&client_id={{client_id}}&state=State&redirect_uri={{redirect_uri}}",
+							"host": [
+								"{{auth_grant_url}}"
+							],
+							"query": [
+								{
+									"key": "scope",
+									"value": "{{permission_scope}}"
+								},
+								{
+									"key": "response_type",
+									"value": "code"
+								},
+								{
+									"key": "client_id",
+									"value": "{{client_id}}"
+								},
+								{
+									"key": "state",
+									"value": "State"
+								},
+								{
+									"key": "redirect_uri",
+									"value": "{{redirect_uri}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Access token from auth grant code",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response should not be an error\", function () {",
+									"      pm.response.to.not.be.error;",
+									"});",
+									"",
+									"// The following script sets Postman environment variables to enable authorization for subsequent requests to the Amazon Ads API. Token freshness for subsequent requests is handled by a collection-level pre-request script. ",
+									"// See collection documentation for setup information. ",
+									"// For information about retrieving access tokens for the Amazon Ads API, see https://advertising.amazon.com/API/docs/en-us/concepts/authorization/access-tokens#retrieving-access-tokens",
+									"",
+									"const res = JSON.parse(responseBody);",
+									"if (res.access_token && res.refresh_token) {",
+									"    postman.setEnvironmentVariable(\"access_token\", res.access_token);",
+									"    postman.setEnvironmentVariable(\"refresh_token\", res.refresh_token);",
+									"    postman.setEnvironmentVariable(\"token_expires_at\", Date.now() + (res.expires_in * 1000) - 10000)",
+									"} else {",
+									"    console.log('Authorization failed.')",
+									"    console.log(res)",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "authorization_code",
+									"type": "text"
+								},
+								{
+									"key": "code",
+									"value": "",
+									"description": "An authorization code retrieved via Login with Amazon's authorization grant process.",
+									"type": "text"
+								},
+								{
+									"key": "redirect_uri",
+									"value": "{{redirect_uri}}",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{client_id}}",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{client_secret}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{token_url}}",
+							"host": [
+								"{{token_url}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Access token from refresh token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response should not be an error\", function () {",
+									"      pm.response.to.not.be.error;",
+									"});",
+									"",
+									"// The following script sets Postman environment variables to enable authorization for subsequent requests to the Amazon Ads API. ",
+									"// NOTE: This request is included for reference, but may not need to be run to use this collection -- token freshness is typically handled by a collection-level pre-request script. ",
+									"// See collection documentation for setup information. ",
+									"// For information about retrieving access tokens for the Amazon Ads API, see https://advertising.amazon.com/API/docs/en-us/concepts/authorization/access-tokens#retrieving-access-tokens",
+									"",
+									"const res = JSON.parse(responseBody);",
+									"if (res.access_token && res.refresh_token) {",
+									"    postman.setEnvironmentVariable(\"access_token\", res.access_token);",
+									"    postman.setEnvironmentVariable(\"refresh_token\", res.refresh_token);",
+									"    postman.setEnvironmentVariable(\"token_expires_at\", Date.now() + (res.expires_in * 1000) - 10000)",
+									"} else {",
+									"    console.log('Authorization failed.')",
+									"    console.log(res)",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "refresh_token",
+									"type": "text"
+								},
+								{
+									"key": "refresh_token",
+									"value": "{{refresh_token}}",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{client_id}}",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{client_secret}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{token_url}}",
+							"host": [
+								"{{token_url}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Authorization credentials for the Amazon Ads API are administered by Login with Amazon. The requests in the **Auth** folder are directed to Login with Amazon hosts rather than to the host specified for other requests to the API.\n\nLearn more about [Authorization in the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/concepts/authorization/overview).\n\n## Setup\n\nTo set up auth for this collection using the requests in this folder, see [Getting started using the Postman collection](https://advertising.amazon.com/API/docs/en-us/setting-up/using-postman-collection) in the Advanced Tools Center.\n\n## Using tokens in this collection\n\nOnce you have retrieved a refresh token, a pre-request script in this collection will refresh your access token automatically as needed."
+		},
+		{
+			"name": "Profiles",
+			"item": [
+				{
+					"name": "Profiles",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response should not be an error\", function () {",
+									"      pm.response.to.not.be.error;",
+									"});",
+									"",
+									"// This script sets the profileId that is used in the \"Amazon-Advertising-API-Scope\" header for subsequent calls to the Amazon Ads API. This header determines the marketplace in which the requested operation will be carried out. ",
+									"// By default, the *first* profile retrieved is used for this script.",
+									"// To use another profile, select the profileId for the appropriate account in the response body, then manually set profileId in the Postman environment to the desired value. To preserve the desired value, disable the script below or simply do not execute this request again.",
+									"// For more information on profiles in the Amazon Ads API, see https://advertising.amazon.com/API/docs/en-us/concepts/authorization/profiles",
+									"",
+									"const res = JSON.parse(responseBody);",
+									"",
+									"// if any profiles are retrieved, set profileId in environment to first profile retrieved",
+									"if (res.length) {",
+									"    postman.setEnvironmentVariable(\"profileId\", res[0].profileId)",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Amazon-Advertising-API-ClientId",
+								"value": "{{client_id}}",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "default",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/v2/profiles",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"v2",
+								"profiles"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Profiles in the Amazon Ads API represent an advertiser's account in a specific marketplace. Advertisers may have a single profile if they advertise in only one marketplace, or a separate profile for *each* marketplace if they advertise regionally or globally.\n\nProfiles play a crucial role in the Amazon Ads API by determining the management scope for a given call. A profile ID is a required credential to access an advertiser's data and services in a specific marketplace.\n\n[Learn more about profiles.](https://advertising.amazon.com/API/docs/en-us/concepts/authorization/profiles)\n\n## Using profiles in this collection\n\nThe **`GET` Profiles** request retrieves a list of all profiles within the API host's region that are associated with the advertiser whose permission is represented by the access token.\n\nBy default, a post-request script sets the `profileId` in your Postman environment to the ID of the _first_ profile retrieved. This value is used as the `Amazon-Advertising-API-Scope` header in all other requests.\n\nTo use a different profile ID, copy a `profileId` from a retrieved profile and use it to set the `profileId` variable in the Postman environment."
+		},
+		{
+			"name": "Reporting",
+			"item": [
+				{
+					"name": "Sponsored Products report",
+					"item": [
+						{
+							"name": "Request SP report",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"/*Tests that response is not an error*/",
+											"pm.test(\"response should return reportId\", function () {",
+											"      pm.response.to.not.be.error;",
+											"});",
+											"",
+											"/**Sets the returned reportId as an environment variable to be used in subsequent calls */",
+											"postman.clearEnvironmentVariable(\"reportId\");",
+											"var response = JSON.parse(responseBody);",
+											"",
+											"if (response && response.status === 'IN_PROGRESS') {",
+											"    postman.setEnvironmentVariable(\"reportId\", response.reportId);",
+											"    console.log('reportId = ' + pm.environment.get(\"reportId\"));",
+											"    ",
+											"    /**Sets GET report status as the next request */",
+											"    postman.setNextRequest(\"SP report status\")",
+											"}",
+											"else {",
+											"    console.log('Error requesting report with error = ' + response.description);",
+											"}",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"content-type": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"reportDate\":\"{{date}}\",\n    \"metrics\":\"clicks,cost,impressions\"\n}"
+								},
+								"url": {
+									"raw": "{{api_url}}/v2/sp/:recordType/report",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"v2",
+										"sp",
+										":recordType",
+										"report"
+									],
+									"variable": [
+										{
+											"key": "recordType",
+											"value": "{{recordType}}"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Keyword search term report",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"reportDate\":\"20220210\",\n    \"metrics\":\"clicks,cost,impressions\",\n    \"segment\":\"query\"\n}"
+										},
+										"url": {
+											"raw": "{{api_url}}/v2/sp/:recordType/report",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"v2",
+												"sp",
+												":recordType",
+												"report"
+											],
+											"variable": [
+												{
+													"key": "recordType",
+													"value": "keywords"
+												}
+											]
+										}
+									},
+									"status": "Accepted",
+									"code": 202,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 22 Feb 2022 19:00:46 GMT"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "HS7281KKSR28EXF3TEX5"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+										},
+										{
+											"key": "Permissions-Policy",
+											"value": "interest-cohort=()"
+										}
+									],
+									"cookie": [],
+									"body": "{\"reportId\":\"amzn1.clicksAPI.v1.p1.xxxxxxxxxxxxxx\",\"recordType\":\"keyword\",\"status\":\"IN_PROGRESS\",\"statusDetails\":\"Report is being generated.\"}"
+								},
+								{
+									"name": "ASIN report",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"reportDate\":\"20220210\",\n    \"metrics\":\"otherAsin,asin,attributedSales14dOtherSKU,attributedSales1dOtherSKU,attributedUnitsOrdered30dOtherSKU\",\n    \"campaignType\": \"sponsoredProducts\"\n}"
+										},
+										"url": {
+											"raw": "{{api_url}}/v2/sp/:recordType/report",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"v2",
+												"sp",
+												":recordType",
+												"report"
+											],
+											"variable": [
+												{
+													"key": "recordType",
+													"value": "asins"
+												}
+											]
+										}
+									},
+									"status": "Accepted",
+									"code": 202,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 22 Feb 2022 18:58:26 GMT"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "G28E9RFQ47MZE2AHKMSC"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+										},
+										{
+											"key": "Permissions-Policy",
+											"value": "interest-cohort=()"
+										}
+									],
+									"cookie": [],
+									"body": "{\"reportId\":\"amzn1.clicksAPI.v1.p1.xxxxxxxxxxxxxxxx\",\"recordType\":\"otherAsin\",\"status\":\"IN_PROGRESS\",\"statusDetails\":\"Report is being generated.\"}"
+								},
+								{
+									"name": "Campaign report",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"reportDate\":\"20220210\",\n    \"metrics\":\"clicks,cost,impressions\"\n}"
+										},
+										"url": {
+											"raw": "{{api_url}}/v2/sp/:recordType/report",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"v2",
+												"sp",
+												":recordType",
+												"report"
+											],
+											"variable": [
+												{
+													"key": "recordType",
+													"value": "campaigns"
+												}
+											]
+										}
+									},
+									"status": "Accepted",
+									"code": 202,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 22 Feb 2022 19:01:40 GMT"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "7S7M1HPV4VP8RG0SF642"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+										},
+										{
+											"key": "Permissions-Policy",
+											"value": "interest-cohort=()"
+										}
+									],
+									"cookie": [],
+									"body": "{\"reportId\":\"amzn1.clicksAPI.v1.p1.xxxxxxxxxxxxxxxx\",\"recordType\":\"campaign\",\"status\":\"IN_PROGRESS\",\"statusDetails\":\"Report is being generated.\"}"
+								}
+							]
+						},
+						{
+							"name": "SP report status",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"/*Tests that response is not an error*/",
+											"pm.test(\"Response should return status\", function () {",
+											"      pm.response.to.not.be.error;",
+											"});",
+											"",
+											"/* If report has finished generating, set next response to \"Download report,\" else wait thirty seconds and check the status again.*/",
+											"var numTries = 0; ",
+											"const sleepBetweenTries = 30000;",
+											"",
+											"const jsonResponse = JSON.parse(responseBody);",
+											"",
+											"if (jsonResponse.status === \"SUCCESS\") {",
+											"    postman.setNextRequest(\"Download SP report\");",
+											"} else if (jsonResponse.status === \"IN_PROGRESS\" && numTries < 5) {",
+											"    setTimeout(function() {}, sleepBetweenTries);",
+											"    numTries += 1;",
+											"    postman.setNextRequest(\"SP report status\");",
+											"} else {",
+											"    postman.setNextRequest()",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									}
+								],
+								"url": {
+									"raw": "{{api_url}}/v2/reports/:reportId",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"v2",
+										"reports",
+										":reportId"
+									],
+									"variable": [
+										{
+											"key": "reportId",
+											"value": "{{reportId}}"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "In progress",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											}
+										],
+										"url": {
+											"raw": "{{api_url}}/v2/reports/:reportId",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"v2",
+												"reports",
+												":reportId"
+											],
+											"variable": [
+												{
+													"key": "reportId",
+													"value": "{{reportId}}"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 22 Feb 2022 19:09:26 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "EXFMZ0VHKD0Q9NTB6EF4"
+										},
+										{
+											"key": "x-amz-request-id",
+											"value": "EXFMZ0VHKD0Q9NTB6EF4"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+										},
+										{
+											"key": "Permissions-Policy",
+											"value": "interest-cohort=()"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"reportId\": \"amzn1.clicksAPI.v1.p1.xxxxxxxxxxx\",\n    \"status\": \"IN_PROGRESS\",\n    \"statusDetails\": \"Report generation is in progress.\"\n}"
+								},
+								{
+									"name": "Complete",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											}
+										],
+										"url": {
+											"raw": "{{api_url}}/v2/reports/:reportId",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"v2",
+												"reports",
+												":reportId"
+											],
+											"variable": [
+												{
+													"key": "reportId",
+													"value": "{{reportId}}"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 22 Feb 2022 19:17:17 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "SVV9411Y1ME1FX16X01P"
+										},
+										{
+											"key": "x-amz-request-id",
+											"value": "SVV9411Y1ME1FX16X01P"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+										},
+										{
+											"key": "Permissions-Policy",
+											"value": "interest-cohort=()"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"reportId\": \"amzn1.clicksAPI.v1.p1.xxxxxxxxxxxxxx\",\n    \"status\": \"SUCCESS\",\n    \"statusDetails\": \"Report has been successfully generated.\",\n    \"location\": \"https://advertising-api.amazon.com/v1/reports/amzn1.clicksAPI.v1.p1.xxxxxxxxxxxxxx/download\",\n    \"fileSize\": 222,\n    \"expiration\": 1653350400000\n}"
+								}
+							]
+						},
+						{
+							"name": "Download SP report",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"/*Tests that response is not an error*/",
+											"pm.test(\"Response should return status\", function () {",
+											"      pm.response.to.not.be.error;",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									}
+								],
+								"url": {
+									"raw": "{{api_url}}/v2/reports/:reportId/download",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"v2",
+										"reports",
+										":reportId",
+										"download"
+									],
+									"variable": [
+										{
+											"key": "reportId",
+											"value": "{{reportId}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Sponsored Brands report",
+					"item": [
+						{
+							"name": "Request SB report",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"/*Tests that response is not an error*/",
+											"pm.test(\"Response should return reportId\", function () {",
+											"      pm.response.to.not.be.error;",
+											"});",
+											"",
+											"/**Sets the returned reportId as an environment variable to be used in subsequent calls */",
+											"postman.clearEnvironmentVariable(\"reportId\");",
+											"var response = JSON.parse(responseBody);",
+											"",
+											"if (response && response.status === 'IN_PROGRESS') {",
+											"    postman.setEnvironmentVariable(\"reportId\", response.reportId);",
+											"    console.log('reportId = ' + pm.environment.get(\"reportId\"));",
+											"}",
+											"else {",
+											"    console.log('Error requesting report with error = ' + response.description);",
+											"}",
+											"",
+											"/**Sets GET report status as the next request */",
+											"postman.setNextRequest(\"SB report status\")"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"content-type": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"reportDate\":\"{{date}}\",\n    \"metrics\":\"impressions,clicks,cost,attributedSales14d,attributedConversions14d\"\n}"
+								},
+								"url": {
+									"raw": "{{api_url}}/v2/hsa/:recordType/report",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"v2",
+										"hsa",
+										":recordType",
+										"report"
+									],
+									"variable": [
+										{
+											"key": "recordType",
+											"value": "{{recordType}}"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Campaign report (video)",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"reportDate\":\"20220210\",\n    \"metrics\":\"impressions,clicks,cost,attributedSales14d,attributedConversions14d\",\n    \"creativeType\":\"video\"\n}"
+										},
+										"url": {
+											"raw": "{{api_url}}/v2/hsa/:recordType/report",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"v2",
+												"hsa",
+												":recordType",
+												"report"
+											],
+											"variable": [
+												{
+													"key": "recordType",
+													"value": "campaigns"
+												}
+											]
+										}
+									},
+									"status": "Accepted",
+									"code": 202,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 22 Feb 2022 19:04:30 GMT"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "7H9R13RS3C9G805AJ5GD"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+										},
+										{
+											"key": "Permissions-Policy",
+											"value": "interest-cohort=()"
+										}
+									],
+									"cookie": [],
+									"body": "{\"reportId\":\"amzn1.clicksAPI.v1.p1.xxxxxxxxxxxxxx\",\"recordType\":\"campaign\",\"status\":\"IN_PROGRESS\",\"statusDetails\":\"Report is being generated.\"}"
+								},
+								{
+									"name": "Placement report",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"reportDate\":\"20220210\",\n    \"metrics\":\"impressions,clicks,cost,attributedSales14d,attributedConversions14d\",\n    \"segment\":\"placement\"\n}"
+										},
+										"url": {
+											"raw": "{{api_url}}/v2/hsa/:recordType/report",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"v2",
+												"hsa",
+												":recordType",
+												"report"
+											],
+											"variable": [
+												{
+													"key": "recordType",
+													"value": "campaigns"
+												}
+											]
+										}
+									},
+									"status": "Accepted",
+									"code": 202,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 22 Feb 2022 19:03:34 GMT"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "NA52PG23YJ6TJDVG1GAC"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+										},
+										{
+											"key": "Permissions-Policy",
+											"value": "interest-cohort=()"
+										}
+									],
+									"cookie": [],
+									"body": "{\"reportId\":\"amzn1.clicksAPI.v1.p1.xxxxxxxxxxxxx\",\"recordType\":\"campaign\",\"status\":\"IN_PROGRESS\",\"statusDetails\":\"Report is being generated.\"}"
+								}
+							]
+						},
+						{
+							"name": "SB report status",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"/*Tests that response is not an error*/",
+											"pm.test(\"Response should return status\", function () {",
+											"      pm.response.to.not.be.error;",
+											"});",
+											"",
+											"/* If report has finished generating, set next response to \"Download report,\" else wait thirty seconds and check the status again.*/",
+											"var numTries = 0; ",
+											"const sleepBetweenTries = 30000;",
+											"",
+											"const jsonResponse = JSON.parse(responseBody);",
+											"",
+											"if (jsonResponse.status === \"SUCCESS\") {",
+											"    postman.setNextRequest(\"Download SB report\");",
+											"} else if (jsonResponse.status === \"IN_PROGRESS\" && numTries < 5) {",
+											"    setTimeout(function() {}, sleepBetweenTries);",
+											"    numTries += 1;",
+											"    postman.setNextRequest(\"SB report status\");",
+											"} else {",
+											"    postman.setNextRequest()",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									}
+								],
+								"url": {
+									"raw": "{{api_url}}/v2/reports/:reportId",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"v2",
+										"reports",
+										":reportId"
+									],
+									"variable": [
+										{
+											"key": "reportId",
+											"value": "{{reportId}}"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "In progress",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											}
+										],
+										"url": {
+											"raw": "{{api_url}}/v2/reports/:reportId",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"v2",
+												"reports",
+												":reportId"
+											],
+											"variable": [
+												{
+													"key": "reportId",
+													"value": "{{reportId}}"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 22 Feb 2022 19:09:26 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "EXFMZ0VHKD0Q9NTB6EF4"
+										},
+										{
+											"key": "x-amz-request-id",
+											"value": "EXFMZ0VHKD0Q9NTB6EF4"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+										},
+										{
+											"key": "Permissions-Policy",
+											"value": "interest-cohort=()"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"reportId\": \"amzn1.clicksAPI.v1.p1.xxxxxxxxxxx\",\n    \"status\": \"IN_PROGRESS\",\n    \"statusDetails\": \"Report generation is in progress.\"\n}"
+								},
+								{
+									"name": "Complete",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											}
+										],
+										"url": {
+											"raw": "{{api_url}}/v2/reports/:reportId",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"v2",
+												"reports",
+												":reportId"
+											],
+											"variable": [
+												{
+													"key": "reportId",
+													"value": "{{reportId}}"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 22 Feb 2022 19:17:17 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "SVV9411Y1ME1FX16X01P"
+										},
+										{
+											"key": "x-amz-request-id",
+											"value": "SVV9411Y1ME1FX16X01P"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+										},
+										{
+											"key": "Permissions-Policy",
+											"value": "interest-cohort=()"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"reportId\": \"amzn1.clicksAPI.v1.p1.xxxxxxxxxxxxxx\",\n    \"status\": \"SUCCESS\",\n    \"statusDetails\": \"Report has been successfully generated.\",\n    \"location\": \"https://advertising-api.amazon.com/v1/reports/amzn1.clicksAPI.v1.p1.xxxxxxxxxxxxxx/download\",\n    \"fileSize\": 222,\n    \"expiration\": 1653350400000\n}"
+								}
+							]
+						},
+						{
+							"name": "Download SB report",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									}
+								],
+								"url": {
+									"raw": "{{api_url}}/v2/reports/:reportId/download",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"v2",
+										"reports",
+										":reportId",
+										"download"
+									],
+									"variable": [
+										{
+											"key": "reportId",
+											"value": "{{reportId}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Sponsored Display report",
+					"item": [
+						{
+							"name": "Sponsored Display report",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"/*Tests that response is not an error*/",
+											"pm.test(\"Response should return reportId\", function () {",
+											"      pm.response.to.not.be.error;",
+											"});",
+											"",
+											"/**Sets the returned reportId as an environment variable to be used in subsequent calls */",
+											"postman.clearEnvironmentVariable(\"reportId\");",
+											"var response = JSON.parse(responseBody);",
+											"",
+											"if (response && response.status === 'IN_PROGRESS') {",
+											"    postman.setEnvironmentVariable(\"reportId\", response.reportId);",
+											"    console.log('reportId = ' + pm.environment.get(\"reportId\"));",
+											"        ",
+											"    /**Sets GET report status as the next request */",
+											"    postman.setNextRequest(\"Report status\")",
+											"}",
+											"else {",
+											"    console.log('Error requesting report with error = ' + response.description);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"content-type": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"reportDate\": \"{{date}}\",\n    \"metrics\": \"impressions,clicks,cost,attributedDetailPageView14d\",\n    \"tactic\": \"T00030\"\n}"
+								},
+								"url": {
+									"raw": "{{api_url}}/v2/sd/:recordType/report",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"v2",
+										"sd",
+										":recordType",
+										"report"
+									],
+									"variable": [
+										{
+											"key": "recordType",
+											"value": "{{recordType}}"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Campaign report (product targeting)",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"reportDate\": \"20220210\",\n    \"metrics\": \"campaignId,impressions,clicks,cost\",\n    \"tactic\": \"T00030\"\n}"
+										},
+										"url": {
+											"raw": "{{api_url}}/v2/sd/:recordType/report",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"v2",
+												"sd",
+												":recordType",
+												"report"
+											],
+											"variable": [
+												{
+													"key": "recordType",
+													"value": "campaigns"
+												}
+											]
+										}
+									},
+									"status": "Accepted",
+									"code": 202,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 22 Feb 2022 19:06:16 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "ZQQZ2P1NE4XRV6JYDDV3"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+										},
+										{
+											"key": "Permissions-Policy",
+											"value": "interest-cohort=()"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"reportId\": \"amzn1.sdAPI.v1.p1.62153428.c07f01eb-2fec-4296-acd2-611208606c30\",\n    \"recordType\": \"campaigns\",\n    \"status\": \"IN_PROGRESS\",\n    \"statusDetails\": \"Report is being generated.\"\n}"
+								},
+								{
+									"name": "Product ad report (audience targeting)",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"reportDate\": \"20220210\",\n    \"metrics\": \"adId,impressions,clicks,cost\",\n    \"tactic\": \"T00030\"\n}"
+										},
+										"url": {
+											"raw": "{{api_url}}/v2/sd/:recordType/report",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"v2",
+												"sd",
+												":recordType",
+												"report"
+											],
+											"variable": [
+												{
+													"key": "recordType",
+													"value": "productAds"
+												}
+											]
+										}
+									},
+									"status": "Accepted",
+									"code": 202,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 22 Feb 2022 19:07:42 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "X41V5W3CFBWTSW17BSH4"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+										},
+										{
+											"key": "Permissions-Policy",
+											"value": "interest-cohort=()"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"reportId\": \"amzn1.sdAPI.v1.p1.6215347E.d8949d61-ef32-49ff-b043-73515a2a5634\",\n    \"recordType\": \"productAds\",\n    \"status\": \"IN_PROGRESS\",\n    \"statusDetails\": \"Report is being generated.\"\n}"
+								}
+							]
+						},
+						{
+							"name": "SD report status",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"/*Tests that response is not an error*/",
+											"pm.test(\"Response should return status\", function () {",
+											"      pm.response.to.not.be.error;",
+											"});",
+											"",
+											"/* If report has finished generating, set next response to \"Download report,\" else wait thirty seconds and check the status again.*/",
+											"var numTries = 0; ",
+											"const sleepBetweenTries = 30000;",
+											"",
+											"const jsonResponse = JSON.parse(responseBody);",
+											"",
+											"if (jsonResponse.status === \"SUCCESS\") {",
+											"    postman.setNextRequest(\"Download SD report\");",
+											"} else if (jsonResponse.status === \"IN_PROGRESS\" && numTries < 5) {",
+											"    setTimeout(function() {}, sleepBetweenTries);",
+											"    numTries += 1;",
+											"    postman.setNextRequest(\"SD report status\");",
+											"} else {",
+											"    postman.setNextRequest()",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									}
+								],
+								"url": {
+									"raw": "{{api_url}}/v2/reports/:reportId",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"v2",
+										"reports",
+										":reportId"
+									],
+									"variable": [
+										{
+											"key": "reportId",
+											"value": "{{reportId}}"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "In progress",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											}
+										],
+										"url": {
+											"raw": "{{api_url}}/v2/reports/:reportId",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"v2",
+												"reports",
+												":reportId"
+											],
+											"variable": [
+												{
+													"key": "reportId",
+													"value": "{{reportId}}"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 22 Feb 2022 19:09:26 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "EXFMZ0VHKD0Q9NTB6EF4"
+										},
+										{
+											"key": "x-amz-request-id",
+											"value": "EXFMZ0VHKD0Q9NTB6EF4"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+										},
+										{
+											"key": "Permissions-Policy",
+											"value": "interest-cohort=()"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"reportId\": \"amzn1.clicksAPI.v1.p1.xxxxxxxxxxx\",\n    \"status\": \"IN_PROGRESS\",\n    \"statusDetails\": \"Report generation is in progress.\"\n}"
+								},
+								{
+									"name": "Complete",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											}
+										],
+										"url": {
+											"raw": "{{api_url}}/v2/reports/:reportId",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"v2",
+												"reports",
+												":reportId"
+											],
+											"variable": [
+												{
+													"key": "reportId",
+													"value": "{{reportId}}"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 22 Feb 2022 19:17:17 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "SVV9411Y1ME1FX16X01P"
+										},
+										{
+											"key": "x-amz-request-id",
+											"value": "SVV9411Y1ME1FX16X01P"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+										},
+										{
+											"key": "Permissions-Policy",
+											"value": "interest-cohort=()"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"reportId\": \"amzn1.clicksAPI.v1.p1.xxxxxxxxxxxxxx\",\n    \"status\": \"SUCCESS\",\n    \"statusDetails\": \"Report has been successfully generated.\",\n    \"location\": \"https://advertising-api.amazon.com/v1/reports/amzn1.clicksAPI.v1.p1.xxxxxxxxxxxxxx/download\",\n    \"fileSize\": 222,\n    \"expiration\": 1653350400000\n}"
+								}
+							]
+						},
+						{
+							"name": "Download SD report",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									}
+								],
+								"url": {
+									"raw": "{{api_url}}/v2/reports/:reportId/download",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"v2",
+										"reports",
+										":reportId",
+										"download"
+									],
+									"variable": [
+										{
+											"key": "reportId",
+											"value": "{{reportId}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Snapshots",
+			"item": [
+				{
+					"name": "Sponsored Products",
+					"item": [
+						{
+							"name": "Request SP snapshot",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"/**Sets the returned snapshotId as an environment variable to be used in subsequent calls */",
+											"postman.clearEnvironmentVariable(\"snapshotId\");",
+											"var response = JSON.parse(responseBody);",
+											"",
+											"if (response && response.status === 'IN_PROGRESS') {",
+											"    postman.setEnvironmentVariable(\"snapshotId\", response.snapshotId);",
+											"    console.log('snapshotId = ' + pm.environment.get(\"snapshotId\"));",
+											"",
+											"    /**Sets GET snapshot status as the next request */",
+											"    postman.setNextRequest(\"SP snapshot status\")",
+											"}",
+											"else {",
+											"    console.log('Error creating campaign with error = ' + response.description);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"content-type": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n}"
+								},
+								"url": {
+									"raw": "{{api_url}}/v2/sp/:recordType/snapshot",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"v2",
+										"sp",
+										":recordType",
+										"snapshot"
+									],
+									"variable": [
+										{
+											"key": "recordType",
+											"value": "{{recordType}}"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Ad group snapshot",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"stateFilter\": \"enabled,paused\"\n}"
+										},
+										"url": {
+											"raw": "{{api_url}}/v2/sp/:recordType/snapshot",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"v2",
+												"sp",
+												":recordType",
+												"snapshot"
+											],
+											"variable": [
+												{
+													"key": "recordType",
+													"value": "adGroups"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 22 Feb 2022 19:14:08 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "A5AH8DN6FFFQ4J2KACHF"
+										},
+										{
+											"key": "x-amz-request-id",
+											"value": "A5AH8DN6FFFQ4J2KACHF"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+										},
+										{
+											"key": "Permissions-Policy",
+											"value": "interest-cohort=()"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"snapshotId\": \"amzn1.clicksAPI.v1.p1.xxxxxxxxxxx\",\n    \"recordType\": \"adGroup\",\n    \"status\": \"IN_PROGRESS\"\n}"
+								},
+								{
+									"name": "Target snapshot",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n}"
+										},
+										"url": {
+											"raw": "{{api_url}}/v2/sp/:recordType/snapshot",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"v2",
+												"sp",
+												":recordType",
+												"snapshot"
+											],
+											"variable": [
+												{
+													"key": "recordType",
+													"value": "targets"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 22 Feb 2022 19:14:40 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "7TX94YMEAW088DKS4Q3R"
+										},
+										{
+											"key": "x-amz-request-id",
+											"value": "7TX94YMEAW088DKS4Q3R"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+										},
+										{
+											"key": "Permissions-Policy",
+											"value": "interest-cohort=()"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"snapshotId\": \"amzn1.clicksAPI.v1.p1.xxxxxxxxxxx\",\n    \"recordType\": \"targets\",\n    \"status\": \"IN_PROGRESS\"\n}"
+								}
+							]
+						},
+						{
+							"name": "SP snapshot status",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"/* If snapshot has finished generating, set next response to \"Download report,\" else wait thirty seconds and check the status again.*/",
+											"const maxNumberOfTries = 5; ",
+											"const sleepBetweenTries = 30000;",
+											"",
+											"const jsonResponse = JSON.parse(responseBody);",
+											"",
+											"if (jsonResponse.status === \"SUCCESS\") {",
+											"    postman.setNextRequest(\"Download SP snapshot\");",
+											"} else {",
+											"    setTimeout(function() {}, sleepBetweenTries);",
+											"    postman.setNextRequest(\"SP snapshot status\");",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true,
+								"disabledSystemHeaders": {
+									"content-type": true
+								}
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{api_url}}/v2/sp/snapshots/:snapshotId",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"v2",
+										"sp",
+										"snapshots",
+										":snapshotId"
+									],
+									"variable": [
+										{
+											"key": "snapshotId",
+											"value": "{{snapshotId}}"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Complete",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											}
+										],
+										"url": {
+											"raw": "{{api_url}}/v2/sp/snapshots/:snapshotId",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"v2",
+												"sp",
+												"snapshots",
+												":snapshotId"
+											],
+											"variable": [
+												{
+													"key": "snapshotId",
+													"value": "{{snapshotId}}"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 22 Feb 2022 19:18:33 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "FJAZ0ZME89AKEZXVK7KY"
+										},
+										{
+											"key": "x-amz-request-id",
+											"value": "FJAZ0ZME89AKEZXVK7KY"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+										},
+										{
+											"key": "Permissions-Policy",
+											"value": "interest-cohort=()"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"snapshotId\": \"amzn1.clicksAPI.v1.p1.xxxxxxxxxxxxxxx\",\n    \"status\": \"SUCCESS\",\n    \"statusDetails\": \"Snapshot has been successfully generated.\",\n    \"location\": \"https://advertising-api.amazon.com/v1/snapshots/amzn1.clicksAPI.v1.p1.xxxxxxxxxxxxxxx/download\",\n    \"fileSize\": 128,\n    \"expiration\": 1653350400000\n}"
+								}
+							]
+						},
+						{
+							"name": "Download SP snapshot",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true,
+								"disabledSystemHeaders": {
+									"content-type": true
+								}
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{api_url}}/v2/sp/snapshots/:snapshotId/download",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"v2",
+										"sp",
+										"snapshots",
+										":snapshotId",
+										"download"
+									],
+									"variable": [
+										{
+											"key": "snapshotId",
+											"value": "{{snapshotId}}"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Campaign snapshot",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											}
+										],
+										"url": {
+											"raw": "{{api_url}}/v2/sp/snapshots/:snapshotId/download",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"v2",
+												"sp",
+												"snapshots",
+												":snapshotId",
+												"download"
+											],
+											"variable": [
+												{
+													"key": "snapshotId",
+													"value": "{{snapshotId}}"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "x-amz-id-2",
+											"value": "BHYo4bgxfiGRFqrPh//IE1LXuU0+6js5+6ryuHaKxTg7vPXioHeJGKOjQtj4kUR3jY5jcxoFO+A="
+										},
+										{
+											"key": "x-amz-request-id",
+											"value": "B6K1VV5G5X9WPEZ5"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 22 Feb 2022 19:20:52 GMT"
+										},
+										{
+											"key": "Last-Modified",
+											"value": "Tue, 22 Feb 2022 19:20:33 GMT"
+										},
+										{
+											"key": "x-amz-expiration",
+											"value": "expiry-date=\"Tue, 24 May 2022 00:00:00 GMT\", rule-id=\"90 Day Retention Policy\""
+										},
+										{
+											"key": "ETag",
+											"value": "\"1b44cb4d27998d6044fdcd0e10ebe40f\""
+										},
+										{
+											"key": "Content-Encoding",
+											"value": "gzip"
+										},
+										{
+											"key": "Accept-Ranges",
+											"value": "bytes"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Server",
+											"value": "AmazonS3"
+										},
+										{
+											"key": "Content-Length",
+											"value": "288"
+										}
+									],
+									"cookie": [],
+									"body": "[\n    {\n        \"campaignId\": 250761521553085,\n        \"name\": \"SpTestCampaign-26/01/2022 15:39:03\",\n        \"campaignType\": \"sponsoredProducts\",\n        \"targetingType\": \"manual\",\n        \"premiumBidAdjustment\": true,\n        \"dailyBudget\": 100,\n        \"startDate\": \"20220126\",\n        \"state\": \"enabled\",\n        \"bidding\": {\n            \"strategy\": \"autoForSales\",\n            \"adjustments\": [\n                {\n                    \"predicate\": \"placementTop\",\n                    \"percentage\": 50\n                }\n            ]\n        }\n    },\n    {\n        \"campaignId\": 245115598954013,\n        \"name\": \"SpTestCampaign-16/11/2021 14:42:49\",\n        \"campaignType\": \"sponsoredProducts\",\n        \"targetingType\": \"manual\",\n        \"premiumBidAdjustment\": true,\n        \"dailyBudget\": 100,\n        \"startDate\": \"20211116\",\n        \"state\": \"enabled\",\n        \"bidding\": {\n            \"strategy\": \"autoForSales\",\n            \"adjustments\": [\n                {\n                    \"predicate\": \"placementTop\",\n                    \"percentage\": 50\n                }\n            ]\n        }\n    }\n]"
+								}
+							]
+						}
+					],
+					"description": "See the [Amazon Ads API reference](https://advertising.amazon.com/API/docs/en-us/sponsored-products/2-0/openapi#/Snapshots) for full Sponsored Products snapshot documentation."
+				},
+				{
+					"name": "Sponsored Display",
+					"item": [
+						{
+							"name": "Request SD snapshot",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"/**Sets the returned snapshotId as an environment variable to be used in subsequent calls */",
+											"postman.clearEnvironmentVariable(\"snapshotId\");",
+											"var response = JSON.parse(responseBody);",
+											"",
+											"if (response && response.status === 'IN_PROGRESS') {",
+											"    postman.setEnvironmentVariable(\"snapshotId\", response.snapshotId);",
+											"    console.log('snapshotId = ' + pm.environment.get(\"snapshotId\"));",
+											"",
+											"    /**Sets GET snapshot status as the next request */",
+											"    postman.setNextRequest(\"SD snapshot status\")",
+											"}",
+											"else {",
+											"    console.log('Error creating campaign with error = ' + response.description);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"content-type": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"tactic\":\"T00030\"\n}"
+								},
+								"url": {
+									"raw": "{{api_url}}/sd/:recordType/snapshot",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sd",
+										":recordType",
+										"snapshot"
+									],
+									"variable": [
+										{
+											"key": "recordType",
+											"value": "{{recordType}}"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Target snapshot",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"tactic\":\"T00030\"\n}"
+										},
+										"url": {
+											"raw": "{{api_url}}/sd/:recordType/snapshot",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sd",
+												":recordType",
+												"snapshot"
+											],
+											"variable": [
+												{
+													"key": "recordType",
+													"value": "targets"
+												}
+											]
+										}
+									},
+									"status": "Accepted",
+									"code": 202,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 22 Feb 2022 19:22:18 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "180"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "FBRFTYV4VVTPDDN76W16"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "f7f051f8-5945-4d58-95d4-4376245a8ecc"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "N9WsnF2_IAMFcXw="
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-621537ea-9505806191d53bb00da9176d"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+										},
+										{
+											"key": "Permissions-Policy",
+											"value": "interest-cohort=()"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"snapshotId\": \"amzn1.sdAPI.p1.621537EA.d1f99bad-1b84-4623-b444-b65a438e9594\",\n    \"recordType\": \"targets\",\n    \"status\": \"IN_PROGRESS\",\n    \"statusDetails\": \"In the process of generating Snapshot.\"\n}"
+								},
+								{
+									"name": "Campaign snapshot",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"tactic\":\"T00030\"\n}"
+										},
+										"url": {
+											"raw": "{{api_url}}/sd/:recordType/snapshot",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sd",
+												":recordType",
+												"snapshot"
+											],
+											"variable": [
+												{
+													"key": "recordType",
+													"value": "campaigns"
+												}
+											]
+										}
+									},
+									"status": "Accepted",
+									"code": 202,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 22 Feb 2022 19:23:44 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "182"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "2AMBADZV208GE868HKAD"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "ec1604a4-2a9c-4f09-8599-38fc9de912b0"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "N9W6GEKHIAMFr2g="
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-62153840-32b41f79534e65081666274f"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+										},
+										{
+											"key": "Permissions-Policy",
+											"value": "interest-cohort=()"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"snapshotId\": \"amzn1.sdAPI.p1.62153840.4bac962c-5f17-45c0-9f5c-7c9eb5d4d8d1\",\n    \"recordType\": \"campaigns\",\n    \"status\": \"IN_PROGRESS\",\n    \"statusDetails\": \"In the process of generating Snapshot.\"\n}"
+								}
+							]
+						},
+						{
+							"name": "SD snapshot status",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"/* If report has finished generating, set next response to \"Download report,\" else wait thirty seconds and check the status again.*/",
+											"const maxNumberOfTries = 5; ",
+											"const sleepBetweenTries = 30000;",
+											"",
+											"const jsonResponse = JSON.parse(responseBody);",
+											"",
+											"if (jsonResponse.status === \"SUCCESS\") {",
+											"    postman.setNextRequest(\"Download SD snapshot\");",
+											"} else {",
+											"    setTimeout(function() {}, sleepBetweenTries);",
+											"    postman.setNextRequest(\"SD snapshot status\");",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true,
+								"disabledSystemHeaders": {
+									"content-type": true
+								}
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{api_url}}/sd/snapshots/:snapshotId",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sd",
+										"snapshots",
+										":snapshotId"
+									],
+									"variable": [
+										{
+											"key": "snapshotId",
+											"value": "{{snapshotId}}"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Complete",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											}
+										],
+										"url": {
+											"raw": "{{api_url}}/sd/snapshots/:snapshotId",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sd",
+												"snapshots",
+												":snapshotId"
+											],
+											"variable": [
+												{
+													"key": "snapshotId",
+													"value": "{{snapshotId}}"
+												}
+											]
+										}
+									},
+									"status": "Accepted",
+									"code": 202,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 22 Feb 2022 19:22:36 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "351"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "V379RBHV15WYYJHF8H3Q"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "b374e84f-ce0c-4069-8da7-4b5864bdb124"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "N9WviH4goAMFmjg="
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-621537fc-f33890747bd1360cfe02bed6"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+										},
+										{
+											"key": "Permissions-Policy",
+											"value": "interest-cohort=()"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"snapshotId\": \"amzn1.sdAPI.p1.xxxxxxxxxxxxxxx\",\n    \"recordType\": \"targets\",\n    \"status\": \"SUCCESS\",\n    \"statusDetails\": \"Snapshot has been successfully generated.\",\n    \"location\": \"https://advertising-api.amazon.com/sd/snapshots/xxxxxxxxxxxxxxx/download\",\n    \"fileSize\": 188,\n    \"expiration\": 1645559538710\n}"
+								}
+							]
+						},
+						{
+							"name": "Download SD snapshot",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true,
+								"disabledSystemHeaders": {
+									"content-type": true
+								}
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{api_url}}/sd/snapshots/:snapshotId/download",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sd",
+										"snapshots",
+										":snapshotId",
+										"download"
+									],
+									"variable": [
+										{
+											"key": "snapshotId",
+											"value": "{{snapshotId}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "See the [Amazon Ads API reference](https://advertising.amazon.com/API/docs/en-us/sponsored-display/3-0/openapi#/Snapshots) for full Sponsored Display snapshot documentation."
+				},
+				{
+					"name": "Sponsored Brands",
+					"item": [
+						{
+							"name": "Request SB snapshot",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"/**Sets the returned snapshotId as an environment variable to be used in subsequent calls */",
+											"postman.clearEnvironmentVariable(\"snapshotId\");",
+											"var response = JSON.parse(responseBody);",
+											"",
+											"if (response && response.status === 'IN_PROGRESS') {",
+											"    postman.setEnvironmentVariable(\"snapshotId\", response.snapshotId);",
+											"    console.log('snapshotId = ' + pm.environment.get(\"snapshotId\"));",
+											"",
+											"    /**Sets GET snapshot status as the next request */",
+											"    postman.setNextRequest(\"SB snapshot status\")",
+											"}",
+											"else {",
+											"    console.log('Error creating campaign with error = ' + response.description);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"content-type": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n}"
+								},
+								"url": {
+									"raw": "{{api_url}}/v2/hsa/:recordType/snapshot",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"v2",
+										"hsa",
+										":recordType",
+										"snapshot"
+									],
+									"variable": [
+										{
+											"key": "recordType",
+											"value": "{{recordType}}"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Keyword snapshot",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n}"
+										},
+										"url": {
+											"raw": "{{api_url}}/v2/hsa/:recordType/snapshot",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"v2",
+												"hsa",
+												":recordType",
+												"snapshot"
+											],
+											"variable": [
+												{
+													"key": "recordType",
+													"value": "keywords"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 22 Feb 2022 19:24:33 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "4KMB7J9RNNNFRVY2V0D2"
+										},
+										{
+											"key": "x-amz-request-id",
+											"value": "4KMB7J9RNNNFRVY2V0D2"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+										},
+										{
+											"key": "Permissions-Policy",
+											"value": "interest-cohort=()"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"snapshotId\": \"amzn1.clicksAPI.v1.p1.62153871.dcc7dcfa-8979-47de-ab33-25b0cfcf81b0\",\n    \"recordType\": \"keyword\",\n    \"status\": \"IN_PROGRESS\"\n}"
+								}
+							]
+						},
+						{
+							"name": "SB snapshot status",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"/* If snapshot has finished generating, set next response to \"Download report,\" else wait thirty seconds and check the status again.*/",
+											"const maxNumberOfTries = 5; ",
+											"const sleepBetweenTries = 30000;",
+											"",
+											"const jsonResponse = JSON.parse(responseBody);",
+											"",
+											"if (jsonResponse.status === \"SUCCESS\") {",
+											"    postman.setNextRequest(\"Download SB snapshot\");",
+											"} else {",
+											"    setTimeout(function() {}, sleepBetweenTries);",
+											"    postman.setNextRequest(\"SB snapshot status\");",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true,
+								"disabledSystemHeaders": {
+									"content-type": true
+								}
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{api_url}}/v2/hsa/snapshots/:snapshotId",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"v2",
+										"hsa",
+										"snapshots",
+										":snapshotId"
+									],
+									"variable": [
+										{
+											"key": "snapshotId",
+											"value": "{{snapshotId}}"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "In progress",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											}
+										],
+										"url": {
+											"raw": "{{api_url}}/v2/hsa/snapshots/:snapshotId",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"v2",
+												"hsa",
+												"snapshots",
+												":snapshotId"
+											],
+											"variable": [
+												{
+													"key": "snapshotId",
+													"value": "{{snapshotId}}"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 22 Feb 2022 19:24:51 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "TDT4ZVCJQ01GNBKM93DM"
+										},
+										{
+											"key": "x-amz-request-id",
+											"value": "TDT4ZVCJQ01GNBKM93DM"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+										},
+										{
+											"key": "Permissions-Policy",
+											"value": "interest-cohort=()"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"snapshotId\": \"amzn1.clicksAPI.v1.p1.62153871.dcc7dcfa-8979-47de-ab33-25b0cfcf81b0\",\n    \"status\": \"IN_PROGRESS\",\n    \"statusDetails\": \"Snapshot generation is in progress.\"\n}"
+								},
+								{
+									"name": "Complete",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											}
+										],
+										"url": {
+											"raw": "{{api_url}}/v2/hsa/snapshots/:snapshotId",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"v2",
+												"hsa",
+												"snapshots",
+												":snapshotId"
+											],
+											"variable": [
+												{
+													"key": "snapshotId",
+													"value": "{{snapshotId}}"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 22 Feb 2022 19:41:12 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "46FZFEZTJDGSTVKE4XGS"
+										},
+										{
+											"key": "x-amz-request-id",
+											"value": "46FZFEZTJDGSTVKE4XGS"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+										},
+										{
+											"key": "Permissions-Policy",
+											"value": "interest-cohort=()"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"snapshotId\": \"amzn1.clicksAPI.v1.p1.xxxxxxxxxx\",\n    \"status\": \"SUCCESS\",\n    \"statusDetails\": \"Snapshot has been successfully generated.\",\n    \"location\": \"https://advertising-api.amazon.com/v1/snapshots/xxxxxxxxxx/download\",\n    \"fileSize\": 285,\n    \"expiration\": 1653350400000\n}"
+								}
+							]
+						},
+						{
+							"name": "Download SB snapshot",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true,
+								"disabledSystemHeaders": {
+									"content-type": true
+								}
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{api_url}}/v2/hsa/snapshots/:snapshotId/download",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"v2",
+										"hsa",
+										"snapshots",
+										":snapshotId",
+										"download"
+									],
+									"variable": [
+										{
+											"key": "snapshotId",
+											"value": "{{snapshotId}}"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Keyword snapshot",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											}
+										],
+										"url": {
+											"raw": "{{api_url}}/v2/hsa/snapshots/:snapshotId/download",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"v2",
+												"hsa",
+												"snapshots",
+												":snapshotId",
+												"download"
+											],
+											"variable": [
+												{
+													"key": "snapshotId",
+													"value": "{{snapshotId}}"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "x-amz-id-2",
+											"value": "U4TekbEAxJQwJvrmVQdm4IgmWukWdLmmZesuHc84V/2IeJDySpVx3iJjPCPN1beRLoBlbJavaEc="
+										},
+										{
+											"key": "x-amz-request-id",
+											"value": "S4HA2MWNJWFQVNKA"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 22 Feb 2022 19:41:54 GMT"
+										},
+										{
+											"key": "Last-Modified",
+											"value": "Tue, 22 Feb 2022 19:31:32 GMT"
+										},
+										{
+											"key": "x-amz-expiration",
+											"value": "expiry-date=\"Tue, 24 May 2022 00:00:00 GMT\", rule-id=\"90 Day Retention Policy\""
+										},
+										{
+											"key": "ETag",
+											"value": "\"218e241e83c48803d5f40428be185788\""
+										},
+										{
+											"key": "Content-Encoding",
+											"value": "gzip"
+										},
+										{
+											"key": "Accept-Ranges",
+											"value": "bytes"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Server",
+											"value": "AmazonS3"
+										},
+										{
+											"key": "Content-Length",
+											"value": "285"
+										}
+									],
+									"cookie": [],
+									"body": "[\n    {\n        \"keywordId\": 144170583660124565,\n        \"adGroupId\": 144264190545297733,\n        \"campaignId\": 144208510156081379,\n        \"keywordText\": \"rca cable 1637073832215\",\n        \"matchType\": \"BROAD\",\n        \"state\": \"enabled\",\n        \"bid\": 10\n    },\n    {\n        \"keywordId\": 144373194309380055,\n        \"adGroupId\": 144293551014439430,\n        \"campaignId\": 144128442807713382,\n        \"keywordText\": \"dixon ticonderoga 2 pencils\",\n        \"matchType\": \"EXACT\",\n        \"state\": \"enabled\",\n        \"bid\": 0.25\n    },\n    {\n        \"keywordId\": 144371828007013213,\n        \"adGroupId\": 144332287029303025,\n        \"campaignId\": 144174946579612496,\n        \"keywordText\": \"rca cable 1637678068990\",\n        \"matchType\": \"BROAD\",\n        \"state\": \"enabled\",\n        \"bid\": 10\n    }\n]"
+								}
+							]
+						}
+					],
+					"description": "See the [Amazon Ads API reference](https://advertising.amazon.com/API/docs/en-us/reference/sponsored-brands/2/snapshots) for full Sponsored Brands snapshot documentation."
+				}
+			]
+		},
+		{
+			"name": "Test accounts",
+			"item": [
+				{
+					"name": "Create test account",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Amazon-Advertising-API-ClientId",
+								"value": "{{client_id}}",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "cache-control",
+								"value": "no-cache",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"countryCode\": \"US\",\n    \"accountType\": \"AUTHOR\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_url}}/testAccounts",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"testAccounts"
+							]
+						},
+						"description": "This endpoint requests creation of a new advertising test account based on parameters determined by the JSON request body.\n\nSee [Creating a test account](https://advertising.amazon.com/API/docs/en-us/test-accounts/create-test-accounts#creating-a-test-account) for information on available parameters."
+					},
+					"response": []
+				},
+				{
+					"name": "Check account creation status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_url}}/testAccounts?requestId",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"testAccounts"
+							],
+							"query": [
+								{
+									"key": "requestId",
+									"value": null
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Advertising test accounts do not serve ads or have active billing, allowing Amazon Ads customers to make API requests to test and learn about API functionality.\n\nThe test account creation API allows users to provision an advertising test account, which can then be used to test API functionality.\n\n[Learn more about test accounts.](https://advertising.amazon.com/API/docs/en-us/test-accounts/overview)\n\n## Using test accounts in this collection\n\nAn additional permission scope, `advertising::test:create_account`, is required to use the test account creation API.\n\nTest account creation is disabled for Amazon user accounts that manage genuine advertising accounts.\n\nTo use test accounts with this Postman collection, follow these steps:\n\n1) Create a *new* Amazon user account using an email address to which your development team has access. Note the login credentials.  \n2) Create a copy of your Postman environment dedicated to testing, using your Login with Amazon credentials. Change the *current_value* of the `permission_scope` variable to include the additional permission scope, as shown here:\n\n`advertising::campaign_management%20advertising::test:create_account`\n\n3) With the new environment active in Postman, follow the steps in the Auth folder, making sure to sign in with your newly created Amazon user account.\n\nThe access token retrieved by this process will enable your client application to do both of the following on behalf of your test user:\n\n*   Create test accounts using the `advertising::test:create_account` permission scope.\n*   Use created test accounts to make other requests to the API using the `advertising::campaign_management` permission scope.\n    \n\n[Learn more about authorization for test accounts.](https://advertising.amazon.com/API/docs/en-us/test-accounts/authorization-for-test-accounts)\n\nUse this Postman environment when accessing the test account creation API or when testing other requests."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// This pre-request script handles access token freshness for requests in this collection (exception: explicit requests located in the Auth folder). ",
+					"// See the collection documentation for initial setup instructions. ",
+					"// For information about authorization in the Amazon Ads API, visit https://advertising.amazon.com/API/docs/en-us/concepts/authorization/overview",
+					"",
+					"// Ignore script for explicit auth requests",
+					"if (pm.info.requestName.startsWith(\"Access token\") || pm.info.requestName.startsWith(\"Auth grant\")) {",
+					"    return false",
+					"}",
+					"",
+					"// Check presence of refresh token",
+					"if (pm.environment.get('refresh_token')) {",
+					"",
+					"    // Check expiry of current access token",
+					"    if (Date.now() > pm.environment.get('token_expires_at')) {",
+					"",
+					"        // Construct refresh token request",
+					"        // Information: https://advertising.amazon.com/API/docs/en-us/concepts/authorization/access-tokens#generating-an-access-token-using-a-refresh-token",
+					"        const refreshRequest = {",
+					"            url: pm.environment.get('token_url'),",
+					"            method: \"POST\",",
+					"            header: {",
+					"                \"Content-Type\": \"application/x-www-form-urlencoded\"",
+					"            },",
+					"            body: {",
+					"                mode: \"urlencoded\",",
+					"                urlencoded: [",
+					"                    'grant_type=refresh_token',",
+					"                    `client_id=${pm.environment.get('client_id')}`,",
+					"                    `refresh_token=${pm.environment.get('refresh_token')}`,",
+					"                    `client_secret=${pm.environment.get('client_secret')}`",
+					"                ]",
+					"            }",
+					"        }",
+					"",
+					"        pm.sendRequest(refreshRequest, (error, response) => {",
+					"            if (error) {",
+					"                console.log(error)",
+					"            } else {",
+					"                if (response.code === 200){",
+					"                    const res = response.json();",
+					"                    const newExpiry = Date.now() + (res.expires_in * 1000) - 10000",
+					"                    console.log('Access token retrieved.')",
+					"                    console.log(`Expires at: ${new Date(newExpiry)}`)",
+					"",
+					"                    // set access_token, refresh_token, and token_expires_at in Postman environment",
+					"                    postman.setEnvironmentVariable(\"access_token\", res.access_token);",
+					"                    postman.setEnvironmentVariable(\"refresh_token\", res.refresh_token);",
+					"                    postman.setEnvironmentVariable(\"token_expires_at\", newExpiry)",
+					"                } else {",
+					"                    console.log(\"Authorization failed.\")",
+					"                    console.log(response)",
+					"                }",
+					"            }",
+					"        })",
+					"    }",
+					"} else {",
+					"    console.log(\"No refresh token found in environment. See documentation for information on auth setup.\")",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
