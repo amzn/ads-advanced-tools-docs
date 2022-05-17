@@ -12,7 +12,7 @@ To stay up to date on the latest additions, add yourself to this repository as a
 
 ## Issues
 
-Developers are encouraged to open issues on the repository to make suggestions and report problems related to the documentation. Our team will monitor incoming issues to continuously improve the documentation.
+Developers are encouraged to [open an issue](https://github.com/amzn/ads-advanced-tools-docs/issues/new/choose) on this repository to make suggestions and report problems related to the documentation. Our team will monitor incoming issues to continuously improve the documentation.
 
 ## Security
 
