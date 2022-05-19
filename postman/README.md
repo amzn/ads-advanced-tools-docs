@@ -21,8 +21,8 @@ To use this collection, you will need credentials for the Amazon Ads API. For in
 
 Find setup instructions in the Amazon Ads advanced tools center for:
 
-- [New users of the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/setting-up/using-postman-collection)
-- [Users with an existing refresh token](https://advertising.amazon.com/API/docs/en-us/setting-up/using-postman-collection) 
+- [New users of the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/getting-started/using-postman-collection)
+- [Users with an existing refresh token](https://advertising.amazon.com/API/docs/en-us/tutorials/postman) 
 
 ## Issues and support
 
