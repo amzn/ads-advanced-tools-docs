@@ -1,7 +1,8 @@
 {
 	"info": {
+		"_postman_id": "96a28055-7db5-49f1-8f48-84672680123e",
 		"name": "Amazon Ads API",
-		"description": "# Amazon Ads API Postman collection\n\nThis collection includes commonly used endpoints for the Amazon Ads API. The collection also includes pre- and post-request scripts to automate management of auth credentials.\n\nVisit the [Amazon Ads advanced tools center](https://advertising.amazon.com/API/docs/en-us/) for API documentation.\n\n## Setup\n\nTo use this collection, you will need credentials for the Amazon Ads API. For information about acquiring credentials, see the [onboarding overview for the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/setting-up/overview).\n\nFind setup instructions in the Amazon Ads advanced tools center for:\n\n- [New users of the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/setting-up/using-postman-collection)\n- [Users with an existing refresh token](https://advertising.amazon.com/API/docs/en-us/setting-up/using-postman-collection) \n\n## Issues and support\n\nFor technical support for the Amazon Ads API, see [Technical support](https://advertising.amazon.com/API/docs/en-us/info/support) in the Amazon Ads advanced tools center.\n\nTo report a bug or suggest an improvement relating to this collection or the documentation, [create an issue](https://github.com/amzn/ads-advanced-tools-docs/issues/new/choose).",
+		"description": "# Amazon Ads API Postman collection\n\nThis collection includes commonly used endpoints for the Amazon Ads API. The collection also includes pre- and post-request scripts to automate management of auth credentials.\n\nVisit the [Amazon Ads advanced tools center](https://advertising.amazon.com/API/docs/en-us/) for API documentation.\n\n## Setup\n\nTo use this collection, you will need credentials for the Amazon Ads API. For information about acquiring credentials, see the [onboarding overview for the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/onboarding/overview).\n\nFind setup instructions in the Amazon Ads advanced tools center for:\n\n- [New users of the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/getting-started/using-postman-collection)\n- [Users with an existing refresh token](https://advertising.amazon.com/API/docs/en-us/tutorials/postman) \n\n## Issues and support\n\nFor technical support for the Amazon Ads API, see [Technical support](https://advertising.amazon.com/API/docs/en-us/info/support) in the Amazon Ads advanced tools center.\n\nTo report a bug or suggest an improvement relating to this collection or the documentation, [create an issue](https://github.com/amzn/ads-advanced-tools-docs/issues/new/choose).",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -4390,7 +4391,10 @@
 					"    }",
 					"} else {",
 					"    console.log(\"No refresh token found in environment. See documentation for information on auth setup.\")",
-					"}"
+					"}",
+					"",
+					"/**Add custom header containing the collection version to all collection requests*/",
+					"pm.request.headers.add({key: 'Postman-Collection', value: 'Amazon-Ads-API-v1'}) "
 				]
 			}
 		},
