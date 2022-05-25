@@ -1,8 +1,10 @@
 {
 	"info": {
+		"_postman_id": "14ad7b54-9bcc-4bfe-87cc-2684126f4878",
 		"name": "Amazon Ads API",
 		"description": "# Amazon Ads API Postman collection\n\nThis collection includes commonly used endpoints for the Amazon Ads API. The collection also includes pre- and post-request scripts to automate management of auth credentials.\n\nVisit the [Amazon Ads advanced tools center](https://advertising.amazon.com/API/docs/en-us/) for API documentation.\n\n## Setup\n\nTo use this collection, you will need credentials for the Amazon Ads API. For information about acquiring credentials, see the [onboarding overview for the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/onboarding/overview).\n\nFind setup instructions in the Amazon Ads advanced tools center for:\n\n- [New users of the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/getting-started/using-postman-collection)\n- [Users with an existing refresh token](https://advertising.amazon.com/API/docs/en-us/tutorials/postman) \n\n## Issues and support\n\nFor technical support for the Amazon Ads API, see [Technical support](https://advertising.amazon.com/API/docs/en-us/info/support) in the Amazon Ads advanced tools center.\n\nTo report a bug or suggest an improvement relating to this collection or the documentation, [create an issue](https://github.com/amzn/ads-advanced-tools-docs/issues/new/choose).",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "10093715"
 	},
 	"item": [
 		{
@@ -217,7 +219,7 @@
 			"description": "Authorization credentials for the Amazon Ads API are administered by Login with Amazon. The requests in the **Auth** folder are directed to Login with Amazon hosts rather than to the host specified for other requests to the API.\n\nLearn more about [Authorization in the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/concepts/authorization/overview).\n\n[Follow the Postman quickstart guide](https://advertising.amazon.com/API/docs/en-us/getting-started/using-postman-collection) to learn about using the requests in this folder.\n\n## Using tokens in this collection\n\nOnce you have retrieved a refresh token, a pre-request script in this collection will refresh your access token automatically as needed."
 		},
 		{
-			"name": "Profiles",
+			"name": "Accounts",
 			"item": [
 				{
 					"name": "Profiles",
@@ -276,6 +278,66 @@
 								"profiles"
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "Manager accounts",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response should not be an error\", function () {",
+									"      pm.response.to.not.be.error;",
+									"});",
+									"",
+									"// This script sets the managerAccountId that is used in subsequent calls to the Amazon Ads API.",
+									"// By default, the *first* manager account retrieved is used for this script.",
+									"// To use another manager account, select the id for the appropriate account in the response body, then manually set managerAccountId in the Postman environment to the desired value. To preserve the desired value, disable the script below or simply do not execute this request again.",
+									"",
+									"const res = JSON.parse(responseBody);",
+									"",
+									"// if any manager accounts are retrieved, set manager account in environment to first manager account retrieved",
+									"if (res.managerAccounts[0].managerAccountId) {",
+									"    data = res.managerAccounts[0].managerAccountId",
+									"    postman.setEnvironmentVariable(\"managerAccountId\", data)",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Amazon-Advertising-API-ClientId",
+								"value": "{{client_id}}",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "default",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/managerAccounts",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"managerAccounts"
+							]
+						},
+						"description": "[Read full documentation.](https://advertising.amazon.com/API/docs/en-us/reference/1-0/managerAccount)"
 					},
 					"response": []
 				}
@@ -2481,6 +2543,178 @@
 							"response": []
 						}
 					]
+				},
+				{
+					"name": "DSP report",
+					"item": [
+						{
+							"name": "Request DSP report",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"/*Tests that response is not an error*/",
+											"pm.test(\"response should return reportId\", function () {",
+											"      pm.response.to.not.be.error;",
+											"});",
+											"",
+											"/**Sets the returned reportId as an environment variable to be used in subsequent calls */",
+											"postman.clearEnvironmentVariable(\"reportId\");",
+											"var response = JSON.parse(responseBody);",
+											"",
+											"if (response) {",
+											"    postman.setEnvironmentVariable(\"reportId\", response.reportId);",
+											"    console.log('reportId = ' + pm.environment.get(\"reportId\"));",
+											"}",
+											"else {",
+											"    console.log('Error requesting report with error = ' + response.description);",
+											"}",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"content-type": true,
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.dspcreatereports.v3+json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"startDate\": \"2022-05-20\",\n    \"endDate\": \"2022-05-21\"\n}"
+								},
+								"url": {
+									"raw": "{{api_url}}/accounts/{{dspAccountId}}/dsp/reports",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"accounts",
+										"{{dspAccountId}}",
+										"dsp",
+										"reports"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "DSP report status",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"/*Tests that response is not an error*/",
+											"pm.test(\"Response should return status\", function () {",
+											"      pm.response.to.not.be.error;",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.dspgetreports.v3+json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{api_url}}/accounts/{{dspAccountId}}/dsp/reports/:reportId",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"accounts",
+										"{{dspAccountId}}",
+										"dsp",
+										"reports",
+										":reportId"
+									],
+									"variable": [
+										{
+											"key": "reportId",
+											"value": "{{reportId}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "[Read full documentation.](https://advertising.amazon.com/API/docs/en-us/dsp-reports-beta-3p/#/Reports)",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
 				}
 			]
 		},
@@ -4316,7 +4550,7 @@
 							"query": [
 								{
 									"key": "requestId",
-									"value": null
+									"value": ""
 								}
 							]
 						}
