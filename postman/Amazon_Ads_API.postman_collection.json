@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "14ad7b54-9bcc-4bfe-87cc-2684126f4878",
+		"_postman_id": "be5bb6dc-d2dc-4df3-9232-1e3e1e929dcc",
 		"name": "Amazon Ads API",
 		"description": "# Amazon Ads API Postman collection\n\nThis collection includes commonly used endpoints for the Amazon Ads API. The collection also includes pre- and post-request scripts to automate management of auth credentials.\n\nVisit the [Amazon Ads advanced tools center](https://advertising.amazon.com/API/docs/en-us/) for API documentation.\n\n## Setup\n\nTo use this collection, you will need credentials for the Amazon Ads API. For information about acquiring credentials, see the [onboarding overview for the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/onboarding/overview).\n\nFind setup instructions in the Amazon Ads advanced tools center for:\n\n- [New users of the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/getting-started/using-postman-collection)\n- [Users with an existing refresh token](https://advertising.amazon.com/API/docs/en-us/tutorials/postman) \n\n## Issues and support\n\nFor technical support for the Amazon Ads API, see [Technical support](https://advertising.amazon.com/API/docs/en-us/info/support) in the Amazon Ads advanced tools center.\n\nTo report a bug or suggest an improvement relating to this collection or the documentation, [create an issue](https://github.com/amzn/ads-advanced-tools-docs/issues/new/choose).",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
@@ -2624,7 +2624,115 @@
 									]
 								}
 							},
-							"response": []
+							"response": [
+								{
+									"name": "Request DSP report",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.dspcreatereports.v3+json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"startDate\": \"2022-05-20\",\n    \"endDate\": \"2022-05-21\"\n}"
+										},
+										"url": {
+											"raw": "{{api_url}}/accounts/{{dspAccountId}}/dsp/reports",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"accounts",
+												"{{dspAccountId}}",
+												"dsp",
+												"reports"
+											]
+										}
+									},
+									"status": "Accepted",
+									"code": 202,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 25 May 2022 17:20:24 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/vnd.dspcreatereports.v3+json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "192"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "3XSAMY34795RVTDP0CC9"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "b5e50062-88cd-4286-af3f-3a2ed1667e4f"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "192"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "SsTFyHHIoAMFx4Q="
+										},
+										{
+											"key": "x-amzn-Remapped-Server",
+											"value": "Apache-Coyote/1.1"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-628e6558-55cf7d19c8a0248034e055a6"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Wed, 25 May 2022 17:20:24 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+										},
+										{
+											"key": "Permissions-Policy",
+											"value": "interest-cohort=()"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"reportId\": \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\n    \"type\": \"CAMPAIGN\",\n    \"format\": \"JSON\",\n    \"status\": \"IN_PROGRESS\",\n    \"statusDetails\": \"In progress\",\n    \"location\": \"\",\n    \"expiration\": \"2022-05-25T18:20:24.425Z\"\n}"
+								}
+							]
 						},
 						{
 							"name": "DSP report status",
@@ -2691,7 +2799,118 @@
 									]
 								}
 							},
-							"response": []
+							"response": [
+								{
+									"name": "DSP report status",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.dspgetreports.v3+json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{api_url}}/accounts/{{dspAccountId}}/dsp/reports/:reportId",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"accounts",
+												"{{dspAccountId}}",
+												"dsp",
+												"reports",
+												":reportId"
+											],
+											"variable": [
+												{
+													"key": "reportId",
+													"value": "{{reportId}}"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 25 May 2022 17:25:18 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/vnd.dspgetreports.v3+json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "580"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "PZXYCVEJEQ5X6CWKSWC6"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "5c3dd01b-4f62-4a33-ab24-f4e5ef8bfe93"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "580"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "SsTzvFUroAMF7iw="
+										},
+										{
+											"key": "x-amzn-Remapped-Server",
+											"value": "Apache-Coyote/1.1"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-628e667e-fca2eb3eb78e9dbe1254e8ee"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Wed, 25 May 2022 17:25:18 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+										},
+										{
+											"key": "Permissions-Policy",
+											"value": "interest-cohort=()"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"reportId\": \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\n    \"type\": \"CAMPAIGN\",\n    \"format\": \"JSON\",\n    \"status\": \"SUCCESS\",\n    \"statusDetails\": \"Success\",\n    \"location\": \"https://corvo-reports.s3.amazonaws.com/DSP_API/2022-05-25/{{reportID}}/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\n    \"expiration\": \"2022-05-25T18:25:18.290Z\"\n}"
+								}
+							]
 						}
 					],
 					"description": "[Read full documentation.](https://advertising.amazon.com/API/docs/en-us/dsp-reports-beta-3p/#/Reports)",
@@ -4540,7 +4759,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api_url}}/testAccounts?requestId",
+							"raw": "{{api_url}}/testAccounts?requestId=",
 							"host": [
 								"{{api_url}}"
 							],
