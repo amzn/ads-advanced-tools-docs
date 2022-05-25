@@ -4759,7 +4759,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api_url}}/testAccounts?requestId=",
+							"raw": "{{api_url}}/testAccounts?requestId",
 							"host": [
 								"{{api_url}}"
 							],
