@@ -2,7 +2,8 @@
 	"info": {
 		"name": "Amazon Ads API",
 		"description": "# Amazon Ads API Postman collection\n\nThis collection includes commonly used endpoints for the Amazon Ads API. The collection also includes pre- and post-request scripts to automate management of auth credentials.\n\nVisit the [Amazon Ads advanced tools center](https://advertising.amazon.com/API/docs/en-us/) for API documentation.\n\n## Setup\n\nTo use this collection, you will need credentials for the Amazon Ads API. For information about acquiring credentials, see the [onboarding overview for the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/onboarding/overview).\n\nFind setup instructions in the Amazon Ads advanced tools center for:\n\n- [New users of the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/getting-started/using-postman-collection)\n- [Users with an existing refresh token](https://advertising.amazon.com/API/docs/en-us/tutorials/postman) \n\n## Issues and support\n\nFor technical support for the Amazon Ads API, see [Technical support](https://advertising.amazon.com/API/docs/en-us/info/support) in the Amazon Ads advanced tools center.\n\nTo report a bug or suggest an improvement relating to this collection or the documentation, [create an issue](https://github.com/amzn/ads-advanced-tools-docs/issues/new/choose).",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "17206731"
 	},
 	"item": [
 		{
@@ -217,7 +218,7 @@
 			"description": "Authorization credentials for the Amazon Ads API are administered by Login with Amazon. The requests in the **Auth** folder are directed to Login with Amazon hosts rather than to the host specified for other requests to the API.\n\nLearn more about [Authorization in the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/concepts/authorization/overview).\n\n[Follow the Postman quickstart guide](https://advertising.amazon.com/API/docs/en-us/getting-started/using-postman-collection) to learn about using the requests in this folder.\n\n## Using tokens in this collection\n\nOnce you have retrieved a refresh token, a pre-request script in this collection will refresh your access token automatically as needed."
 		},
 		{
-			"name": "Profiles",
+			"name": "Accounts",
 			"item": [
 				{
 					"name": "Profiles",
@@ -275,12 +276,62 @@
 								"v2",
 								"profiles"
 							]
+						},
+						"description": "[Read full documentation.](https://advertising.amazon.com/API/docs/en-us/reference/2/profiles)"
+					},
+					"response": []
+				},
+				{
+					"name": "Manager accounts",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response should not be an error\", function () {",
+									"      pm.response.to.not.be.error;",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
 						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Amazon-Advertising-API-ClientId",
+								"value": "{{client_id}}",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "default",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/managerAccounts",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"managerAccounts"
+							]
+						},
+						"description": "[Read full documentation.](https://advertising.amazon.com/API/docs/en-us/reference/1-0/managerAccount)"
 					},
 					"response": []
 				}
 			],
-			"description": "Profiles in the Amazon Ads API represent an advertiser's account in a specific marketplace. Advertisers may have a single profile if they advertise in only one marketplace, or a separate profile for *each* marketplace if they advertise regionally or globally.\n\nProfiles play a crucial role in the Amazon Ads API by determining the management scope for a given call. A profile ID is a required credential to access an advertiser's data and services in a specific marketplace.\n\n[Learn more about profiles.](https://advertising.amazon.com/API/docs/en-us/concepts/authorization/profiles)\n\n## Using profiles in this collection\n\nThe **`GET` Profiles** request retrieves a list of all profiles within the API host's region that are associated with the advertiser whose permission is represented by the access token.\n\nBy default, a post-request script sets the `profileId` in your Postman environment to the ID of the _first_ profile retrieved. This value is used as the `Amazon-Advertising-API-Scope` header in all other requests.\n\nTo use a different profile ID, copy a `profileId` from a retrieved profile and use it to set the `profileId` variable in the Postman environment."
+			"description": "## Profiles\n\nProfiles in the Amazon Ads API represent an advertiser's account in a specific marketplace. Advertisers may have a single profile if they advertise in only one marketplace, or a separate profile for *each* marketplace if they advertise regionally or globally.\n\nProfiles play a crucial role in the Amazon Ads API by determining the management scope for most requests. A profile ID is a required credential to access an advertiser's data and services in a specific marketplace.\n\n[Learn more about profiles.](https://advertising.amazon.com/API/docs/en-us/concepts/authorization/profiles)\n\n## Using profiles in this collection\n\nThe **`GET`** **Profiles** request retrieves a list of all profiles within the API host's region that are associated with the advertiser whose permission is represented by the access token.\n\nBy default, a post-request script sets the `profileId` in your Postman environment to the ID of the *first* profile retrieved. This value is used as the `Amazon-Advertising-API-Scope` header in all other requests.\n\nTo use a different profile ID, copy a `profileId` from a retrieved profile and use it to set the `profileId` variable in the Postman environment.\n\n## Manager accounts\n\nManager accounts can manage multiple advertising accounts through a single user account.\n\n[Learn more about manager accounts in the Amazon Ads console.](https://advertising.amazon.com/help?ref_=a20m_us_blog_whtsnewfb2020_040120&entityId=ENTITY3GRDJT8FAN4KG#GU3YDB26FR7XT3C8)\n\nA manager account can retrieve profiles for its linked accounts via the **`GET`** **Profiles** request.\n\nThe **`GET`** **Manager accounts** request returns additional information about linked accounts, including the `dspAdvertiserId` for DSP advertisers."
 		},
 		{
 			"name": "First call",
@@ -2481,6 +2532,397 @@
 							"response": []
 						}
 					]
+				},
+				{
+					"name": "DSP report",
+					"item": [
+						{
+							"name": "Request DSP report",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"/*Tests that response is not an error*/",
+											"pm.test(\"response should return reportId\", function () {",
+											"      pm.response.to.not.be.error;",
+											"});",
+											"",
+											"/**Sets the returned reportId as an environment variable to be used in subsequent calls */",
+											"postman.clearEnvironmentVariable(\"reportId\");",
+											"var response = JSON.parse(responseBody);",
+											"",
+											"if (response) {",
+											"    postman.setEnvironmentVariable(\"reportId\", response.reportId);",
+											"    console.log('reportId = ' + pm.environment.get(\"reportId\"));",
+											"}",
+											"else {",
+											"    console.log('Error requesting report with error = ' + response.description);",
+											"}",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"content-type": true,
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.dspcreatereports.v3+json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"startDate\": \"2022-05-20\",\n    \"endDate\": \"2022-05-21\"\n}"
+								},
+								"url": {
+									"raw": "{{api_url}}/accounts/{{dspAccountId}}/dsp/reports",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"accounts",
+										"{{dspAccountId}}",
+										"dsp",
+										"reports"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Request DSP report",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.dspcreatereports.v3+json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"startDate\": \"2022-05-20\",\n    \"endDate\": \"2022-05-21\"\n}"
+										},
+										"url": {
+											"raw": "{{api_url}}/accounts/{{dspAccountId}}/dsp/reports",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"accounts",
+												"{{dspAccountId}}",
+												"dsp",
+												"reports"
+											]
+										}
+									},
+									"status": "Accepted",
+									"code": 202,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 25 May 2022 17:20:24 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/vnd.dspcreatereports.v3+json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "192"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "3XSAMY34795RVTDP0CC9"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "b5e50062-88cd-4286-af3f-3a2ed1667e4f"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "192"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "SsTFyHHIoAMFx4Q="
+										},
+										{
+											"key": "x-amzn-Remapped-Server",
+											"value": "Apache-Coyote/1.1"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-628e6558-55cf7d19c8a0248034e055a6"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Wed, 25 May 2022 17:20:24 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+										},
+										{
+											"key": "Permissions-Policy",
+											"value": "interest-cohort=()"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"reportId\": \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\n    \"type\": \"CAMPAIGN\",\n    \"format\": \"JSON\",\n    \"status\": \"IN_PROGRESS\",\n    \"statusDetails\": \"In progress\",\n    \"location\": \"\",\n    \"expiration\": \"2022-05-25T18:20:24.425Z\"\n}"
+								}
+							]
+						},
+						{
+							"name": "DSP report status",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"/*Tests that response is not an error*/",
+											"pm.test(\"Response should return status\", function () {",
+											"      pm.response.to.not.be.error;",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.dspgetreports.v3+json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{api_url}}/accounts/{{dspAccountId}}/dsp/reports/:reportId",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"accounts",
+										"{{dspAccountId}}",
+										"dsp",
+										"reports",
+										":reportId"
+									],
+									"variable": [
+										{
+											"key": "reportId",
+											"value": "{{reportId}}"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "DSP report status",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.dspgetreports.v3+json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{api_url}}/accounts/{{dspAccountId}}/dsp/reports/:reportId",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"accounts",
+												"{{dspAccountId}}",
+												"dsp",
+												"reports",
+												":reportId"
+											],
+											"variable": [
+												{
+													"key": "reportId",
+													"value": "{{reportId}}"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 25 May 2022 17:25:18 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/vnd.dspgetreports.v3+json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "580"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "PZXYCVEJEQ5X6CWKSWC6"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "5c3dd01b-4f62-4a33-ab24-f4e5ef8bfe93"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "580"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "SsTzvFUroAMF7iw="
+										},
+										{
+											"key": "x-amzn-Remapped-Server",
+											"value": "Apache-Coyote/1.1"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-628e667e-fca2eb3eb78e9dbe1254e8ee"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Wed, 25 May 2022 17:25:18 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+										},
+										{
+											"key": "Permissions-Policy",
+											"value": "interest-cohort=()"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"reportId\": \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\n    \"type\": \"CAMPAIGN\",\n    \"format\": \"JSON\",\n    \"status\": \"SUCCESS\",\n    \"statusDetails\": \"Success\",\n    \"location\": \"https://corvo-reports.s3.amazonaws.com/DSP_API/2022-05-25/{{reportID}}/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\n    \"expiration\": \"2022-05-25T18:25:18.290Z\"\n}"
+								}
+							]
+						}
+					],
+					"description": "Note that you must set the `dspAccountId` variable in your Postman environment to use the requests in this folder.\n\n[Read full documentation.](https://advertising.amazon.com/API/docs/en-us/dsp-reports-beta-3p/#/Reports)",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
 				}
 			]
 		},
@@ -4316,7 +4758,7 @@
 							"query": [
 								{
 									"key": "requestId",
-									"value": null
+									"value": ""
 								}
 							]
 						}
