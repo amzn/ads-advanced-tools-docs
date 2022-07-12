@@ -1,0 +1,74 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  AWS CloudFormation Template to create a new SQS queue used as a Stream
+  destination
+Parameters:
+  StreamDestinationQueueName:
+    Type: String
+    Description: The name of the SQS queue to be created and used as a Stream destination
+  StreamDatasetId:
+    Type: String
+    Description: The ID of the dataset to stream
+    AllowedValues:
+      - sp-traffic
+      - sp-conversion
+      - budget-usage
+  StreamRealm:
+    Type: String
+    Description: The realm to stream
+    AllowedValues:
+      - NA
+Mappings:
+  Region:
+    NA:
+      Region: us-east-1
+  NA:
+    sp-traffic:
+      Account: 906013806264
+    sp-conversion:
+      Account: 802324068763
+    budget-usage:
+      Account: 055588217351
+Resources:
+  StreamDestinationQueue:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      QueueName: !Ref StreamDestinationQueueName
+  StreamDestinationQueuePolicy:
+    Type: "AWS::SQS::QueuePolicy"
+    Properties:
+      Queues:
+        - !Ref StreamDestinationQueue
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: AllowStreamSendMessage
+            Effect: Allow
+            Principal:
+              Service: sns.amazonaws.com
+            Action:
+              - "sqs:SendMessage"
+            Resource: !GetAtt
+              - StreamDestinationQueue
+              - Arn
+            Condition:
+              ArnLike:
+                "aws:SourceArn": !Sub
+                  - "arn:aws:sns:${region}:${account}:*"
+                  - region: !FindInMap
+                      - Region
+                      - !Ref StreamRealm
+                      - Region
+                    account: !FindInMap
+                      - !Ref StreamRealm
+                      - !Ref StreamDatasetId
+                      - Account
+          - Sid: AllowStreamReviewerGetQueueAttributes
+            Effect: Allow
+            Principal:
+              AWS: "arn:aws:iam::926844853897:role/ReviewerRole"
+            Action:
+              - "sqs:GetQueueAttributes"
+            Resource: !GetAtt
+              - StreamDestinationQueue
+              - Arn
