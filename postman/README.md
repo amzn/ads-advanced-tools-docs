@@ -14,6 +14,7 @@ The Amazon Ads API Postman collection currently supports the following features:
 - Sponsored ads reporting
 - Sponsored ads snapshots 
 - Test accounts
+- Amazon Marketing Stream beta
 
 ## Setup
 

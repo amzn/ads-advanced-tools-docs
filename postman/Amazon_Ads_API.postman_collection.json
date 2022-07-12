@@ -1,9 +1,9 @@
 {
 	"info": {
+		"_postman_id": "321567c2-f333-4a2a-8517-6f827fa1cb30",
 		"name": "Amazon Ads API",
 		"description": "# Amazon Ads API Postman collection\n\nThis collection includes commonly used endpoints for the Amazon Ads API. The collection also includes pre- and post-request scripts to automate management of auth credentials.\n\nVisit the [Amazon Ads advanced tools center](https://advertising.amazon.com/API/docs/en-us/) for API documentation.\n\n## Setup\n\nTo use this collection, you will need credentials for the Amazon Ads API. For information about acquiring credentials, see the [onboarding overview for the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/onboarding/overview).\n\nFind setup instructions in the Amazon Ads advanced tools center for:\n\n- [New users of the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/getting-started/using-postman-collection)\n- [Users with an existing refresh token](https://advertising.amazon.com/API/docs/en-us/tutorials/postman) \n\n## Issues and support\n\nFor technical support for the Amazon Ads API, see [Technical support](https://advertising.amazon.com/API/docs/en-us/info/support) in the Amazon Ads advanced tools center.\n\nTo report a bug or suggest an improvement relating to this collection or the documentation, [create an issue](https://github.com/amzn/ads-advanced-tools-docs/issues/new/choose).",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "17206731"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
@@ -4748,7 +4748,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api_url}}/testAccounts?requestId",
+							"raw": "{{api_url}}/testAccounts?requestId=",
 							"host": [
 								"{{api_url}}"
 							],
@@ -4767,6 +4767,628 @@
 				}
 			],
 			"description": "Advertising test accounts do not serve ads or have active billing, allowing Amazon Ads customers to make API requests to test and learn about API functionality.\n\nThe test account creation API allows users to provision an advertising test account, which can then be used to test API functionality.\n\n[Learn more about test accounts.](https://advertising.amazon.com/API/docs/en-us/test-accounts/overview)\n\n## Using test accounts in this collection\n\nAn additional permission scope, `advertising::test:create_account`, is required to use the test account creation API.\n\nTest account creation is disabled for Amazon user accounts that manage genuine advertising accounts.\n\nTo use test accounts with this Postman collection, follow these steps:\n\n1) Create a *new* Amazon user account using an email address to which your development team has access. Note the login credentials.  \n2) Create a copy of your Postman environment dedicated to testing, using your Login with Amazon credentials. Change the *current_value* of the `permission_scope` variable to include the additional permission scope, as shown here:\n\n`advertising::campaign_management%20advertising::test:create_account`\n\n3) With the new environment active in Postman, follow the steps in the Auth folder, making sure to sign in with your newly created Amazon user account.\n\nThe access token retrieved by this process will enable your client application to do both of the following on behalf of your test user:\n\n*   Create test accounts using the `advertising::test:create_account` permission scope.\n*   Use created test accounts to make other requests to the API using the `advertising::campaign_management` permission scope.\n    \n\n[Learn more about authorization for test accounts.](https://advertising.amazon.com/API/docs/en-us/test-accounts/authorization-for-test-accounts)\n\nUse this Postman environment when accessing the test account creation API or when testing other requests."
+		},
+		{
+			"name": "Amazon Marketing Stream",
+			"item": [
+				{
+					"name": "Create Stream subscription",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"/*Tests that response is not an error*/",
+									"pm.test(\"response should return subscriptionId\", function () {",
+									"      pm.response.to.not.be.error;",
+									"});",
+									"",
+									"/**Sets the returned subscriptionId as an environment variable */",
+									"postman.clearEnvironmentVariable(\"subscriptionId\");",
+									"var response = JSON.parse(responseBody);",
+									"",
+									"postman.setEnvironmentVariable(\"subscriptionId\", response.subscriptionId);",
+									"console.log('subscriptionId = ' + pm.environment.get(\"subscriptionId\"));",
+									"    "
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"description": "(Required) The identifier of a client associated with a \"Login with Amazon\" account.",
+								"key": "Amazon-Advertising-API-ClientId",
+								"value": "{{client_id}}"
+							},
+							{
+								"description": "(Required) The identifier of a profile associated with the advertiser account. Use GET method on Profiles resource to list profiles associated with the access token passed in the HTTP Authorization header.",
+								"key": "Amazon-Advertising-API-Scope",
+								"value": "{{profileId}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/vnd.MarketingStreamSubscriptions.StreamSubscriptionResource.v1.0+json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/vnd.MarketingStreamSubscriptions.StreamSubscriptionResource.v1.0+json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"notes\": \"subscription for sp-traffic\",\n  \"clientRequestToken\": \"1234-5678-910-11-12-12-12-12-12\",\n  \"dataSetId\": \"sp-traffic\",\n  \"destinationArn\": \"arn:aws:sqs:us-east-1:379073720614:EF-Test-2-sp-traffic\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_url}}/streams/subscriptions",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"streams",
+								"subscriptions"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "sp-traffic",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": "(Required) The identifier of a client associated with a \"Login with Amazon\" account.",
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}"
+									},
+									{
+										"description": "(Required) The identifier of a profile associated with the advertiser account. Use GET method on Profiles resource to list profiles associated with the access token passed in the HTTP Authorization header.",
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"clientRequestToken\": \"stream-sp-traffic-test-123456\",\n  \"dataSetId\": \"sp-traffic\",\n  \"destinationArn\": \"arn:aws:sqs:us-east-1:xxxxxxxxxxxxxxxx\",\n  \"notes\": \"sp traffic subscription\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/streams/subscriptions",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"streams",
+										"subscriptions"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/vnd.MarketingStreamSubscriptions.StreamSubscriptionResource.v1.0+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"clientRequestToken\": \"stream-sp-traffic-test-123456\",\n  \"subscriptionId\": \"xxxxxxxxxxxxxxx\"\n}"
+						},
+						{
+							"name": "sp-conversion",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": "(Required) The identifier of a client associated with a \"Login with Amazon\" account.",
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}"
+									},
+									{
+										"description": "(Required) The identifier of a profile associated with the advertiser account. Use GET method on Profiles resource to list profiles associated with the access token passed in the HTTP Authorization header.",
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"clientRequestToken\": \"stream-sp-conversion-test-123456\",\n  \"dataSetId\": \"sp-conversion\",\n  \"destinationArn\": \"arn:aws:sqs:us-east-1:xxxxxxxxxxxxxxxx\",\n  \"notes\": \"sp conversion subscription\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/streams/subscriptions",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"streams",
+										"subscriptions"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/vnd.MarketingStreamSubscriptions.StreamSubscriptionResource.v1.0+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"clientRequestToken\": \"stream-sp-conversion-test-123456\",\n  \"subscriptionId\": \"xxxxxxxxxxxxxxx\"\n}"
+						},
+						{
+							"name": "budget-usage",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": "(Required) The identifier of a client associated with a \"Login with Amazon\" account.",
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "aliquip cillum officia ea"
+									},
+									{
+										"description": "(Required) The identifier of a profile associated with the advertiser account. Use GET method on Profiles resource to list profiles associated with the access token passed in the HTTP Authorization header.",
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "consequat Ut dolore"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"clientRequestToken\": \"stream-budget-usage-test-123456\",\n  \"dataSetId\": \"budget-usage\",\n  \"destinationArn\": \"arn:aws:sqs:us-east-1:xxxxxxxxxxxxxxxx\",\n  \"notes\": \"budget usage subscription\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/streams/subscriptions",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"streams",
+										"subscriptions"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/vnd.MarketingStreamSubscriptions.StreamSubscriptionResource.v1.0+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"clientRequestToken\": \"stream-budget-usage-test-123456\",\n  \"subscriptionId\": \"xxxxxxxxxxxxxxx\"\n}"
+						}
+					]
+				},
+				{
+					"name": "List Stream subscriptions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"/*Tests that response is not an error*/",
+									"pm.test(\"response should return subscriptionId\", function () {",
+									"      pm.response.to.not.be.error;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Amazon-Advertising-API-ClientId",
+								"value": "{{client_id}}"
+							},
+							{
+								"key": "Amazon-Advertising-API-Scope",
+								"value": "{{profileId}}"
+							},
+							{
+								"key": "Accept",
+								"value": "application/vnd.MarketingStreamSubscriptions.StreamSubscriptionResource.v1.0+json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/streams/subscriptions",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"streams",
+								"subscriptions"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"description": "(Required) The identifier of a client associated with a \"Login with Amazon\" account.",
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "aliquip cillum officia ea"
+									},
+									{
+										"description": "(Required) The identifier of a profile associated with the advertiser account. Use GET method on Profiles resource to list profiles associated with the access token passed in the HTTP Authorization header.",
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "consequat Ut dolore"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									}
+								],
+								"url": {
+									"raw": "{{api_url}}/streams/subscriptions?maxResults=2",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"streams",
+										"subscriptions"
+									],
+									"query": [
+										{
+											"key": "maxResults",
+											"value": "2"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/vnd.MarketingStreamSubscriptions.StreamSubscriptionResource.v1.0+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"subscriptions\": [\n    {\n      \"createdDate\": \"1954-09-09T11:09:32.877Z\",\n      \"dataSetId\": \"budget-usage\",\n      \"destinationArn\": \"etanim nisireprehenderit commodo\",\n      \"status\": \"SUSPENDED\",\n      \"subscriptionId\": \"anim reprehenderit\",\n      \"updatedDate\": \"1951-07-18T13:45:38.665Z\",\n      \"notes\": \"magna eiusmod\"\n    },\n    {\n      \"createdDate\": \"1993-05-26T17:50:38.666Z\",\n      \"dataSetId\": \"sp-conversion\",\n      \"destinationArn\": \"dolore anim nullacupidatat velit ad laboris dolor\",\n      \"status\": \"SUSPENDED\",\n      \"subscriptionId\": \"laboris non dolor sint\",\n      \"updatedDate\": \"2007-01-09T16:59:45.442Z\",\n      \"notes\": \"deserunt dolor exercitation magna\"\n    }\n  ],\n  \"nextToken\": \"xxxxxxxxxxx\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Stream subscription by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"/*Tests that response is not an error*/",
+									"pm.test(\"response should return subscriptionId\", function () {",
+									"      pm.response.to.not.be.error;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Amazon-Advertising-API-ClientId",
+								"value": "{{client_id}}"
+							},
+							{
+								"key": "Amazon-Advertising-API-Scope",
+								"value": "{{profileId}}"
+							},
+							{
+								"key": "Accept",
+								"value": "application/vnd.MarketingStreamSubscriptions.StreamSubscriptionResource.v1.0+json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/streams/subscriptions/:subscriptionId",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"streams",
+								"subscriptions",
+								":subscriptionId"
+							],
+							"variable": [
+								{
+									"key": "subscriptionId",
+									"value": "{{subscriptionId}}"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"description": "(Required) The identifier of a client associated with a \"Login with Amazon\" account.",
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}"
+									},
+									{
+										"description": "(Required) The identifier of a profile associated with the advertiser account. Use GET method on Profiles resource to list profiles associated with the access token passed in the HTTP Authorization header.",
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									}
+								],
+								"url": {
+									"raw": "{{api_url}}/streams/subscriptions/:subscriptionId",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"streams",
+										"subscriptions",
+										":subscriptionId"
+									],
+									"variable": [
+										{
+											"key": "subscriptionId",
+											"value": "xxxxxxxxxxxx"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/vnd.MarketingStreamSubscriptions.StreamSubscriptionResource.v1.0+json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"subscription\": {\n    \"createdDate\": \"1995-12-19T01:37:51.432Z\",\n    \"dataSetId\": \"sp-conversion\",\n    \"destinationArn\": \"xxxxxxxxxxxxx\",\n    \"status\": \"PENDING_CONFIRMATION\",\n    \"subscriptionId\": \"xxxxxxxxxxxxxx\",\n    \"updatedDate\": \"2015-02-05T11:12:31.839Z\",\n    \"notes\": \"sp-conversion subscription\"\n  }\n}"
+						}
+					]
+				},
+				{
+					"name": "Update Stream subscription",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"/*Tests that response is not an error*/",
+									"pm.test(\"response should return subscriptionId\", function () {",
+									"      pm.response.to.not.be.error;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"description": "(Required) The identifier of a client associated with a \"Login with Amazon\" account.",
+								"key": "Amazon-Advertising-API-ClientId",
+								"value": "{{client_id}}"
+							},
+							{
+								"description": "(Required) The identifier of a profile associated with the advertiser account. Use GET method on Profiles resource to list profiles associated with the access token passed in the HTTP Authorization header.",
+								"key": "Amazon-Advertising-API-Scope",
+								"value": "{{profileId}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/vnd.MarketingStreamSubscriptions.StreamSubscriptionResource.v1.0+json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"notes\": \"Only ACTIVE subscriptions can be archived\",\n  \"status\": \"ARCHIVED\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_url}}/streams/subscriptions/:subscriptionId",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"streams",
+								"subscriptions",
+								":subscriptionId"
+							],
+							"variable": [
+								{
+									"key": "subscriptionId",
+									"value": "{{subscriptionId}}"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Archive subscription",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"description": "(Required) The identifier of a client associated with a \"Login with Amazon\" account.",
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}"
+									},
+									{
+										"description": "(Required) The identifier of a profile associated with the advertiser account. Use GET method on Profiles resource to list profiles associated with the access token passed in the HTTP Authorization header.",
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/vnd.MarketingStreamSubscriptions.StreamSubscriptionResource.v1.0+json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"notes\": \"Change status of subscription\",\n  \"status\": \"ARCHIVED\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/streams/subscriptions/:subscriptionId",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"streams",
+										"subscriptions",
+										":subscriptionId"
+									],
+									"variable": [
+										{
+											"key": "subscriptionId",
+											"value": "{{subscriptionId}}"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "plain",
+							"header": [
+								{
+									"key": "Server",
+									"value": "Server"
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 05 Jul 2022 21:45:39 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								},
+								{
+									"key": "Content-Length",
+									"value": "0"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "x-amz-rid",
+									"value": "HZ669J1F0ZN9WV3YHR3P"
+								},
+								{
+									"key": "x-amz-apigw-id",
+									"value": "c2090393aed164a76ba8d75f13180ad5"
+								},
+								{
+									"key": "Vary",
+									"value": "Content-Type,Accept-Encoding,X-Amzn-CDN-Cache,X-Amzn-AX-Treatment,User-Agent"
+								},
+								{
+									"key": "Permissions-Policy",
+									"value": "interest-cohort=()"
+								}
+							],
+							"cookie": [],
+							"body": "{}"
+						}
+					]
+				}
+			],
+			"description": "Full API reference available in the [advanced tools center](https://advertising.amazon.com/API/docs/en-us/amazon-marketing-stream/openapi)."
 		}
 	],
 	"event": [
@@ -4835,7 +5457,7 @@
 					"}",
 					"",
 					"/**Add custom header containing the collection version to all collection requests*/",
-					"pm.request.headers.add({key: 'Postman-Collection', value: 'Amazon-Ads-API-v1'}) "
+					"pm.request.headers.add({key: 'Postman-Collection', value: 'Amazon-Ads-API-v1.1'}) "
 				]
 			}
 		},

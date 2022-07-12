@@ -9,6 +9,7 @@ To stay up to date on the latest additions, add yourself to this repository as a
 ## Contents
 
 - [Amazon Ads API Postman collection](postman)
+- [Amazon Marketing Stream CloudFormation template](amazon_marketing_stream)
 
 ## Issues
 
