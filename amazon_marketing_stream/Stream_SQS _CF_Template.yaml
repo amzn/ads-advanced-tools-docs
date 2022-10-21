@@ -18,10 +18,16 @@ Parameters:
     Description: The realm to stream
     AllowedValues:
       - NA
+      - EU
+      - FE
 Mappings:
   Region:
     NA:
       Region: us-east-1
+    EU:
+      Region: eu-west-1
+    FE:
+      Region: us-west-2
   NA:
     sp-traffic:
       Account: 906013806264
@@ -29,6 +35,20 @@ Mappings:
       Account: 802324068763
     budget-usage:
       Account: 055588217351
+  EU:
+    sp-traffic:
+      Account: 668473351658
+    sp-conversion:
+      Account: 562877083794
+    budget-usage:
+      Account: 675750596317      
+  FE:
+    sp-traffic:
+      Account: 074266271188
+    sp-conversion:
+      Account: 622939981599
+    budget-usage:
+      Account: 100899330244      
 Resources:
   StreamDestinationQueue:
     Type: "AWS::SQS::Queue"
