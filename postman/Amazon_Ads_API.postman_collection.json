@@ -8193,13 +8193,12 @@
 											"raw": "{\n  \"campaignIdFilter\": {\n    \"include\": [\n      \"{{campaignId}}\"\n    ]\n  }\n}"
 										},
 										"url": {
-											"raw": "{{api_url}}/sp/preview/targets/list",
+											"raw": "{{api_url}}/sp/targets/list",
 											"host": [
 												"{{api_url}}"
 											],
 											"path": [
 												"sp",
-												"preview",
 												"targets",
 												"list"
 											]
@@ -9909,13 +9908,12 @@
 									}
 								},
 								"url": {
-									"raw": "{{api_url}}/sp/preview/keywords/list",
+									"raw": "{{api_url}}/sp/keywords/list",
 									"host": [
 										"{{api_url}}"
 									],
 									"path": [
 										"sp",
-										"preview",
 										"keywords",
 										"list"
 									]
@@ -9963,13 +9961,12 @@
 											}
 										},
 										"url": {
-											"raw": "{{api_url}}/sp/preview/keywords/list",
+											"raw": "{{api_url}}/sp/keywords/list",
 											"host": [
 												"{{api_url}}"
 											],
 											"path": [
 												"sp",
-												"preview",
 												"keywords",
 												"list"
 											]
@@ -11454,13 +11451,12 @@
 									}
 								},
 								"url": {
-									"raw": "{{api_url}}/sp/preview/negativeKeywords/list",
+									"raw": "{{api_url}}/sp/negativeKeywords/list",
 									"host": [
 										"{{api_url}}"
 									],
 									"path": [
 										"sp",
-										"preview",
 										"negativeKeywords",
 										"list"
 									]
@@ -11508,13 +11504,12 @@
 											}
 										},
 										"url": {
-											"raw": "{{api_url}}/sp/preview/negativeKeywords/list",
+											"raw": "{{api_url}}/sp/negativeKeywords/list",
 											"host": [
 												"{{api_url}}"
 											],
 											"path": [
 												"sp",
-												"preview",
 												"negativeKeywords",
 												"list"
 											]
@@ -12695,13 +12690,12 @@
 									"raw": ""
 								},
 								"url": {
-									"raw": "{{api_url}}/sp/preview/negativeTargets/list",
+									"raw": "{{api_url}}/sp/negativeTargets/list",
 									"host": [
 										"{{api_url}}"
 									],
 									"path": [
 										"sp",
-										"preview",
 										"negativeTargets",
 										"list"
 									]
@@ -12749,13 +12743,12 @@
 											"raw": ""
 										},
 										"url": {
-											"raw": "{{api_url}}/sp/preview/negativeTargets/list",
+											"raw": "{{api_url}}/sp/negativeTargets/list",
 											"host": [
 												"{{api_url}}"
 											],
 											"path": [
 												"sp",
-												"preview",
 												"negativeTargets",
 												"list"
 											]
