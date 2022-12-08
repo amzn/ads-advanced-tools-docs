@@ -47,22 +47,14 @@ Mappings:
     sp-conversion:
       Account: 562877083794
     budget-usage:
-      Account: 675750596317 
-    sd-traffic:
-      Account: 947153514089
-    sd-conversion:
-      Account: 664093967423      
+      Account: 675750596317       
   FE:
     sp-traffic:
       Account: 074266271188
     sp-conversion:
       Account: 622939981599
     budget-usage:
-      Account: 100899330244
-    sd-traffic:
-      Account: 310605068565
-    sd-conversion:
-      Account: 818973306977        
+      Account: 100899330244       
 Resources:
   StreamDestinationQueue:
     Type: "AWS::SQS::Queue"
