@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
   AWS CloudFormation Template to create a new SQS queue used as a Stream
-  destination
+  destination.
 Parameters:
   StreamDestinationQueueName:
     Type: String
@@ -13,6 +13,8 @@ Parameters:
       - sp-traffic
       - sp-conversion
       - budget-usage
+      - sd-traffic      
+      - sd-conversion     
   StreamRealm:
     Type: String
     Description: The realm to stream
@@ -35,20 +37,24 @@ Mappings:
       Account: 802324068763
     budget-usage:
       Account: 055588217351
+    sd-traffic:
+      Account: 370941301809
+    sd-conversion:
+      Account: 877712924581
   EU:
     sp-traffic:
       Account: 668473351658
     sp-conversion:
       Account: 562877083794
     budget-usage:
-      Account: 675750596317      
+      Account: 675750596317       
   FE:
     sp-traffic:
       Account: 074266271188
     sp-conversion:
       Account: 622939981599
     budget-usage:
-      Account: 100899330244      
+      Account: 100899330244       
 Resources:
   StreamDestinationQueue:
     Type: "AWS::SQS::Queue"
