@@ -1,9 +1,10 @@
 {
 	"info": {
-		"_postman_id": "014dcc1a-4645-4fb2-8169-ccd85ccac871",
+		"_postman_id": "6d5100fe-e1c8-43c6-abe8-982125165433",
 		"name": "Amazon Ads API",
 		"description": "# Amazon Ads API Postman collection\n\nThis collection includes commonly used endpoints for the Amazon Ads API. The collection also includes pre- and post-request scripts to automate management of auth credentials.\n\nVisit the [Amazon Ads advanced tools center](https://advertising.amazon.com/API/docs/en-us/) for API documentation.\n\n## Setup\n\nTo use this collection, you will need credentials for the Amazon Ads API. For information about acquiring credentials, see the [onboarding overview for the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/onboarding/overview).\n\nFind setup instructions in the Amazon Ads advanced tools center for:\n\n- [New users of the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/getting-started/using-postman-collection)\n- [Users with an existing refresh token](https://advertising.amazon.com/API/docs/en-us/tutorials/postman) \n\n## Issues and support\n\nFor technical support for the Amazon Ads API, see [Technical support](https://advertising.amazon.com/API/docs/en-us/info/support) in the Amazon Ads advanced tools center.\n\nTo report a bug or suggest an improvement relating to this collection or the documentation, [create an issue](https://github.com/amzn/ads-advanced-tools-docs/issues/new/choose).",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25489918"
 	},
 	"item": [
 		{
@@ -856,7 +857,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"startDate\": \"2022-05-20\",\n    \"endDate\": \"2022-05-21\"\n}"
+									"raw": "{\n    \"startDate\": \"2023-02-21\",\n    \"endDate\": \"2023-02-27\",\n    \"type\": \"CAMPAIGN\",\n    \"dimensions\": [\n        \"ORDER\",\n        \"LINE_ITEM\",\n        \"CREATIVE\"\n    ],\n    \"metrics\": [\n        \"3pFeeAutomotive\",\n        \"3pFeeAutomotiveAbsorbed\",\n        \"3pFeeComScore\",\n        \"3pFeeComScoreAbsorbed\",\n        \"3pFeeCPM1\",\n        \"3pFeeCPM1Absorbed\",\n        \"3pFeeCPM2\",\n        \"3pFeeCPM2Absorbed\",\n        \"3pFeeCPM3\",\n        \"3pFeeCPM3Absorbed\",\n        \"3pFeeDoubleclickCampaignManager\",\n        \"3pFeeDoubleclickCampaignManagerAbsorbed\",\n        \"3pFeeDoubleVerify\",\n        \"3pFeeDoubleVerifyAbsorbed\",\n        \"3pFeeIntegralAdScience\",\n        \"3pFeeIntegralAdScienceAbsorbed\",\n        \"3PFees\",\n        \"accept14d\",\n        \"acceptClicks14d\",\n        \"acceptCPA14d\",\n        \"acceptCVR14d\",\n        \"acceptViews14d\",\n        \"addedToShoppingCart14d\",\n        \"addedToShoppingCartClicks14d\",\n        \"addedToShoppingCartCPA14d\",\n        \"addedToShoppingCartCVR14d\",\n        \"addedToShoppingCartViews14d\",\n        \"addToWatchlist14d\",\n        \"addToWatchlistClicks14d\",\n        \"addToWatchlistCPA14d\",\n        \"addToWatchlistCVR14d\",\n        \"addToWatchlistViews14d\",\n        \"advertiserCountry\",\n        \"advertiserTimezone\",\n        \"agencyFee\",\n        \"amazonAudienceFee\",\n        \"amazonPlatformFee\",\n        \"application14d\",\n        \"applicationClicks14d\",\n        \"applicationCPA14d\",\n        \"applicationCVR14d\",\n        \"applicationViews14d\",\n        \"atc14d\",\n        \"atcClicks14d\",\n        \"atcr14d\",\n        \"atcViews14d\",\n        \"atl14d\",\n        \"atlClicks14d\",\n        \"atlr14d\",\n        \"atlViews14d\",\n        \"bannerInteraction14d\",\n        \"bannerInteractionClicks14d\",\n        \"bannerInteractionCPA14d\",\n        \"bannerInteractionCVR14d\",\n        \"bannerInteractionViews14d\",\n        \"brandSearch14d\",\n        \"brandSearchClicks14d\",\n        \"brandSearchCPA14d\",\n        \"brandSearchRate14d\",\n        \"brandSearchViews14d\",\n        \"brandStoreEngagement1\",\n        \"brandStoreEngagement1Clicks\",\n        \"brandStoreEngagement1CPA\",\n        \"brandStoreEngagement1CVR\",\n        \"brandStoreEngagement1Views\",\n        \"brandStoreEngagement2\",\n        \"brandStoreEngagement2Clicks\",\n        \"brandStoreEngagement2CPA\",\n        \"brandStoreEngagement2CVR\",\n        \"brandStoreEngagement2Views\",\n        \"brandStoreEngagement3\",\n        \"brandStoreEngagement3Clicks\",\n        \"brandStoreEngagement3CPA\",\n        \"brandStoreEngagement3CVR\",\n        \"brandStoreEngagement3Views\",\n        \"brandStoreEngagement4\",\n        \"brandStoreEngagement4Clicks\",\n        \"brandStoreEngagement4CPA\",\n        \"brandStoreEngagement4CVR\",\n        \"brandStoreEngagement4Views\",\n        \"brandStoreEngagement5\",\n        \"brandStoreEngagement5Clicks\",\n        \"brandStoreEngagement5CPA\",\n        \"brandStoreEngagement5CVR\",\n        \"brandStoreEngagement5Views\",\n        \"brandStoreEngagement6\",\n        \"brandStoreEngagement6Clicks\",\n        \"brandStoreEngagement6CPA\",\n        \"brandStoreEngagement6CVR\",\n        \"brandStoreEngagement6Views\",\n        \"brandStoreEngagement7\",\n        \"brandStoreEngagement7Clicks\",\n        \"brandStoreEngagement7CPA\",\n        \"brandStoreEngagement7CVR\",\n        \"brandStoreEngagement7Views\",\n        \"clickOnRedirect14d\",\n        \"clickOnRedirectClicks14d\",\n        \"clickOnRedirectCPA14d\",\n        \"clickOnRedirectCVR14d\",\n        \"clickOnRedirectViews14d\",\n        \"clickThroughs\",\n        \"combinedECPP\",\n        \"combinedERPM\",\n        \"combinedProductSales\",\n        \"combinedPurchaseRate\",\n        \"combinedPurchases\",\n        \"combinedPurchasesClicks\",\n        \"combinedPurchasesViews\",\n        \"combinedROAS\",\n        \"combinedUnitsSold\",\n        \"CTR\",\n        \"decline14d\",\n        \"declineClicks14d\",\n        \"declineCPA14d\",\n        \"declineCVR14d\",\n        \"declineViews14d\",\n        \"downloadedVideoPlayRate14d\",\n        \"downloadedVideoPlays14d\",\n        \"downloadedVideoPlaysClicks14d\",\n        \"downloadedVideoPlaysViews14d\",\n        \"dpv14d\",\n        \"dpvClicks14d\",\n        \"dpvr14d\",\n        \"dpvViews14d\",\n        \"dropDownSelection14d\",\n        \"dropDownSelectionClicks14d\",\n        \"dropDownSelectionCPA14d\",\n        \"dropDownSelectionCVR14d\",\n        \"dropDownSelectionViews14d\",\n        \"eCPAtc14d\",\n        \"eCPAtl14d\",\n        \"eCPC\",\n        \"eCPDPV14d\",\n        \"eCPDVP14d\",\n        \"eCPM\",\n        \"eCPnewSubscribeAndSave14d\",\n        \"eCPP14d\",\n        \"eCPPRPV14d\",\n        \"eCPPT14d\",\n        \"ecpr14d\",\n        \"ecpvc\",\n        \"ecpvd14d\",\n        \"eCPVS14d\",\n        \"emailInteraction14d\",\n        \"emailInteractionClicks14d\",\n        \"emailInteractionCPA14d\",\n        \"emailInteractionCVR14d\",\n        \"emailInteractionViews14d\",\n        \"emailLoad14d\",\n        \"emailLoadClicks14d\",\n        \"emailLoadCPA14d\",\n        \"emailLoadCVR14d\",\n        \"emailLoadViews14d\",\n        \"eRPM14d\",\n        \"gameInteraction14d\",\n        \"gameInteractionClicks14d\",\n        \"gameInteractionCPA14d\",\n        \"gameInteractionCVR14d\",\n        \"gameInteractionViews14d\",\n        \"gameLoad14d\",\n        \"gameLoadClicks14d\",\n        \"gameLoadCPA14d\",\n        \"gameLoadCVR14d\",\n        \"gameLoadViews14d\",\n        \"grossClickThroughs\",\n        \"grossImpressions\",\n        \"homepageVisit14d\",\n        \"homepageVisitClicks14d\",\n        \"homepageVisitCPA14d\",\n        \"homepageVisitCVR14d\",\n        \"homepageVisitViews14d\",\n        \"impressions\",\n        \"invalidClickThroughs\",\n        \"invalidClickThroughsRate\",\n        \"invalidImpressionRate\",\n        \"invalidImpressions\",\n        \"marketingLandingPage14d\",\n        \"marketingLandingPageClicks14d\",\n        \"marketingLandingPageCPA14d\",\n        \"marketingLandingPageCVR14d\",\n        \"marketingLandingPageViews14d\",\n        \"mashupAddToCart14d\",\n        \"mashupAddToCartClickCVR14d\",\n        \"mashupAddToCartClicks14d\",\n        \"mashupAddToCartCPA14d\",\n        \"mashupAddToCartViews14d\",\n        \"mashupAddToWishlist14d\",\n        \"mashupAddToWishlistClicks14d\",\n        \"mashupAddToWishlistCPA14d\",\n        \"mashupAddToWishlistCVR14d\",\n        \"mashupAddToWishlistViews14d\",\n        \"mashupBackupImage\",\n        \"mashupBackupImageClicks\",\n        \"mashupBackupImageCPA\",\n        \"mashupBackupImageCVR\",\n        \"mashupBackupImageViews\",\n        \"mashupClickToPage\",\n        \"mashupClickToPageClicks\",\n        \"mashupClickToPageCPA\",\n        \"mashupClickToPageCVR\",\n        \"mashupClickToPageViews\",\n        \"mashupClipCouponClick14d\",\n        \"mashupClipCouponClickClicks14d\",\n        \"mashupClipCouponClickCPA14d\",\n        \"mashupClipCouponClickCVR14d\",\n        \"mashupClipCouponClickViews14d\",\n        \"mashupShopNowClick14d\",\n        \"mashupShopNowClickClicks14d\",\n        \"mashupShopNowClickCPA14d\",\n        \"mashupShopNowClickCVR14d\",\n        \"mashupShopNowClickViews14d\",\n        \"mashupSubscribeAndSave14d\",\n        \"mashupSubscribeAndSaveClick14d\",\n        \"mashupSubscribeAndSaveClickViews14d\",\n        \"mashupSubscribeAndSaveCPA14d\",\n        \"mashupSubscribeAndSaveCVR14d\",\n        \"measurableImpressions\",\n        \"measurableRate\",\n        \"messageSent14d\",\n        \"messageSentClicks14d\",\n        \"messageSentCPA14d\",\n        \"messageSentCVR14d\",\n        \"messageSentViews14d\",\n        \"mobileAppFirstStartClicks14d\",\n        \"mobileAppFirstStartCVR14d\",\n        \"mobileAppFirstStarts14d\",\n        \"mobileAppFirstStartsCPA14d\",\n        \"mobileAppFirstStartViews14d\",\n        \"newSubscribeAndSave14d\",\n        \"newSubscribeAndSaveClicks14d\",\n        \"newSubscribeAndSaveRate14d\",\n        \"newSubscribeAndSaveViews14d\",\n        \"newToBrandECPP14d\",\n        \"newToBrandERPM14d\",\n        \"newToBrandProductSales14d\",\n        \"newToBrandPurchaseRate14d\",\n        \"newToBrandPurchases14d\",\n        \"newToBrandPurchasesClicks14d\",\n        \"newToBrandPurchasesViews14d\",\n        \"newToBrandROAS14d\",\n        \"newToBrandUnitsSold14d\",\n        \"offAmazonClicks14d\",\n        \"offAmazonConversions14d\",\n        \"offAmazonCPA14d\",\n        \"offAmazonCVR14d\",\n        \"offAmazonECPP14d\",\n        \"offAmazonERPM14d\",\n        \"offAmazonProductSales14d\",\n        \"offAmazonPurchaseRate14d\",\n        \"offAmazonPurchases14d\",\n        \"offAmazonPurchasesClicks14d\",\n        \"offAmazonPurchasesViews14d\",\n        \"offAmazonROAS14d\",\n        \"offAmazonUnitsSold14d\",\n        \"offAmazonViews14d\",\n        \"percentOfPurchasesNewToBrand14d\",\n        \"playerTrailersClicks14d\",\n        \"playTrailerRate14d\",\n        \"playTrailers14d\",\n        \"playTrailersViews14d\",\n        \"pRPV14d\",\n        \"pRPVClicks14d\",\n        \"pRPVr14d\",\n        \"pRPVViews14d\",\n        \"purchaseButton14d\",\n        \"purchaseButtonClicks14d\",\n        \"purchaseButtonCPA14d\",\n        \"purchaseButtonCVR14d\",\n        \"purchaseButtonViews14d\",\n        \"purchaseRate14d\",\n        \"purchases14d\",\n        \"purchasesClicks14d\",\n        \"purchasesViews14d\",\n        \"referral14d\",\n        \"referralClicks14d\",\n        \"referralCPA14d\",\n        \"referralCVR14d\",\n        \"referralViews14d\",\n        \"registrationConfirmPage14d\",\n        \"registrationConfirmPageClicks14d\",\n        \"registrationConfirmPageCPA14d\",\n        \"registrationConfirmPageCVR14d\",\n        \"registrationConfirmPageViews14d\",\n        \"registrationForm14d\",\n        \"registrationFormClicks14d\",\n        \"registrationFormCPA14d\",\n        \"registrationFormCVR14d\",\n        \"registrationFormViews14d\",\n        \"rentalRate14d\",\n        \"rentals14d\",\n        \"rentalsClicks14d\",\n        \"rentalsViews14d\",\n        \"ROAS14d\",\n        \"sales14d\",\n        \"signUp14d\",\n        \"signUpClicks14d\",\n        \"signUpCPA14d\",\n        \"signUpCVR14d\",\n        \"signUpPage14d\",\n        \"signUpPageClicks14d\",\n        \"signUpPageCPA14d\",\n        \"signUpPageCVR14d\",\n        \"signUpPageViews14d\",\n        \"signUpViews14d\",\n        \"storeLocatorPage14d\",\n        \"storeLocatorPageClicks14d\",\n        \"storeLocatorPageCPA14d\",\n        \"storeLocatorPageCVR14d\",\n        \"storeLocatorPageViews14d\",\n        \"submitButton14d\",\n        \"submitButtonClicks14d\",\n        \"submitButtonCPA14d\",\n        \"submitButtonCVR14d\",\n        \"submitButtonViews14d\",\n        \"subscribe14d\",\n        \"subscribeClicks14d\",\n        \"subscribeCPA14d\",\n        \"subscribeCVR14d\",\n        \"subscribeViews14d\",\n        \"subscriptionButton14d\",\n        \"subscriptionButtonClicks14d\",\n        \"subscriptionButtonCPA14d\",\n        \"subscriptionButtonCVR14d\",\n        \"subscriptionButtonViews14d\",\n        \"successPage14d\",\n        \"successPageClicks14d\",\n        \"successPageCPA14d\",\n        \"successPageCVR14d\",\n        \"successPageViews14d\",\n        \"supplyCost\",\n        \"surveyFinish14d\",\n        \"surveyFinishClicks14d\",\n        \"surveyFinishCPA14d\",\n        \"surveyFinishCVR14d\",\n        \"surveyFinishViews14d\",\n        \"surveyStart14d\",\n        \"surveyStartClicks14d\",\n        \"surveyStartCPA14d\",\n        \"surveyStartCVR14d\",\n        \"surveyStartViews14d\",\n        \"thankYouPage14d\",\n        \"thankYouPageClicks14d\",\n        \"thankYouPageCPA14d\",\n        \"thankYouPageCVR14d\",\n        \"thankYouPageViews14d\",\n        \"totalAddToCart14d\",\n        \"totalAddToCartClicks14d\",\n        \"totalAddToCartCPA14d\",\n        \"totalAddToCartCVR14d\",\n        \"totalAddToCartViews14d\",\n        \"totalAddToList14d\",\n        \"totalAddToListClicks14d\",\n        \"totalAddToListCPA14d\",\n        \"totalAddToListCVR14d\",\n        \"totalAddToListViews14d\",\n        \"totalCost\",\n        \"totalDetailPageClicks14d\",\n        \"totalDetailPageViews14d\",\n        \"totalDetailPageViewsCVR14d\",\n        \"totalDetailPageViewViews14d\",\n        \"totalDetaiPageViewCPA14d\",\n        \"totalECPP14d\",\n        \"totalECPPRPV14d\",\n        \"totalERPM14d\",\n        \"totalFee\",\n        \"totalNewToBrandECPP14d\",\n        \"totalNewToBrandERPM14d\",\n        \"totalNewToBrandProductSales14d\",\n        \"totalNewToBrandPurchaseRate14d\",\n        \"totalNewToBrandPurchases14d\",\n        \"totalNewToBrandPurchasesClicks14d\",\n        \"totalNewToBrandPurchasesViews14d\",\n        \"totalNewToBrandROAS14d\",\n        \"totalNewToBrandUnitsSold14d\",\n        \"totalPercentOfPurchasesNewToBrand14d\",\n        \"totalPRPV14d\",\n        \"totalPRPVClicks14d\",\n        \"totalPRPVr14d\",\n        \"totalPRPVViews14d\",\n        \"totalPurchaseRate14d\",\n        \"totalPurchases14d\",\n        \"totalPurchasesClicks14d\",\n        \"totalPurchasesViews14d\",\n        \"totalROAS14d\",\n        \"totalSales14d\",\n        \"totalSubscribeAndSaveSubscriptionClicks14d\",\n        \"totalSubscribeAndSaveSubscriptionCPA14d\",\n        \"totalSubscribeAndSaveSubscriptionCVR14d\",\n        \"totalSubscribeAndSaveSubscriptions14d\",\n        \"totalSubscribeAndSaveSubscriptionViews14d\",\n        \"totalUnitsSold14d\",\n        \"unitsSold14d\",\n        \"videoComplete\",\n        \"videoCompleted\",\n        \"videoCompletedCPA\",\n        \"videoCompletedCVR\",\n        \"videoCompletedViews\",\n        \"videoCompletionRate\",\n        \"videoDownloadRate14d\",\n        \"videoDownloads14d\",\n        \"videoDownloadsClicks14d\",\n        \"videoDownloadsViews14d\",\n        \"videoEndClicks\",\n        \"videoFirstQuartile\",\n        \"videoMidpoint\",\n        \"videoMute\",\n        \"videoPause\",\n        \"videoResume\",\n        \"videoStart\",\n        \"videoStarted\",\n        \"videoStartedClicks\",\n        \"videoStartedCPA\",\n        \"videoStartedCVR\",\n        \"videoStartedViews\",\n        \"videoStreams14d\",\n        \"videoStreamsClicks14d\",\n        \"videoStreamsRate14d\",\n        \"videoStreamsViews14d\",\n        \"videoThirdQuartile\",\n        \"videoUnmute\",\n        \"viewabilityRate\",\n        \"viewableImpressions\",\n        \"widgetInteraction14d\",\n        \"widgetInteractionClicks14d\",\n        \"widgetInteractionCPA14d\",\n        \"widgetInteractionCVR14d\",\n        \"widgetInteractionViews14d\",\n        \"widgetLoad14d\",\n        \"widgetLoadClicks14d\",\n        \"widgetLoadCPA14d\",\n        \"widgetLoadCVR14d\",\n        \"widgetLoadViews14d\"\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{api_url}}/accounts/{{dspAccountId}}/dsp/reports",
@@ -900,7 +901,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"startDate\": \"2022-05-20\",\n    \"endDate\": \"2022-05-21\"\n}"
+											"raw": "{\n    \"startDate\": \"2023-02-01\",\n    \"endDate\": \"2023-02-03\"\n}"
 										},
 										"url": {
 											"raw": "{{api_url}}/accounts/{{dspAccountId}}/dsp/reports",
@@ -978,6 +979,791 @@
 									],
 									"cookie": [],
 									"body": "{\n    \"reportId\": \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\n    \"type\": \"CAMPAIGN\",\n    \"format\": \"JSON\",\n    \"status\": \"IN_PROGRESS\",\n    \"statusDetails\": \"In progress\",\n    \"location\": \"\",\n    \"expiration\": \"2022-05-25T18:20:24.425Z\"\n}"
+								},
+								{
+									"name": "Campaign",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.dspcreatereports.v3+json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"startDate\": \"2023-02-21\",\n    \"endDate\": \"2023-02-27\",\n    \"type\": \"CAMPAIGN\",\n    \"dimensions\": [\n        \"ORDER\",\n        \"LINE_ITEM\",\n        \"CREATIVE\"\n    ],\n    \"metrics\": [\n        \"3pFeeAutomotive\",\n        \"3pFeeAutomotiveAbsorbed\",\n        \"3pFeeComScore\",\n        \"3pFeeComScoreAbsorbed\",\n        \"3pFeeCPM1\",\n        \"3pFeeCPM1Absorbed\",\n        \"3pFeeCPM2\",\n        \"3pFeeCPM2Absorbed\",\n        \"3pFeeCPM3\",\n        \"3pFeeCPM3Absorbed\",\n        \"3pFeeDoubleclickCampaignManager\",\n        \"3pFeeDoubleclickCampaignManagerAbsorbed\",\n        \"3pFeeDoubleVerify\",\n        \"3pFeeDoubleVerifyAbsorbed\",\n        \"3pFeeIntegralAdScience\",\n        \"3pFeeIntegralAdScienceAbsorbed\",\n        \"3PFees\",\n        \"accept14d\",\n        \"acceptClicks14d\",\n        \"acceptCPA14d\",\n        \"acceptCVR14d\",\n        \"acceptViews14d\",\n        \"addedToShoppingCart14d\",\n        \"addedToShoppingCartClicks14d\",\n        \"addedToShoppingCartCPA14d\",\n        \"addedToShoppingCartCVR14d\",\n        \"addedToShoppingCartViews14d\",\n        \"addToWatchlist14d\",\n        \"addToWatchlistClicks14d\",\n        \"addToWatchlistCPA14d\",\n        \"addToWatchlistCVR14d\",\n        \"addToWatchlistViews14d\",\n        \"advertiserCountry\",\n        \"advertiserTimezone\",\n        \"agencyFee\",\n        \"amazonAudienceFee\",\n        \"amazonPlatformFee\",\n        \"application14d\",\n        \"applicationClicks14d\",\n        \"applicationCPA14d\",\n        \"applicationCVR14d\",\n        \"applicationViews14d\",\n        \"atc14d\",\n        \"atcClicks14d\",\n        \"atcr14d\",\n        \"atcViews14d\",\n        \"atl14d\",\n        \"atlClicks14d\",\n        \"atlr14d\",\n        \"atlViews14d\",\n        \"bannerInteraction14d\",\n        \"bannerInteractionClicks14d\",\n        \"bannerInteractionCPA14d\",\n        \"bannerInteractionCVR14d\",\n        \"bannerInteractionViews14d\",\n        \"brandSearch14d\",\n        \"brandSearchClicks14d\",\n        \"brandSearchCPA14d\",\n        \"brandSearchRate14d\",\n        \"brandSearchViews14d\",\n        \"brandStoreEngagement1\",\n        \"brandStoreEngagement1Clicks\",\n        \"brandStoreEngagement1CPA\",\n        \"brandStoreEngagement1CVR\",\n        \"brandStoreEngagement1Views\",\n        \"brandStoreEngagement2\",\n        \"brandStoreEngagement2Clicks\",\n        \"brandStoreEngagement2CPA\",\n        \"brandStoreEngagement2CVR\",\n        \"brandStoreEngagement2Views\",\n        \"brandStoreEngagement3\",\n        \"brandStoreEngagement3Clicks\",\n        \"brandStoreEngagement3CPA\",\n        \"brandStoreEngagement3CVR\",\n        \"brandStoreEngagement3Views\",\n        \"brandStoreEngagement4\",\n        \"brandStoreEngagement4Clicks\",\n        \"brandStoreEngagement4CPA\",\n        \"brandStoreEngagement4CVR\",\n        \"brandStoreEngagement4Views\",\n        \"brandStoreEngagement5\",\n        \"brandStoreEngagement5Clicks\",\n        \"brandStoreEngagement5CPA\",\n        \"brandStoreEngagement5CVR\",\n        \"brandStoreEngagement5Views\",\n        \"brandStoreEngagement6\",\n        \"brandStoreEngagement6Clicks\",\n        \"brandStoreEngagement6CPA\",\n        \"brandStoreEngagement6CVR\",\n        \"brandStoreEngagement6Views\",\n        \"brandStoreEngagement7\",\n        \"brandStoreEngagement7Clicks\",\n        \"brandStoreEngagement7CPA\",\n        \"brandStoreEngagement7CVR\",\n        \"brandStoreEngagement7Views\",\n        \"clickOnRedirect14d\",\n        \"clickOnRedirectClicks14d\",\n        \"clickOnRedirectCPA14d\",\n        \"clickOnRedirectCVR14d\",\n        \"clickOnRedirectViews14d\",\n        \"clickThroughs\",\n        \"combinedECPP\",\n        \"combinedERPM\",\n        \"combinedProductSales\",\n        \"combinedPurchaseRate\",\n        \"combinedPurchases\",\n        \"combinedPurchasesClicks\",\n        \"combinedPurchasesViews\",\n        \"combinedROAS\",\n        \"combinedUnitsSold\",\n        \"CTR\",\n        \"decline14d\",\n        \"declineClicks14d\",\n        \"declineCPA14d\",\n        \"declineCVR14d\",\n        \"declineViews14d\",\n        \"downloadedVideoPlayRate14d\",\n        \"downloadedVideoPlays14d\",\n        \"downloadedVideoPlaysClicks14d\",\n        \"downloadedVideoPlaysViews14d\",\n        \"dpv14d\",\n        \"dpvClicks14d\",\n        \"dpvr14d\",\n        \"dpvViews14d\",\n        \"dropDownSelection14d\",\n        \"dropDownSelectionClicks14d\",\n        \"dropDownSelectionCPA14d\",\n        \"dropDownSelectionCVR14d\",\n        \"dropDownSelectionViews14d\",\n        \"eCPAtc14d\",\n        \"eCPAtl14d\",\n        \"eCPC\",\n        \"eCPDPV14d\",\n        \"eCPDVP14d\",\n        \"eCPM\",\n        \"eCPnewSubscribeAndSave14d\",\n        \"eCPP14d\",\n        \"eCPPRPV14d\",\n        \"eCPPT14d\",\n        \"ecpr14d\",\n        \"ecpvc\",\n        \"ecpvd14d\",\n        \"eCPVS14d\",\n        \"emailInteraction14d\",\n        \"emailInteractionClicks14d\",\n        \"emailInteractionCPA14d\",\n        \"emailInteractionCVR14d\",\n        \"emailInteractionViews14d\",\n        \"emailLoad14d\",\n        \"emailLoadClicks14d\",\n        \"emailLoadCPA14d\",\n        \"emailLoadCVR14d\",\n        \"emailLoadViews14d\",\n        \"eRPM14d\",\n        \"gameInteraction14d\",\n        \"gameInteractionClicks14d\",\n        \"gameInteractionCPA14d\",\n        \"gameInteractionCVR14d\",\n        \"gameInteractionViews14d\",\n        \"gameLoad14d\",\n        \"gameLoadClicks14d\",\n        \"gameLoadCPA14d\",\n        \"gameLoadCVR14d\",\n        \"gameLoadViews14d\",\n        \"grossClickThroughs\",\n        \"grossImpressions\",\n        \"homepageVisit14d\",\n        \"homepageVisitClicks14d\",\n        \"homepageVisitCPA14d\",\n        \"homepageVisitCVR14d\",\n        \"homepageVisitViews14d\",\n        \"impressions\",\n        \"invalidClickThroughs\",\n        \"invalidClickThroughsRate\",\n        \"invalidImpressionRate\",\n        \"invalidImpressions\",\n        \"marketingLandingPage14d\",\n        \"marketingLandingPageClicks14d\",\n        \"marketingLandingPageCPA14d\",\n        \"marketingLandingPageCVR14d\",\n        \"marketingLandingPageViews14d\",\n        \"mashupAddToCart14d\",\n        \"mashupAddToCartClickCVR14d\",\n        \"mashupAddToCartClicks14d\",\n        \"mashupAddToCartCPA14d\",\n        \"mashupAddToCartViews14d\",\n        \"mashupAddToWishlist14d\",\n        \"mashupAddToWishlistClicks14d\",\n        \"mashupAddToWishlistCPA14d\",\n        \"mashupAddToWishlistCVR14d\",\n        \"mashupAddToWishlistViews14d\",\n        \"mashupBackupImage\",\n        \"mashupBackupImageClicks\",\n        \"mashupBackupImageCPA\",\n        \"mashupBackupImageCVR\",\n        \"mashupBackupImageViews\",\n        \"mashupClickToPage\",\n        \"mashupClickToPageClicks\",\n        \"mashupClickToPageCPA\",\n        \"mashupClickToPageCVR\",\n        \"mashupClickToPageViews\",\n        \"mashupClipCouponClick14d\",\n        \"mashupClipCouponClickClicks14d\",\n        \"mashupClipCouponClickCPA14d\",\n        \"mashupClipCouponClickCVR14d\",\n        \"mashupClipCouponClickViews14d\",\n        \"mashupShopNowClick14d\",\n        \"mashupShopNowClickClicks14d\",\n        \"mashupShopNowClickCPA14d\",\n        \"mashupShopNowClickCVR14d\",\n        \"mashupShopNowClickViews14d\",\n        \"mashupSubscribeAndSave14d\",\n        \"mashupSubscribeAndSaveClick14d\",\n        \"mashupSubscribeAndSaveClickViews14d\",\n        \"mashupSubscribeAndSaveCPA14d\",\n        \"mashupSubscribeAndSaveCVR14d\",\n        \"measurableImpressions\",\n        \"measurableRate\",\n        \"messageSent14d\",\n        \"messageSentClicks14d\",\n        \"messageSentCPA14d\",\n        \"messageSentCVR14d\",\n        \"messageSentViews14d\",\n        \"mobileAppFirstStartClicks14d\",\n        \"mobileAppFirstStartCVR14d\",\n        \"mobileAppFirstStarts14d\",\n        \"mobileAppFirstStartsCPA14d\",\n        \"mobileAppFirstStartViews14d\",\n        \"newSubscribeAndSave14d\",\n        \"newSubscribeAndSaveClicks14d\",\n        \"newSubscribeAndSaveRate14d\",\n        \"newSubscribeAndSaveViews14d\",\n        \"newToBrandECPP14d\",\n        \"newToBrandERPM14d\",\n        \"newToBrandProductSales14d\",\n        \"newToBrandPurchaseRate14d\",\n        \"newToBrandPurchases14d\",\n        \"newToBrandPurchasesClicks14d\",\n        \"newToBrandPurchasesViews14d\",\n        \"newToBrandROAS14d\",\n        \"newToBrandUnitsSold14d\",\n        \"offAmazonClicks14d\",\n        \"offAmazonConversions14d\",\n        \"offAmazonCPA14d\",\n        \"offAmazonCVR14d\",\n        \"offAmazonECPP14d\",\n        \"offAmazonERPM14d\",\n        \"offAmazonProductSales14d\",\n        \"offAmazonPurchaseRate14d\",\n        \"offAmazonPurchases14d\",\n        \"offAmazonPurchasesClicks14d\",\n        \"offAmazonPurchasesViews14d\",\n        \"offAmazonROAS14d\",\n        \"offAmazonUnitsSold14d\",\n        \"offAmazonViews14d\",\n        \"percentOfPurchasesNewToBrand14d\",\n        \"playerTrailersClicks14d\",\n        \"playTrailerRate14d\",\n        \"playTrailers14d\",\n        \"playTrailersViews14d\",\n        \"pRPV14d\",\n        \"pRPVClicks14d\",\n        \"pRPVr14d\",\n        \"pRPVViews14d\",\n        \"purchaseButton14d\",\n        \"purchaseButtonClicks14d\",\n        \"purchaseButtonCPA14d\",\n        \"purchaseButtonCVR14d\",\n        \"purchaseButtonViews14d\",\n        \"purchaseRate14d\",\n        \"purchases14d\",\n        \"purchasesClicks14d\",\n        \"purchasesViews14d\",\n        \"referral14d\",\n        \"referralClicks14d\",\n        \"referralCPA14d\",\n        \"referralCVR14d\",\n        \"referralViews14d\",\n        \"registrationConfirmPage14d\",\n        \"registrationConfirmPageClicks14d\",\n        \"registrationConfirmPageCPA14d\",\n        \"registrationConfirmPageCVR14d\",\n        \"registrationConfirmPageViews14d\",\n        \"registrationForm14d\",\n        \"registrationFormClicks14d\",\n        \"registrationFormCPA14d\",\n        \"registrationFormCVR14d\",\n        \"registrationFormViews14d\",\n        \"rentalRate14d\",\n        \"rentals14d\",\n        \"rentalsClicks14d\",\n        \"rentalsViews14d\",\n        \"ROAS14d\",\n        \"sales14d\",\n        \"signUp14d\",\n        \"signUpClicks14d\",\n        \"signUpCPA14d\",\n        \"signUpCVR14d\",\n        \"signUpPage14d\",\n        \"signUpPageClicks14d\",\n        \"signUpPageCPA14d\",\n        \"signUpPageCVR14d\",\n        \"signUpPageViews14d\",\n        \"signUpViews14d\",\n        \"storeLocatorPage14d\",\n        \"storeLocatorPageClicks14d\",\n        \"storeLocatorPageCPA14d\",\n        \"storeLocatorPageCVR14d\",\n        \"storeLocatorPageViews14d\",\n        \"submitButton14d\",\n        \"submitButtonClicks14d\",\n        \"submitButtonCPA14d\",\n        \"submitButtonCVR14d\",\n        \"submitButtonViews14d\",\n        \"subscribe14d\",\n        \"subscribeClicks14d\",\n        \"subscribeCPA14d\",\n        \"subscribeCVR14d\",\n        \"subscribeViews14d\",\n        \"subscriptionButton14d\",\n        \"subscriptionButtonClicks14d\",\n        \"subscriptionButtonCPA14d\",\n        \"subscriptionButtonCVR14d\",\n        \"subscriptionButtonViews14d\",\n        \"successPage14d\",\n        \"successPageClicks14d\",\n        \"successPageCPA14d\",\n        \"successPageCVR14d\",\n        \"successPageViews14d\",\n        \"supplyCost\",\n        \"surveyFinish14d\",\n        \"surveyFinishClicks14d\",\n        \"surveyFinishCPA14d\",\n        \"surveyFinishCVR14d\",\n        \"surveyFinishViews14d\",\n        \"surveyStart14d\",\n        \"surveyStartClicks14d\",\n        \"surveyStartCPA14d\",\n        \"surveyStartCVR14d\",\n        \"surveyStartViews14d\",\n        \"thankYouPage14d\",\n        \"thankYouPageClicks14d\",\n        \"thankYouPageCPA14d\",\n        \"thankYouPageCVR14d\",\n        \"thankYouPageViews14d\",\n        \"totalAddToCart14d\",\n        \"totalAddToCartClicks14d\",\n        \"totalAddToCartCPA14d\",\n        \"totalAddToCartCVR14d\",\n        \"totalAddToCartViews14d\",\n        \"totalAddToList14d\",\n        \"totalAddToListClicks14d\",\n        \"totalAddToListCPA14d\",\n        \"totalAddToListCVR14d\",\n        \"totalAddToListViews14d\",\n        \"totalCost\",\n        \"totalDetailPageClicks14d\",\n        \"totalDetailPageViews14d\",\n        \"totalDetailPageViewsCVR14d\",\n        \"totalDetailPageViewViews14d\",\n        \"totalDetaiPageViewCPA14d\",\n        \"totalECPP14d\",\n        \"totalECPPRPV14d\",\n        \"totalERPM14d\",\n        \"totalFee\",\n        \"totalNewToBrandECPP14d\",\n        \"totalNewToBrandERPM14d\",\n        \"totalNewToBrandProductSales14d\",\n        \"totalNewToBrandPurchaseRate14d\",\n        \"totalNewToBrandPurchases14d\",\n        \"totalNewToBrandPurchasesClicks14d\",\n        \"totalNewToBrandPurchasesViews14d\",\n        \"totalNewToBrandROAS14d\",\n        \"totalNewToBrandUnitsSold14d\",\n        \"totalPercentOfPurchasesNewToBrand14d\",\n        \"totalPRPV14d\",\n        \"totalPRPVClicks14d\",\n        \"totalPRPVr14d\",\n        \"totalPRPVViews14d\",\n        \"totalPurchaseRate14d\",\n        \"totalPurchases14d\",\n        \"totalPurchasesClicks14d\",\n        \"totalPurchasesViews14d\",\n        \"totalROAS14d\",\n        \"totalSales14d\",\n        \"totalSubscribeAndSaveSubscriptionClicks14d\",\n        \"totalSubscribeAndSaveSubscriptionCPA14d\",\n        \"totalSubscribeAndSaveSubscriptionCVR14d\",\n        \"totalSubscribeAndSaveSubscriptions14d\",\n        \"totalSubscribeAndSaveSubscriptionViews14d\",\n        \"totalUnitsSold14d\",\n        \"unitsSold14d\",\n        \"videoComplete\",\n        \"videoCompleted\",\n        \"videoCompletedCPA\",\n        \"videoCompletedCVR\",\n        \"videoCompletedViews\",\n        \"videoCompletionRate\",\n        \"videoDownloadRate14d\",\n        \"videoDownloads14d\",\n        \"videoDownloadsClicks14d\",\n        \"videoDownloadsViews14d\",\n        \"videoEndClicks\",\n        \"videoFirstQuartile\",\n        \"videoMidpoint\",\n        \"videoMute\",\n        \"videoPause\",\n        \"videoResume\",\n        \"videoStart\",\n        \"videoStarted\",\n        \"videoStartedClicks\",\n        \"videoStartedCPA\",\n        \"videoStartedCVR\",\n        \"videoStartedViews\",\n        \"videoStreams14d\",\n        \"videoStreamsClicks14d\",\n        \"videoStreamsRate14d\",\n        \"videoStreamsViews14d\",\n        \"videoThirdQuartile\",\n        \"videoUnmute\",\n        \"viewabilityRate\",\n        \"viewableImpressions\",\n        \"widgetInteraction14d\",\n        \"widgetInteractionClicks14d\",\n        \"widgetInteractionCPA14d\",\n        \"widgetInteractionCVR14d\",\n        \"widgetInteractionViews14d\",\n        \"widgetLoad14d\",\n        \"widgetLoadClicks14d\",\n        \"widgetLoadCPA14d\",\n        \"widgetLoadCVR14d\",\n        \"widgetLoadViews14d\"\n    ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/accounts/{{dspAccountId}}/dsp/reports",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"accounts",
+												"{{dspAccountId}}",
+												"dsp",
+												"reports"
+											]
+										}
+									},
+									"status": "Accepted",
+									"code": 202,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 28 Dec 2022 18:32:08 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/vnd.dspcreatereports.v3+json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "192"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "VWXKM8B9S3P287JDMVYK"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "daec928a-63d5-4c7c-b9e2-d8973f71afc5"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "192"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "d3rCVFdooAMFheQ="
+										},
+										{
+											"key": "x-amzn-Remapped-Server",
+											"value": "Apache-Coyote/1.1"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-63ac8ba8-8e66dc53659956d7dec784f7"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Wed, 28 Dec 2022 18:32:08 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"reportId\": \"f8c38a51-0b59-f7c7-d100-9d3ddb8bc22e\",\n    \"type\": \"CAMPAIGN\",\n    \"format\": \"JSON\",\n    \"status\": \"IN_PROGRESS\",\n    \"statusDetails\": \"In progress\",\n    \"location\": \"\",\n    \"expiration\": \"2023-03-24T18:19:39.715Z\"\n}"
+								},
+								{
+									"name": "Inventory",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.dspcreatereports.v3+json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"startDate\": \"2022-12-21\",\n    \"endDate\": \"2022-12-27\",\n    \"type\": \"INVENTORY\",\n    \"dimensions\": [\n        \"SUPPLY\",\n        \"DEAL\"\n    ],\n    \"metrics\": [\n        \"accept14d\",\n        \"acceptClicks14d\",\n        \"acceptCPA14d\",\n        \"acceptCVR14d\",\n        \"acceptViews14d\",\n        \"addedToShoppingCart14d\",\n        \"addedToShoppingCartClicks14d\",\n        \"addedToShoppingCartCPA14d\",\n        \"addedToShoppingCartCVR14d\",\n        \"addedToShoppingCartViews14d\",\n        \"addToWatchlist14d\",\n        \"addToWatchlistClicks14d\",\n        \"addToWatchlistCPA14d\",\n        \"addToWatchlistCVR14d\",\n        \"addToWatchlistViews14d\",\n        \"advertiserCountry\",\n        \"advertiserTimezone\",\n        \"amazonAudienceFee\",\n        \"amazonPlatformFee\",\n        \"application14d\",\n        \"applicationClicks14d\",\n        \"applicationCPA14d\",\n        \"applicationCVR14d\",\n        \"applicationViews14d\",\n        \"atc14d\",\n        \"atcClicks14d\",\n        \"atcr14d\",\n        \"atcViews14d\",\n        \"atl14d\",\n        \"atlClicks14d\",\n        \"atlr14d\",\n        \"atlViews14d\",\n        \"bannerInteraction14d\",\n        \"bannerInteractionClicks14d\",\n        \"bannerInteractionCPA14d\",\n        \"bannerInteractionCVR14d\",\n        \"bannerInteractionViews14d\",\n        \"brandSearch14d\",\n        \"brandSearchClicks14d\",\n        \"brandSearchCPA14d\",\n        \"brandSearchRate14d\",\n        \"brandSearchViews14d\",\n        \"brandStoreEngagement1\",\n        \"brandStoreEngagement1Clicks\",\n        \"brandStoreEngagement1CPA\",\n        \"brandStoreEngagement1CVR\",\n        \"brandStoreEngagement1Views\",\n        \"brandStoreEngagement2\",\n        \"brandStoreEngagement2Clicks\",\n        \"brandStoreEngagement2CPA\",\n        \"brandStoreEngagement2CVR\",\n        \"brandStoreEngagement2Views\",\n        \"brandStoreEngagement3\",\n        \"brandStoreEngagement3Clicks\",\n        \"brandStoreEngagement3CPA\",\n        \"brandStoreEngagement3CVR\",\n        \"brandStoreEngagement3Views\",\n        \"brandStoreEngagement4\",\n        \"brandStoreEngagement4Clicks\",\n        \"brandStoreEngagement4CPA\",\n        \"brandStoreEngagement4CVR\",\n        \"brandStoreEngagement4Views\",\n        \"brandStoreEngagement5\",\n        \"brandStoreEngagement5Clicks\",\n        \"brandStoreEngagement5CPA\",\n        \"brandStoreEngagement5CVR\",\n        \"brandStoreEngagement5Views\",\n        \"brandStoreEngagement6\",\n        \"brandStoreEngagement6Clicks\",\n        \"brandStoreEngagement6CPA\",\n        \"brandStoreEngagement6CVR\",\n        \"brandStoreEngagement6Views\",\n        \"brandStoreEngagement7\",\n        \"brandStoreEngagement7Clicks\",\n        \"brandStoreEngagement7CPA\",\n        \"brandStoreEngagement7CVR\",\n        \"brandStoreEngagement7Views\",\n        \"clickOnRedirect14d\",\n        \"clickOnRedirectClicks14d\",\n        \"clickOnRedirectCPA14d\",\n        \"clickOnRedirectCVR14d\",\n        \"clickOnRedirectViews14d\",\n        \"clickThroughs\",\n        \"CTR\",\n        \"decline14d\",\n        \"declineClicks14d\",\n        \"declineCPA14d\",\n        \"declineCVR14d\",\n        \"declineViews14d\",\n        \"downloadedVideoPlayRate14d\",\n        \"downloadedVideoPlays14d\",\n        \"downloadedVideoPlaysClicks14d\",\n        \"downloadedVideoPlaysViews14d\",\n        \"dpv14d\",\n        \"dpvClicks14d\",\n        \"dpvr14d\",\n        \"dpvViews14d\",\n        \"dropDownSelection14d\",\n        \"dropDownSelectionClicks14d\",\n        \"dropDownSelectionCPA14d\",\n        \"dropDownSelectionCVR14d\",\n        \"dropDownSelectionViews14d\",\n        \"eCPAtc14d\",\n        \"eCPAtl14d\",\n        \"eCPC\",\n        \"eCPDPV14d\",\n        \"eCPDVP14d\",\n        \"eCPM\",\n        \"eCPnewSubscribeAndSave14d\",\n        \"eCPP14d\",\n        \"eCPPRPV14d\",\n        \"eCPPT14d\",\n        \"ecpr14d\",\n        \"ecpvc\",\n        \"ecpvd14d\",\n        \"eCPVS14d\",\n        \"emailInteraction14d\",\n        \"emailInteractionClicks14d\",\n        \"emailInteractionCPA14d\",\n        \"emailInteractionCVR14d\",\n        \"emailInteractionViews14d\",\n        \"emailLoad14d\",\n        \"emailLoadClicks14d\",\n        \"emailLoadCPA14d\",\n        \"emailLoadCVR14d\",\n        \"emailLoadViews14d\",\n        \"gameInteraction14d\",\n        \"gameInteractionClicks14d\",\n        \"gameInteractionCPA14d\",\n        \"gameInteractionCVR14d\",\n        \"gameInteractionViews14d\",\n        \"gameLoad14d\",\n        \"gameLoadClicks14d\",\n        \"gameLoadCPA14d\",\n        \"gameLoadCVR14d\",\n        \"gameLoadViews14d\",\n        \"grossClickThroughs\",\n        \"grossImpressions\",\n        \"homepageVisit14d\",\n        \"homepageVisitClicks14d\",\n        \"homepageVisitCPA14d\",\n        \"homepageVisitCVR14d\",\n        \"homepageVisitViews14d\",\n        \"impressions\",\n        \"invalidClickThroughs\",\n        \"invalidClickThroughsRate\",\n        \"invalidImpressionRate\",\n        \"invalidImpressions\",\n        \"marketingLandingPage14d\",\n        \"marketingLandingPageClicks14d\",\n        \"marketingLandingPageCPA14d\",\n        \"marketingLandingPageCVR14d\",\n        \"marketingLandingPageViews14d\",\n        \"mashupAddToCart14d\",\n        \"mashupAddToCartClickCVR14d\",\n        \"mashupAddToCartClicks14d\",\n        \"mashupAddToCartCPA14d\",\n        \"mashupAddToCartViews14d\",\n        \"mashupAddToWishlist14d\",\n        \"mashupAddToWishlistClicks14d\",\n        \"mashupAddToWishlistCPA14d\",\n        \"mashupAddToWishlistCVR14d\",\n        \"mashupAddToWishlistViews14d\",\n        \"mashupBackupImage\",\n        \"mashupBackupImageClicks\",\n        \"mashupBackupImageCPA\",\n        \"mashupBackupImageCVR\",\n        \"mashupBackupImageViews\",\n        \"mashupClickToPage\",\n        \"mashupClickToPageClicks\",\n        \"mashupClickToPageCPA\",\n        \"mashupClickToPageCVR\",\n        \"mashupClickToPageViews\",\n        \"mashupClipCouponClick14d\",\n        \"mashupClipCouponClickClicks14d\",\n        \"mashupClipCouponClickCPA14d\",\n        \"mashupClipCouponClickCVR14d\",\n        \"mashupClipCouponClickViews14d\",\n        \"mashupShopNowClick14d\",\n        \"mashupShopNowClickClicks14d\",\n        \"mashupShopNowClickCPA14d\",\n        \"mashupShopNowClickCVR14d\",\n        \"mashupShopNowClickViews14d\",\n        \"mashupSubscribeAndSave14d\",\n        \"mashupSubscribeAndSaveClick14d\",\n        \"mashupSubscribeAndSaveClickViews14d\",\n        \"mashupSubscribeAndSaveCPA14d\",\n        \"mashupSubscribeAndSaveCVR14d\",\n        \"messageSent14d\",\n        \"messageSentClicks14d\",\n        \"messageSentCPA14d\",\n        \"messageSentCVR14d\",\n        \"messageSentViews14d\",\n        \"mobileAppFirstStartClicks14d\",\n        \"mobileAppFirstStartCVR14d\",\n        \"mobileAppFirstStarts14d\",\n        \"mobileAppFirstStartsCPA14d\",\n        \"mobileAppFirstStartViews14d\",\n        \"newSubscribeAndSave14d\",\n        \"newSubscribeAndSaveClicks14d\",\n        \"newSubscribeAndSaveRate14d\",\n        \"newSubscribeAndSaveViews14d\",\n        \"newToBrandECPP14d\",\n        \"newToBrandPurchaseRate14d\",\n        \"newToBrandPurchases14d\",\n        \"newToBrandPurchasesClicks14d\",\n        \"newToBrandPurchasesViews14d\",\n        \"offAmazonClicks14d\",\n        \"offAmazonConversions14d\",\n        \"offAmazonCPA14d\",\n        \"offAmazonCVR14d\",\n        \"offAmazonECPP14d\",\n        \"offAmazonPurchaseRate14d\",\n        \"offAmazonPurchases14d\",\n        \"offAmazonPurchasesClicks14d\",\n        \"offAmazonPurchasesViews14d\",\n        \"offAmazonViews14d \",\n        \"percentOfPurchasesNewToBrand14d\",\n        \"playerTrailersClicks14d\",\n        \"playTrailerRate14d\",\n        \"playTrailers14d\",\n        \"playTrailersViews14d\",\n        \"pRPV14d\",\n        \"pRPVClicks14d\",\n        \"pRPVr14d\",\n        \"pRPVViews14d\",\n        \"purchaseButton14d\",\n        \"purchaseButtonClicks14d\",\n        \"purchaseButtonCPA14d\",\n        \"purchaseButtonCVR14d\",\n        \"purchaseButtonViews14d\",\n        \"purchaseRate14d\",\n        \"purchases14d\",\n        \"purchasesClicks14d\",\n        \"purchasesViews14d\",\n        \"referral14d\",\n        \"referralClicks14d\",\n        \"referralCPA14d\",\n        \"referralCVR14d\",\n        \"referralViews14d\",\n        \"registrationConfirmPage14d\",\n        \"registrationConfirmPageClicks14d\",\n        \"registrationConfirmPageCPA14d\",\n        \"registrationConfirmPageCVR14d\",\n        \"registrationConfirmPageViews14d\",\n        \"registrationForm14d\",\n        \"registrationFormClicks14d\",\n        \"registrationFormCPA14d\",\n        \"registrationFormCVR14d\",\n        \"registrationFormViews14d\",\n        \"rentalRate14d\",\n        \"rentals14d\",\n        \"rentalsClicks14d\",\n        \"rentalsViews14d\",\n        \"signUp14d\",\n        \"signUpClicks14d\",\n        \"signUpCPA14d\",\n        \"signUpCVR14d\",\n        \"signUpPage14d\",\n        \"signUpPageClicks14d\",\n        \"signUpPageCPA14d\",\n        \"signUpPageCVR14d\",\n        \"signUpPageViews14d\",\n        \"signUpViews14d\",\n        \"storeLocatorPage14d\",\n        \"storeLocatorPageClicks14d\",\n        \"storeLocatorPageCPA14d\",\n        \"storeLocatorPageCVR14d\",\n        \"storeLocatorPageViews14d\",\n        \"submitButton14d\",\n        \"submitButtonClicks14d\",\n        \"submitButtonCPA14d\",\n        \"submitButtonCVR14d\",\n        \"submitButtonViews14d\",\n        \"subscribe14d\",\n        \"subscribeClicks14d\",\n        \"subscribeCPA14d\",\n        \"subscribeCVR14d\",\n        \"subscribeViews14d\",\n        \"subscriptionButton14d\",\n        \"subscriptionButtonClicks14d\",\n        \"subscriptionButtonCPA14d\",\n        \"subscriptionButtonCVR14d\",\n        \"subscriptionButtonViews14d\",\n        \"successPage14d\",\n        \"successPageClicks14d\",\n        \"successPageCPA14d\",\n        \"successPageCVR14d\",\n        \"successPageViews14d\",\n        \"supplyCost\",\n        \"surveyFinish14d\",\n        \"surveyFinishClicks14d\",\n        \"surveyFinishCPA14d\",\n        \"surveyFinishCVR14d\",\n        \"surveyFinishViews14d\",\n        \"surveyStart14d\",\n        \"surveyStartClicks14d\",\n        \"surveyStartCPA14d\",\n        \"surveyStartCVR14d\",\n        \"surveyStartViews14d\",\n        \"thankYouPage14d\",\n        \"thankYouPageClicks14d\",\n        \"thankYouPageCPA14d\",\n        \"thankYouPageCVR14d\",\n        \"thankYouPageViews14d\",\n        \"totalCost\",\n        \"videoComplete\",\n        \"videoCompleted\",\n        \"videoCompletedCPA\",\n        \"videoCompletedCVR\",\n        \"videoCompletedViews\",\n        \"videoCompletionRate\",\n        \"videoDownloadRate14d\",\n        \"videoDownloads14d\",\n        \"videoDownloadsClicks14d\",\n        \"videoDownloadsViews14d\",\n        \"videoEndClicks\",\n        \"videoFirstQuartile\",\n        \"videoMidpoint\",\n        \"videoMute\",\n        \"videoPause\",\n        \"videoResume\",\n        \"videoStart\",\n        \"videoStarted\",\n        \"videoStartedClicks\",\n        \"videoStartedCPA\",\n        \"videoStartedCVR\",\n        \"videoStartedViews\",\n        \"videoStreams14d\",\n        \"videoStreamsClicks14d\",\n        \"videoStreamsRate14d\",\n        \"videoStreamsViews14d\",\n        \"videoThirdQuartile\",\n        \"videoUnmute\",\n        \"widgetInteraction14d\",\n        \"widgetInteractionClicks14d\",\n        \"widgetInteractionCPA14d\",\n        \"widgetInteractionCVR14d\",\n        \"widgetInteractionViews14d\",\n        \"widgetLoad14d\",\n        \"widgetLoadClicks14d\",\n        \"widgetLoadCPA14d\",\n        \"widgetLoadCVR14d\",\n        \"widgetLoadViews14d\",\n        \"agencyFee\",\n        \"totalFee\",\n        \"3pFeeAutomotive\",\n        \"3pFeeAutomotiveAbsorbed\",\n        \"3pFeeComScore\",\n        \"3pFeeComScoreAbsorbed\",\n        \"3pFeeCPM1\",\n        \"3pFeeCPM1Absorbed\",\n        \"3pFeeCPM2\",\n        \"3pFeeCPM2Absorbed\",\n        \"3pFeeCPM3\",\n        \"3pFeeCPM3Absorbed\",\n        \"3pFeeDoubleclickCampaignManager\",\n        \"3pFeeDoubleclickCampaignManagerAbsorbed\",\n        \"3pFeeDoubleVerify\",\n        \"3pFeeDoubleVerifyAbsorbed\",\n        \"3pFeeIntegralAdScience\",\n        \"3pFeeIntegralAdScienceAbsorbed\",\n        \"3PFees\",\n        \"unitsSold14d\",\n        \"sales14d\",\n        \"ROAS14d\",\n        \"eRPM14d\",\n        \"newToBrandUnitsSold14d\",\n        \"newToBrandProductSales14d\",\n        \"newToBrandROAS14d\",\n        \"newToBrandERPM14d\",\n        \"totalPRPV14d\",\n        \"totalPRPVViews14d\",\n        \"totalPRPVClicks14d\",\n        \"totalPRPVr14d\",\n        \"totalECPPRPV14d\",\n        \"totalPurchases14d\",\n        \"totalPurchasesViews14d\",\n        \"totalPurchasesClicks14d\",\n        \"totalPurchaseRate14d\",\n        \"totalECPP14d\",\n        \"totalNewToBrandPurchases14d\",\n        \"totalNewToBrandPurchasesViews14d\",\n        \"totalNewToBrandPurchasesClicks14d\",\n        \"totalNewToBrandPurchaseRate14d\",\n        \"totalNewToBrandECPP14d\",\n        \"totalPercentOfPurchasesNewToBrand14d\",\n        \"totalUnitsSold14d\",\n        \"totalSales14d\",\n        \"totalROAS14d\",\n        \"totalERPM14d\",\n        \"totalNewToBrandUnitsSold14d\",\n        \"totalNewToBrandProductSales14d\",\n        \"totalNewToBrandROAS14d\",\n        \"totalNewToBrandERPM14d\",\n        \"viewableImpressions\",\n        \"measurableImpressions\",\n        \"measurableRate\",\n        \"viewabilityRate\",\n        \"totalDetailPageViews14d\",\n        \"totalDetailPageViewViews14d\",\n        \"totalDetailPageClicks14d\",\n        \"totalDetailPageViewsCVR14d\",\n        \"totalDetaiPageViewCPA14d\",\n        \"totalAddToList14d\",\n        \"totalAddToListViews14d\",\n        \"totalAddToListClicks14d\",\n        \"totalAddToListCVR14d\",\n        \"totalAddToListCPA14d\",\n        \"totalAddToCart14d\",\n        \"totalAddToCartViews14d\",\n        \"totalAddToCartClicks14d\",\n        \"totalAddToCartCVR14d\",\n        \"totalAddToCartCPA14d\",\n        \"totalSubscribeAndSaveSubscriptions14d\",\n        \"totalSubscribeAndSaveSubscriptionViews14d\",\n        \"totalSubscribeAndSaveSubscriptionClicks14d\",\n        \"totalSubscribeAndSaveSubscriptionCVR14d\",\n        \"totalSubscribeAndSaveSubscriptionCPA14d\",\n        \"offAmazonProductSales14d\",\n        \"offAmazonUnitsSold14d\",\n        \"offAmazonROAS14d\",\n        \"offAmazonERPM14d\",\n        \"combinedPurchases\",\n        \"combinedPurchasesViews\",\n        \"combinedPurchasesClicks\",\n        \"combinedPurchaseRate\",\n        \"combinedECPP\",\n        \"combinedProductSales\",\n        \"combinedUnitsSold\",\n        \"combinedROAS\",\n        \"combinedERPM\",\n        \"dealType\"\n    ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/accounts/{{dspAccountId}}/dsp/reports",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"accounts",
+												"{{dspAccountId}}",
+												"dsp",
+												"reports"
+											]
+										}
+									},
+									"status": "Accepted",
+									"code": 202,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 28 Dec 2022 18:42:02 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/vnd.dspcreatereports.v3+json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "193"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "AWYMH56KQFC61Y3889JK"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "f6e69bc8-4b83-4990-b703-65a7ccca0fec"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "193"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "d3sfAHmAIAMFhuw="
+										},
+										{
+											"key": "x-amzn-Remapped-Server",
+											"value": "Apache-Coyote/1.1"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-63ac8dfa-087d60d2e24b4702bdf9fe6c"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Wed, 28 Dec 2022 18:42:02 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"reportId\": \"88c2ad05-4c5f-b0f6-029a-727c3913eccc\",\n    \"type\": \"INVENTORY\",\n    \"format\": \"JSON\",\n    \"status\": \"IN_PROGRESS\",\n    \"statusDetails\": \"In progress\",\n    \"location\": \"\",\n    \"expiration\": \"2022-12-28T19:42:02.063Z\"\n}"
+								},
+								{
+									"name": "Audience",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.dspcreatereports.v3+json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"startDate\": \"2022-12-21\",\n    \"endDate\": \"2022-12-27\",\n    \"type\": \"AUDIENCE\",\n    \"dimensions\": [\n        \"ORDER\",\n        \"LINE_ITEM\"\n    ],\n    \"metrics\": [\n        \"accept14d\",\n        \"acceptClicks14d\",\n        \"acceptCPA14d\",\n        \"acceptCVR14d\",\n        \"acceptViews14d\",\n        \"addedToShoppingCart14d\",\n        \"addedToShoppingCartClicks14d\",\n        \"addedToShoppingCartCPA14d\",\n        \"addedToShoppingCartCVR14d\",\n        \"addedToShoppingCartViews14d\",\n        \"addToWatchlist14d\",\n        \"addToWatchlistClicks14d\",\n        \"addToWatchlistCPA14d\",\n        \"addToWatchlistCVR14d\",\n        \"addToWatchlistViews14d\",\n        \"advertiserCountry\",\n        \"advertiserTimezone\",\n        \"amazonAudienceFee\",\n        \"amazonPlatformFee\",\n        \"application14d\",\n        \"applicationClicks14d\",\n        \"applicationCPA14d\",\n        \"applicationCVR14d\",\n        \"applicationViews14d\",\n        \"atc14d\",\n        \"atcClicks14d\",\n        \"atcr14d\",\n        \"atcViews14d\",\n        \"atl14d\",\n        \"atlClicks14d\",\n        \"atlr14d\",\n        \"atlViews14d\",\n        \"bannerInteraction14d\",\n        \"bannerInteractionClicks14d\",\n        \"bannerInteractionCPA14d\",\n        \"bannerInteractionCVR14d\",\n        \"bannerInteractionViews14d\",\n        \"brandSearch14d\",\n        \"brandSearchClicks14d\",\n        \"brandSearchCPA14d\",\n        \"brandSearchRate14d\",\n        \"brandSearchViews14d\",\n        \"brandStoreEngagement1\",\n        \"brandStoreEngagement1Clicks\",\n        \"brandStoreEngagement1CPA\",\n        \"brandStoreEngagement1CVR\",\n        \"brandStoreEngagement1Views\",\n        \"brandStoreEngagement2\",\n        \"brandStoreEngagement2Clicks\",\n        \"brandStoreEngagement2CPA\",\n        \"brandStoreEngagement2CVR\",\n        \"brandStoreEngagement2Views\",\n        \"brandStoreEngagement3\",\n        \"brandStoreEngagement3Clicks\",\n        \"brandStoreEngagement3CPA\",\n        \"brandStoreEngagement3CVR\",\n        \"brandStoreEngagement3Views\",\n        \"brandStoreEngagement4\",\n        \"brandStoreEngagement4Clicks\",\n        \"brandStoreEngagement4CPA\",\n        \"brandStoreEngagement4CVR\",\n        \"brandStoreEngagement4Views\",\n        \"brandStoreEngagement5\",\n        \"brandStoreEngagement5Clicks\",\n        \"brandStoreEngagement5CPA\",\n        \"brandStoreEngagement5CVR\",\n        \"brandStoreEngagement5Views\",\n        \"brandStoreEngagement6\",\n        \"brandStoreEngagement6Clicks\",\n        \"brandStoreEngagement6CPA\",\n        \"brandStoreEngagement6CVR\",\n        \"brandStoreEngagement6Views\",\n        \"brandStoreEngagement7\",\n        \"brandStoreEngagement7Clicks\",\n        \"brandStoreEngagement7CPA\",\n        \"brandStoreEngagement7CVR\",\n        \"brandStoreEngagement7Views\",\n        \"clickOnRedirect14d\",\n        \"clickOnRedirectClicks14d\",\n        \"clickOnRedirectCPA14d\",\n        \"clickOnRedirectCVR14d\",\n        \"clickOnRedirectViews14d\",\n        \"clickThroughs\",\n        \"CTR\",\n        \"decline14d\",\n        \"declineClicks14d\",\n        \"declineCPA14d\",\n        \"declineCVR14d\",\n        \"declineViews14d\",\n        \"downloadedVideoPlayRate14d\",\n        \"downloadedVideoPlays14d\",\n        \"downloadedVideoPlaysClicks14d\",\n        \"downloadedVideoPlaysViews14d\",\n        \"dpv14d\",\n        \"dpvClicks14d\",\n        \"dpvr14d\",\n        \"dpvViews14d\",\n        \"dropDownSelection14d\",\n        \"dropDownSelectionClicks14d\",\n        \"dropDownSelectionCPA14d\",\n        \"dropDownSelectionCVR14d\",\n        \"dropDownSelectionViews14d\",\n        \"eCPAtc14d\",\n        \"eCPAtl14d\",\n        \"eCPC\",\n        \"eCPDPV14d\",\n        \"eCPDVP14d\",\n        \"eCPM\",\n        \"eCPnewSubscribeAndSave14d\",\n        \"eCPP14d\",\n        \"eCPPRPV14d\",\n        \"eCPPT14d\",\n        \"ecpr14d\",\n        \"ecpvc\",\n        \"ecpvd14d\",\n        \"eCPVS14d\",\n        \"emailInteraction14d\",\n        \"emailInteractionClicks14d\",\n        \"emailInteractionCPA14d\",\n        \"emailInteractionCVR14d\",\n        \"emailInteractionViews14d\",\n        \"emailLoad14d\",\n        \"emailLoadClicks14d\",\n        \"emailLoadCPA14d\",\n        \"emailLoadCVR14d\",\n        \"emailLoadViews14d\",\n        \"gameInteraction14d\",\n        \"gameInteractionClicks14d\",\n        \"gameInteractionCPA14d\",\n        \"gameInteractionCVR14d\",\n        \"gameInteractionViews14d\",\n        \"gameLoad14d\",\n        \"gameLoadClicks14d\",\n        \"gameLoadCPA14d\",\n        \"gameLoadCVR14d\",\n        \"gameLoadViews14d\",\n        \"grossClickThroughs\",\n        \"grossImpressions\",\n        \"homepageVisit14d\",\n        \"homepageVisitClicks14d\",\n        \"homepageVisitCPA14d\",\n        \"homepageVisitCVR14d\",\n        \"homepageVisitViews14d\",\n        \"impressions\",\n        \"invalidClickThroughs\",\n        \"invalidClickThroughsRate\",\n        \"invalidImpressionRate\",\n        \"invalidImpressions\",\n        \"marketingLandingPage14d\",\n        \"marketingLandingPageClicks14d\",\n        \"marketingLandingPageCPA14d\",\n        \"marketingLandingPageCVR14d\",\n        \"marketingLandingPageViews14d\",\n        \"mashupAddToCart14d\",\n        \"mashupAddToCartClickCVR14d\",\n        \"mashupAddToCartClicks14d\",\n        \"mashupAddToCartCPA14d\",\n        \"mashupAddToCartViews14d\",\n        \"mashupAddToWishlist14d\",\n        \"mashupAddToWishlistClicks14d\",\n        \"mashupAddToWishlistCPA14d\",\n        \"mashupAddToWishlistCVR14d\",\n        \"mashupAddToWishlistViews14d\",\n        \"mashupBackupImage\",\n        \"mashupBackupImageClicks\",\n        \"mashupBackupImageCPA\",\n        \"mashupBackupImageCVR\",\n        \"mashupBackupImageViews\",\n        \"mashupClickToPage\",\n        \"mashupClickToPageClicks\",\n        \"mashupClickToPageCPA\",\n        \"mashupClickToPageCVR\",\n        \"mashupClickToPageViews\",\n        \"mashupClipCouponClick14d\",\n        \"mashupClipCouponClickClicks14d\",\n        \"mashupClipCouponClickCPA14d\",\n        \"mashupClipCouponClickCVR14d\",\n        \"mashupClipCouponClickViews14d\",\n        \"mashupShopNowClick14d\",\n        \"mashupShopNowClickClicks14d\",\n        \"mashupShopNowClickCPA14d\",\n        \"mashupShopNowClickCVR14d\",\n        \"mashupShopNowClickViews14d\",\n        \"mashupSubscribeAndSave14d\",\n        \"mashupSubscribeAndSaveClick14d\",\n        \"mashupSubscribeAndSaveClickViews14d\",\n        \"mashupSubscribeAndSaveCPA14d\",\n        \"mashupSubscribeAndSaveCVR14d\",\n        \"messageSent14d\",\n        \"messageSentClicks14d\",\n        \"messageSentCPA14d\",\n        \"messageSentCVR14d\",\n        \"messageSentViews14d\",\n        \"mobileAppFirstStartClicks14d\",\n        \"mobileAppFirstStartCVR14d\",\n        \"mobileAppFirstStarts14d\",\n        \"mobileAppFirstStartsCPA14d\",\n        \"mobileAppFirstStartViews14d\",\n        \"newSubscribeAndSave14d\",\n        \"newSubscribeAndSaveClicks14d\",\n        \"newSubscribeAndSaveRate14d\",\n        \"newSubscribeAndSaveViews14d\",\n        \"newToBrandECPP14d\",\n        \"newToBrandPurchaseRate14d\",\n        \"newToBrandPurchases14d\",\n        \"newToBrandPurchasesClicks14d\",\n        \"newToBrandPurchasesViews14d\",\n        \"offAmazonClicks14d\",\n        \"offAmazonConversions14d\",\n        \"offAmazonCPA14d\",\n        \"offAmazonCVR14d\",\n        \"offAmazonECPP14d\",\n        \"offAmazonPurchaseRate14d\",\n        \"offAmazonPurchases14d\",\n        \"offAmazonPurchasesClicks14d\",\n        \"offAmazonPurchasesViews14d\",\n        \"offAmazonViews14d\",\n        \"percentOfPurchasesNewToBrand14d\",\n        \"playerTrailersClicks14d\",\n        \"playTrailerRate14d\",\n        \"playTrailers14d\",\n        \"playTrailersViews14d\",\n        \"pRPV14d\",\n        \"pRPVClicks14d\",\n        \"pRPVr14d\",\n        \"pRPVViews14d\",\n        \"purchaseButton14d\",\n        \"purchaseButtonClicks14d\",\n        \"purchaseButtonCPA14d\",\n        \"purchaseButtonCVR14d\",\n        \"purchaseButtonViews14d\",\n        \"purchaseRate14d\",\n        \"purchases14d\",\n        \"purchasesClicks14d\",\n        \"purchasesViews14d\",\n        \"referral14d\",\n        \"referralClicks14d\",\n        \"referralCPA14d\",\n        \"referralCVR14d\",\n        \"referralViews14d\",\n        \"registrationConfirmPage14d\",\n        \"registrationConfirmPageClicks14d\",\n        \"registrationConfirmPageCPA14d\",\n        \"registrationConfirmPageCVR14d\",\n        \"registrationConfirmPageViews14d\",\n        \"registrationForm14d\",\n        \"registrationFormClicks14d\",\n        \"registrationFormCPA14d\",\n        \"registrationFormCVR14d\",\n        \"registrationFormViews14d\",\n        \"rentalRate14d\",\n        \"rentals14d\",\n        \"rentalsClicks14d\",\n        \"rentalsViews14d\",\n        \"signUp14d\",\n        \"signUpClicks14d\",\n        \"signUpCPA14d\",\n        \"signUpCVR14d\",\n        \"signUpPage14d\",\n        \"signUpPageClicks14d\",\n        \"signUpPageCPA14d\",\n        \"signUpPageCVR14d\",\n        \"signUpPageViews14d\",\n        \"signUpViews14d\",\n        \"storeLocatorPage14d\",\n        \"storeLocatorPageClicks14d\",\n        \"storeLocatorPageCPA14d\",\n        \"storeLocatorPageCVR14d\",\n        \"storeLocatorPageViews14d\",\n        \"submitButton14d\",\n        \"submitButtonClicks14d\",\n        \"submitButtonCPA14d\",\n        \"submitButtonCVR14d\",\n        \"submitButtonViews14d\",\n        \"subscribe14d\",\n        \"subscribeClicks14d\",\n        \"subscribeCPA14d\",\n        \"subscribeCVR14d\",\n        \"subscribeViews14d\",\n        \"subscriptionButton14d\",\n        \"subscriptionButtonClicks14d\",\n        \"subscriptionButtonCPA14d\",\n        \"subscriptionButtonCVR14d\",\n        \"subscriptionButtonViews14d\",\n        \"successPage14d\",\n        \"successPageClicks14d\",\n        \"successPageCPA14d\",\n        \"successPageCVR14d\",\n        \"successPageViews14d\",\n        \"supplyCost\",\n        \"surveyFinish14d\",\n        \"surveyFinishClicks14d\",\n        \"surveyFinishCPA14d\",\n        \"surveyFinishCVR14d\",\n        \"surveyFinishViews14d\",\n        \"surveyStart14d\",\n        \"surveyStartClicks14d\",\n        \"surveyStartCPA14d\",\n        \"surveyStartCVR14d\",\n        \"surveyStartViews14d\",\n        \"thankYouPage14d\",\n        \"thankYouPageClicks14d\",\n        \"thankYouPageCPA14d\",\n        \"thankYouPageCVR14d\",\n        \"thankYouPageViews14d\",\n        \"totalCost\",\n        \"videoComplete\",\n        \"videoCompleted\",\n        \"videoCompletedCPA\",\n        \"videoCompletedCVR\",\n        \"videoCompletedViews\",\n        \"videoCompletionRate\",\n        \"videoDownloadRate14d\",\n        \"videoDownloads14d\",\n        \"videoDownloadsClicks14d\",\n        \"videoDownloadsViews14d\",\n        \"videoEndClicks\",\n        \"videoFirstQuartile\",\n        \"videoMidpoint\",\n        \"videoMute\",\n        \"videoPause\",\n        \"videoResume\",\n        \"videoStart\",\n        \"videoStarted\",\n        \"videoStartedClicks\",\n        \"videoStartedCPA\",\n        \"videoStartedCVR\",\n        \"videoStartedViews\",\n        \"videoStreams14d\",\n        \"videoStreamsClicks14d\",\n        \"videoStreamsRate14d\",\n        \"videoStreamsViews14d\",\n        \"videoThirdQuartile\",\n        \"videoUnmute\",\n        \"widgetInteraction14d\",\n        \"widgetInteractionClicks14d\",\n        \"widgetInteractionCPA14d\",\n        \"widgetInteractionCVR14d\",\n        \"widgetInteractionViews14d\",\n        \"widgetLoad14d\",\n        \"widgetLoadClicks14d\",\n        \"widgetLoadCPA14d\",\n        \"widgetLoadCVR14d\",\n        \"widgetLoadViews14d\",\n        \"lineitemtype\",\n        \"segmentClassCode\",\n        \"segmentSource\",\n        \"segmentType\",\n        \"segmentMarketplaceID\",\n        \"targetingMethod\",\n        \"combinedPurchases\",\n        \"combinedPurchasesViews\",\n        \"combinedPurchasesClicks\",\n        \"combinedPurchaseRate\",\n        \"combinedECPP\"\n    ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/accounts/{{dspAccountId}}/dsp/reports",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"accounts",
+												"{{dspAccountId}}",
+												"dsp",
+												"reports"
+											]
+										}
+									},
+									"status": "Accepted",
+									"code": 202,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 28 Dec 2022 18:45:40 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/vnd.dspcreatereports.v3+json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "192"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "BNRY8S0920AX300RYW9G"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "52026f5e-a17e-47a8-ab6c-ff81c104c2d0"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "192"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "d3tBLFijoAMFQOw="
+										},
+										{
+											"key": "x-amzn-Remapped-Server",
+											"value": "Apache-Coyote/1.1"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-63ac8ed4-b5807fa6f59f2ec8e8801165"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Wed, 28 Dec 2022 18:45:39 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"reportId\": \"c8c2ad06-f728-0140-9e07-e4b2982c40ed\",\n    \"type\": \"AUDIENCE\",\n    \"format\": \"JSON\",\n    \"status\": \"IN_PROGRESS\",\n    \"statusDetails\": \"In progress\",\n    \"location\": \"\",\n    \"expiration\": \"2022-12-28T19:45:40.581Z\"\n}"
+								},
+								{
+									"name": "Products",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.dspcreatereports.v3+json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"startDate\": \"2022-12-21\",\n    \"endDate\": \"2022-12-27\",\n    \"type\": \"PRODUCTS\",\n    \"dimensions\": [\n        \"ORDER\",\n        \"LINE_ITEM\"\n    ],\n    \"metrics\": [\n        \"productName\",\n        \"productGroup\",\n        \"productCategory\",\n        \"productSubcategory\",\n        \"dpv14d\",\n        \"dpvViews14d\",\n        \"dpvClicks14d\",\n        \"pRPV14d\",\n        \"pRPVViews14d\",\n        \"pRPVClicks14d\",\n        \"atl14d\",\n        \"atlViews14d\",\n        \"atlClicks14d\",\n        \"atc14d\",\n        \"atcViews14d\",\n        \"atcClicks14d\",\n        \"purchases14d\",\n        \"purchasesViews14d\",\n        \"purchasesClicks14d\",\n        \"newToBrandPurchases14d\",\n        \"newToBrandPurchasesViews14d\",\n        \"newToBrandPurchasesClicks14d\",\n        \"percentOfPurchasesNewToBrand14d\",\n        \"totalDetailPageViews14d\",\n        \"totalDetailPageViewViews14d\",\n        \"totalDetailPageClicks14d\",\n        \"totalPRPV14d\",\n        \"totalPRPVViews14d\",\n        \"totalPRPVClicks14d\",\n        \"totalAddToList14d\",\n        \"totalAddToListViews14d\",\n        \"totalAddToListClicks14d\",\n        \"totalAddToCart14d\",\n        \"totalAddToCartViews14d\",\n        \"totalAddToCartClicks14d\",\n        \"totalPurchases14d\",\n        \"totalPurchasesViews14d\",\n        \"totalPurchasesClicks14d\",\n        \"totalNewToBrandPurchases14d\",\n        \"totalNewToBrandPurchasesViews14d\",\n        \"totalNewToBrandPurchasesClicks14d\",\n        \"totalPercentOfPurchasesNewToBrand14d\",\n        \"newSubscribeAndSave14d\",\n        \"newSubscribeAndSaveViews14d\",\n        \"newSubscribeAndSaveClicks14d\",\n        \"totalSubscribeAndSaveSubscriptions14d\",\n        \"totalSubscribeAndSaveSubscriptionViews14d\",\n        \"totalSubscribeAndSaveSubscriptionClicks14d\",\n        \"unitsSold14d\",\n        \"sales14d\",\n        \"totalUnitsSold14d\",\n        \"totalSales14d\",\n        \"newToBrandUnitsSold14d\",\n        \"newToBrandProductSales14d\",\n        \"brandHaloDetailPage14d\",\n        \"brandHaloDetailPageViews14d\",\n        \"brandHaloDetailPageClicks14d\",\n        \"brandHaloProductReviewPage14d\",\n        \"brandHaloProductReviewPageViews14d\",\n        \"brandHaloProductReviewPageClicks14d\",\n        \"brandHaloAddToList14d\",\n        \"brandHaloAddToListViews14d\",\n        \"brandHaloAddToListClicks14d\",\n        \"brandHaloAddToCart14d\",\n        \"brandHaloAddToCartViews14d\",\n        \"brandHaloAddToCartClicks14d\",\n        \"brandHaloPurchases14d\",\n        \"brandHaloPurchasesViews14d\",\n        \"brandHaloPurchasesClicks14d\",\n        \"brandHaloNewToBrandPurchases14d\",\n        \"brandHaloNewToBrandPurchasesViews14d\",\n        \"brandHaloNewToBrandPurchasesClicks14d\",\n        \"brandHaloPercentOfPurchasesNewToBrand14d\",\n        \"brandHaloNewSubscribeAndSave14d\",\n        \"combinedPurchases\",\n        \"brandHaloNewSubscribeAndSaveViews14d\",\n        \"brandHaloNewSubscribeAndSaveClicks14d\",\n        \"brandHaloTotalUnitsSold14d\",\n        \"brandHaloTotalSales14d\",\n        \"brandHaloTotalNewToBrandSales14d\",\n        \"brandHaloTotalNewToBrandUnitsSold14d\"\n    ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/accounts/{{dspAccountId}}/dsp/reports",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"accounts",
+												"{{dspAccountId}}",
+												"dsp",
+												"reports"
+											]
+										}
+									},
+									"status": "Accepted",
+									"code": 202,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 28 Dec 2022 20:16:58 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/vnd.dspcreatereports.v3+json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "192"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "1HYXSH36A5TEQ5JBC4J2"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "8870ef0b-5f65-4d42-8563-597448272883"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "192"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "d36ZHHovIAMFbRA="
+										},
+										{
+											"key": "x-amzn-Remapped-Server",
+											"value": "Apache-Coyote/1.1"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-63aca43a-56bb3a72247f7b9f232c675b"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Wed, 28 Dec 2022 20:16:58 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"reportId\": \"7ec2ad30-c23a-1bdd-d97e-0c2072e24184\",\n    \"type\": \"PRODUCTS\",\n    \"format\": \"JSON\",\n    \"status\": \"IN_PROGRESS\",\n    \"statusDetails\": \"In progress\",\n    \"location\": \"\",\n    \"expiration\": \"2022-12-28T21:16:58.497Z\"\n}"
+								},
+								{
+									"name": "Technology",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.dspcreatereports.v3+json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"startDate\": \"2022-12-21\",\n    \"endDate\": \"2022-12-27\",\n    \"type\": \"TECHNOLOGY\",\n    \"dimensions\": [\n        \"ORDER\",\n        \"LINE_ITEM\",\n        \"OPERATING_SYSTEM\",\n        \"BROWSER_TYPE\",\n        \"BROWSER_VERSION\",\n        \"DEVICE_TYPE\",\n        \"ENVIRONMENT_TYPE\"\n    ],\n    \"metrics\": [\n        \"mashupShopNowClick14d\",\n        \"mashupShopNowClickViews14d\",\n        \"mashupShopNowClickClicks14d\",\n        \"referral14d\",\n        \"referralViews14d\",\n        \"referralClicks14d\",\n        \"accept14d\",\n        \"acceptViews14d\",\n        \"acceptClicks14d\",\n        \"decline14d\",\n        \"declineViews14d\",\n        \"declineClicks14d\",\n        \"dpv14d\",\n        \"dpvViews14d\",\n        \"dpvClicks14d\",\n        \"pRPV14d\",\n        \"pRPVViews14d\",\n        \"pRPVClicks14d\",\n        \"atl14d\",\n        \"atlViews14d\",\n        \"atlClicks14d\",\n        \"atc14d\",\n        \"atcViews14d\",\n        \"atcClicks14d\",\n        \"purchases14d\",\n        \"purchasesViews14d\",\n        \"purchasesClicks14d\",\n        \"newToBrandPurchases14d\",\n        \"newToBrandPurchasesViews14d\",\n        \"newToBrandPurchasesClicks14d\",\n        \"newSubscribeAndSave14d\",\n        \"newSubscribeAndSaveViews14d\",\n        \"newSubscribeAndSaveClicks14d\",\n        \"addToWatchlist14d\",\n        \"addToWatchlistViews14d\",\n        \"addToWatchlistClicks14d\",\n        \"downloadedVideoPlays14d\",\n        \"downloadedVideoPlaysViews14d\",\n        \"downloadedVideoPlaysClicks14d\",\n        \"videoStreams14d\",\n        \"videoStreamsViews14d\",\n        \"videoStreamsClicks14d\",\n        \"playTrailers14d\",\n        \"playTrailersViews14d\",\n        \"playerTrailersClicks14d\",\n        \"rentals14d\",\n        \"rentalsViews14d\",\n        \"rentalsClicks14d\",\n        \"videoDownloads14d\",\n        \"videoDownloadsViews14d\",\n        \"videoDownloadsClicks14d\",\n        \"videoStart\",\n        \"videoFirstQuartile\",\n        \"videoMidpoint\",\n        \"videoThirdQuartile\",\n        \"videoComplete\",\n        \"videoPause\",\n        \"videoResume\",\n        \"videoMute\",\n        \"videoUnmute\",\n        \"unitsSold14d\",\n        \"sales14d\",\n        \"newToBrandUnitsSold14d\",\n        \"newToBrandProductSales14d\",\n        \"brandSearch14d\",\n        \"brandSearchViews14d\",\n        \"brandSearchClicks14d\",\n        \"brandSearchRate14d\",\n        \"brandSearchCPA14d\",\n        \"grossImpressions\",\n        \"grossClickThroughs\",\n        \"invalidImpressions\",\n        \"invalidClickThroughs\",\n        \"invalidImpressionRate\",\n        \"invalidClickThroughsRate\",\n        \"offAmazonProductSales14d\",\n        \"offAmazonUnitsSold14d\",\n        \"totalPurchases14d\",\n        \"totalPurchasesViews14d\",\n        \"totalPurchasesClicks14d\",\n        \"totalSales14d\",\n        \"totalUnitsSold14d\",\n        \"combinedPurchases\",\n        \"combinedPurchasesViews\",\n        \"combinedPurchasesClicks\",\n        \"combinedProductSales\",\n        \"combinedUnitsSold\"\n    ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/accounts/{{dspAccountId}}/dsp/reports",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"accounts",
+												"{{dspAccountId}}",
+												"dsp",
+												"reports"
+											]
+										}
+									},
+									"status": "Accepted",
+									"code": 202,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 28 Dec 2022 20:20:07 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/vnd.dspcreatereports.v3+json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "194"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "DKEYHZG9APRAQ66S94Q0"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "357edcde-bbdb-4879-9fc5-66bc3ccbd93d"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "194"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "d362jEc9IAMFvQg="
+										},
+										{
+											"key": "x-amzn-Remapped-Server",
+											"value": "Apache-Coyote/1.1"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-63aca4f7-7d88fbaf7052ffacc33e5839"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Wed, 28 Dec 2022 20:20:06 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"reportId\": \"f4c2ad32-32dc-c54c-c4a2-c03127f74459\",\n    \"type\": \"TECHNOLOGY\",\n    \"format\": \"JSON\",\n    \"status\": \"IN_PROGRESS\",\n    \"statusDetails\": \"In progress\",\n    \"location\": \"\",\n    \"expiration\": \"2022-12-28T21:20:07.236Z\"\n}"
+								},
+								{
+									"name": "Geography",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.dspcreatereports.v3+json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"startDate\": \"2022-12-21\",\n    \"endDate\": \"2022-12-27\",\n    \"type\": \"GEOGRAPHY\",\n    \"dimensions\": [\n        \"ORDER\",\n        \"LINE_ITEM\",\n        \"COUNTRY\",\n        \"STATE_COUNTY_REGION\",\n        \"CITY\",\n        \"DMA\",\n        \"POSTAL_CODE\"\n    ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/accounts/{{dspAccountId}}/dsp/reports",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"accounts",
+												"{{dspAccountId}}",
+												"dsp",
+												"reports"
+											]
+										}
+									},
+									"status": "Accepted",
+									"code": 202,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 28 Dec 2022 20:22:56 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/vnd.dspcreatereports.v3+json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "193"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "CSEYQ7JGYPM5Q9V0V7ZB"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "2eb1287a-9cae-42fd-914b-bb6daba10b8a"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "193"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "d37Q-E9FoAMF9xw="
+										},
+										{
+											"key": "x-amzn-Remapped-Server",
+											"value": "Apache-Coyote/1.1"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-63aca5a0-7e5c127281845e9ef70f6d6f"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Wed, 28 Dec 2022 20:22:56 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"reportId\": \"32c2ad33-7ca1-b83b-7ce5-05cd92bef026\",\n    \"type\": \"GEOGRAPHY\",\n    \"format\": \"JSON\",\n    \"status\": \"IN_PROGRESS\",\n    \"statusDetails\": \"In progress\",\n    \"location\": \"\",\n    \"expiration\": \"2022-12-28T21:22:56.081Z\"\n}"
+								},
+								{
+									"name": "Conversion source",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.dspcreatereports.v3+json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"startDate\": \"2022-12-21\",\n    \"endDate\": \"2022-12-27\",\n    \"type\": \"CONVERSION_SOURCE\",\n    \"dimensions\": [\n        \"ORDER\",\n        \"LINE_ITEM\",\n        \"CREATIVE\"\n    ],\n    \"metrics\": [\n        \"totalPurchases14d\",\n        \"totalPurchasesViews14d\",\n        \"totalPurchasesClicks14d\",\n        \"totalSales14d\",\n        \"totalUnitsSold14d\",\n        \"offAmazonPurchases14d\",\n        \"offAmazonPurchasesViews14d\",\n        \"offAmazonPurchasesClicks14d\",\n        \"offAmazonProductSales14d\",\n        \"offAmazonUnitsSold14d\",\n        \"combinedPurchases\",\n        \"combinedPurchasesViews\",\n        \"combinedPurchasesClicks\",\n        \"combinedProductSales\",\n        \"combinedUnitsSold\"\n    ]\n}"
+										},
+										"url": {
+											"raw": "{{api_url}}/accounts/{{dspAccountId}}/dsp/reports",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"accounts",
+												"{{dspAccountId}}",
+												"dsp",
+												"reports"
+											]
+										}
+									},
+									"status": "Accepted",
+									"code": 202,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 28 Dec 2022 22:06:09 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/vnd.dspcreatereports.v3+json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "201"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "AJRR599BDDS0DQEEEBX8"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "a1e19252-bbeb-4379-8524-7ef2a8bb250a"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "201"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "d4KYnHshoAMFwBQ="
+										},
+										{
+											"key": "x-amzn-Remapped-Server",
+											"value": "Apache-Coyote/1.1"
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-63acbdd1-8c0c51206be6afad64794108"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Wed, 28 Dec 2022 22:06:08 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"reportId\": \"cac2ad62-bc47-86ed-515a-1cf579ec8366\",\n    \"type\": \"CONVERSION_SOURCE\",\n    \"format\": \"JSON\",\n    \"status\": \"IN_PROGRESS\",\n    \"statusDetails\": \"In progress\",\n    \"location\": \"\",\n    \"expiration\": \"2022-12-28T23:06:09.048Z\"\n}"
 								}
 							]
 						},
