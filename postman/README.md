@@ -11,14 +11,19 @@ Visit the [Amazon Ads advanced tools center](https://advertising.amazon.com/API/
 The Amazon Ads API Postman collection currently supports the following features:
 
 - Authentication
+- GET profiles
+- GET manager accounts
 - Sponsored Products campaign management (version 3)
 - Sponsored ads reporting
     - Version 3
     - Version 2
+- DSP reporting
 - Sponsored ads snapshots 
 - Test accounts
 - Amazon Marketing Stream beta
 - Product metadata 
+- Sponsored ads budget usage
+- Sponsored ads budget rules
 
 ## Setup
 
