@@ -15,7 +15,8 @@ Parameters:
       - sp-conversion
       - budget-usage
       - sd-traffic      
-      - sd-conversion     
+      - sd-conversion
+      - sponsored-ads-campaign-diagnostics-recommendations
   StreamRealm:
     Type: String
     Description: The realm to stream
@@ -42,6 +43,8 @@ Mappings:
       Account: 370941301809
     sd-conversion:
       Account: 877712924581
+    sponsored-ads-campaign-diagnostics-recommendations:
+      Account: 084590724871
   EU:
     sp-traffic:
       Account: 668473351658
@@ -52,7 +55,9 @@ Mappings:
     sd-traffic:
       Account: 947153514089
     sd-conversion:
-      Account: 664093967423      
+      Account: 664093967423 
+    sponsored-ads-campaign-diagnostics-recommendations:
+      Account: 059061853903
   FE:
     sp-traffic:
       Account: 074266271188
@@ -63,7 +68,9 @@ Mappings:
     sd-traffic:
       Account: 310605068565
     sd-conversion:
-      Account: 818973306977    
+      Account: 818973306977
+    sponsored-ads-campaign-diagnostics-recommendations:
+      Account: 489995134625
 Rules:
   NA:
     RuleCondition:
