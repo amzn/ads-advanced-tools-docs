@@ -24,6 +24,9 @@ The Amazon Ads API Postman collection currently supports the following features:
 - Product metadata 
 - Sponsored ads budget usage
 - Sponsored ads budget rules
+- Sponsored Brands campaigns, ads, and ad groups
+- Creative asset library
+- Stores
 
 ## Setup
 

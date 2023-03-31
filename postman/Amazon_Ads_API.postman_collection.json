@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "dadc4fb5-e58a-46dd-ae42-a071838044d7",
+		"_postman_id": "23b8b875-057b-4514-92bf-f07e8fb759f3",
 		"name": "Amazon Ads API",
 		"description": "# Amazon Ads API Postman collection\n\nThis collection includes commonly used endpoints for the Amazon Ads API. The collection also includes pre- and post-request scripts to automate management of auth credentials.\n\nVisit the [Amazon Ads advanced tools center](https://advertising.amazon.com/API/docs/en-us/) for API documentation.\n\n## Setup\n\nTo use this collection, you will need credentials for the Amazon Ads API. For information about acquiring credentials, see the [onboarding overview for the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/onboarding/overview).\n\nFind setup instructions in the Amazon Ads advanced tools center for:\n\n- [New users of the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/getting-started/using-postman-collection)\n- [Users with an existing refresh token](https://advertising.amazon.com/API/docs/en-us/tutorials/postman) \n\n## Issues and support\n\nFor technical support for the Amazon Ads API, see [Technical support](https://advertising.amazon.com/API/docs/en-us/info/support) in the Amazon Ads advanced tools center.\n\nTo report a bug or suggest an improvement relating to this collection or the documentation, [create an issue](https://github.com/amzn/ads-advanced-tools-docs/issues/new/choose).",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -6391,7 +6391,7 @@
 			"description": "Full API reference available in the [advanced tools center](https://advertising.amazon.com/API/docs/en-us/amazon-marketing-stream/openapi)."
 		},
 		{
-			"name": "Sponsored Products (version 3)",
+			"name": "Sponsored Products",
 			"item": [
 				{
 					"name": "Campaigns",
@@ -16177,6 +16177,3666 @@
 			]
 		},
 		{
+			"name": "Sponsored Brands",
+			"item": [
+				{
+					"name": "Campaigns",
+					"item": [
+						{
+							"name": "Create campaigns",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = JSON.parse(responseBody);",
+											"",
+											"/*Save campaignId for first object to environment*/",
+											"if (response.campaigns.success[0] != null ) {",
+											"var campaignId = response.campaigns.success[0].campaignId;",
+											"postman.clearEnvironmentVariable(\"campaignId\");",
+											"postman.setEnvironmentVariable(\"campaignId\", campaignId);",
+											"} else {",
+											"    console.log(responseBody);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.sbcampaignresource.v4+json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"campaigns\": [\n        {\n            \"budgetType\": \"DAILY\",\n            \"name\": \"Name of campaign\",\n            \"state\": \"ENABLED\",\n            \"productLocation\": \"SOLD_ON_AMAZON\",\n            \"startDate\": \"2023-05-21\",\n            \"budget\": 10,\n            \"bidding\": {\n                \"bidOptimization\": \"false\",\n                \"bidAdjustmentsByShopperSegment\": [\n                    {\n                        \"percentage\": 200,\n                        \"shopperSegment\": \"NEW_TO_BRAND_PURCHASE\"\n                    }\n                ],\n                \"bidAdjustmentsByPlacement\": [\n                    {\n                        \"percentage\": 20,\n                        \"placement\": \"HOME\"\n                    },\n                    {\n                        \"percentage\": 15,\n                        \"placement\": \"DETAIL_PAGE\"\n                    },\n                    {\n                        \"percentage\": 15,\n                        \"placement\": \"OTHER\"\n                    }\n                ],\n                \"bidOptimizationStrategy\":\"MAXIMIZE_NEW_TO_BRAND_CUSTOMERS\"\n            }\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/sb/v4/campaigns",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sb",
+										"v4",
+										"campaigns"
+									]
+								},
+								"description": "brandEntityID is required for sellers"
+							},
+							"response": [
+								{
+									"name": "Vendor",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.sbcampaignresource.v4+json",
+												"type": "default"
+											},
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"campaigns\": [\n    {\n      \"budgetType\": \"DAILY\",\n      \"name\": \"Name of campaign\",\n      \"state\": \"PAUSED\",\n      \"productLocation\": \"SOLD_ON_AMAZON\",\n      \"startDate\": \"2022-10-20\",\n      \"budget\": 10\n    }\n  ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/sb/v4/campaigns",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sb",
+												"v4",
+												"campaigns"
+											]
+										}
+									},
+									"status": "Multi-Status (WebDAV) (RFC 4918)",
+									"code": 207,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 05 Oct 2022 18:19:07 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "381"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "RAPA4PY9GPDHXGDST0K9"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "954ab2f6-4115-4924-a7d2-22940d8610c0"
+										},
+										{
+											"key": "x-amzn-Remapped-x-amzn-RequestId",
+											"value": "61f9f56f-5a9f-4dd1-8345-2b3b11edbf4f"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "381"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "ZiyXtE9rIAMFY8Q="
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-633dca9a-8475838267e8a57345365026"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Wed, 05 Oct 2022 18:19:06 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"campaigns\": {\n        \"error\": [],\n        \"success\": [\n            {\n                \"campaign\": {\n                    \"bidding\": {\n                        \"bidOptimization\": true,\n                        \"bidOptimizationStrategy\": \"MAXIMIZE_IMMEDIATE_SALES\"\n                    },\n                    \"budget\": 10,\n                    \"budgetType\": \"DAILY\",\n                    \"campaignId\": \"33598597792560\",\n                    \"isMultiAdGroupsEnabled\": true,\n                    \"name\": \"Test v4 campaign 3\",\n                    \"productLocation\": \"SOLD_ON_AMAZON\",\n                    \"startDate\": \"2022-10-20\",\n                    \"state\": \"PAUSED\"\n                },\n                \"campaignId\": \"33598597792560\",\n                \"index\": 0\n            }\n        ]\n    }\n}"
+								},
+								{
+									"name": "Seller",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.sbcampaignresource.v4+json",
+												"type": "default"
+											},
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"campaigns\": [\n    {\n      \"budgetType\": \"DAILY\",\n      \"name\": \"Name of campaign\",\n      \"state\": \"PAUSED\",\n      \"productLocation\": \"SOLD_ON_AMAZON\",\n      \"startDate\": \"2022-10-20\",\n      \"budget\": 10,\n      \"brandEntityId\": \"{{brandEntityId}}\"\n    }\n  ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/sb/v4/campaigns",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sb",
+												"v4",
+												"campaigns"
+											]
+										}
+									},
+									"status": "Multi-Status (WebDAV) (RFC 4918)",
+									"code": 207,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 05 Oct 2022 18:24:01 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "421"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "WTV0QNATXKRG64MRN82J"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "6c555975-1c15-4b5e-8155-840844c98273"
+										},
+										{
+											"key": "x-amzn-Remapped-x-amzn-RequestId",
+											"value": "87caf347-ac62-495e-91ac-55bf65ce5842"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "421"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "ZizFtETToAMFSlw="
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-633dcbc1-1fe21f9445d0b750be60719e"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Wed, 05 Oct 2022 18:24:01 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"campaigns\": {\n        \"error\": [],\n        \"success\": [\n            {\n                \"campaign\": {\n                    \"bidding\": {\n                        \"bidOptimization\": true,\n                        \"bidOptimizationStrategy\": \"MAXIMIZE_IMMEDIATE_SALES\"\n                    },\n                    \"brandEntityId\": \"ENTITY1GY02L4M2U9FK\",\n                    \"budget\": 10,\n                    \"budgetType\": \"DAILY\",\n                    \"campaignId\": \"177829948461538\",\n                    \"isMultiAdGroupsEnabled\": true,\n                    \"name\": \"Test v4 campaign 3\",\n                    \"productLocation\": \"SOLD_ON_AMAZON\",\n                    \"startDate\": \"2022-10-20\",\n                    \"state\": \"PAUSED\"\n                },\n                \"campaignId\": \"177829948461538\",\n                \"index\": 0\n            }\n        ]\n    }\n}"
+								},
+								{
+									"name": "Auto bidding success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.sbcampaignresource.v4+json",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"campaigns\": [\n    {\n      \"budgetType\": \"DAILY\",\n      \"name\": \"Name of campaign\",\n      \"state\": \"ENABLED\",\n      \"productLocation\": \"SOLD_ON_AMAZON\",\n      \"startDate\": \"2023-05-21\",\n      \"budget\": 10,\n      \"bidding\": {\n          \"bidOptimization\": \"true\"\n      }\n    }\n  ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/sb/v4/campaigns",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sb",
+												"v4",
+												"campaigns"
+											]
+										}
+									},
+									"status": "Multi-Status (WebDAV) (RFC 4918)",
+									"code": 207,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 28 Mar 2023 21:09:00 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "392"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "8XBQFDB6ECDBKDFXGT7R"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "e7a2b7c3-f473-4c3f-ba8a-df533547345d"
+										},
+										{
+											"key": "x-amzn-Remapped-x-amzn-RequestId",
+											"value": "3ac0ff79-a09c-49e0-ba3e-b23318c042fa"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "392"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "CgqY_G0AoAMFZqA="
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6423576c-a8cb009940fe6e12e645e987"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Tue, 28 Mar 2023 21:09:00 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"campaigns\": {\n        \"error\": [],\n        \"success\": [\n            {\n                \"campaign\": {\n                    \"bidding\": {\n                        \"bidOptimization\": true,\n                        \"bidOptimizationStrategy\": \"MAXIMIZE_IMMEDIATE_SALES\"\n                    },\n                    \"budget\": 10,\n                    \"budgetType\": \"DAILY\",\n                    \"campaignId\": \"178005441007220\",\n                    \"isMultiAdGroupsEnabled\": true,\n                    \"name\": \"Test campaign bidding auto\",\n                    \"productLocation\": \"SOLD_ON_AMAZON\",\n                    \"startDate\": \"2023-05-21\",\n                    \"state\": \"ENABLED\"\n                },\n                \"campaignId\": \"178005441007220\",\n                \"index\": 0\n            }\n        ]\n    }\n}"
+								},
+								{
+									"name": "Manual bidding success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.sbcampaignresource.v4+json",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"campaigns\": [\n        {\n            \"budgetType\": \"DAILY\",\n            \"name\": \"Name of campaign\",\n            \"state\": \"ENABLED\",\n            \"productLocation\": \"SOLD_ON_AMAZON\",\n            \"startDate\": \"2023-05-21\",\n            \"budget\": 10,\n            \"bidding\": {\n                \"bidOptimization\": \"false\",\n                \"bidAdjustmentsByShopperSegment\": [\n                    {\n                        \"percentage\": 200,\n                        \"shopperSegment\": \"NEW_TO_BRAND_PURCHASE\"\n                    }\n                ],\n                \"bidAdjustmentsByPlacement\": [\n                    {\n                        \"percentage\": 20,\n                        \"placement\": \"HOME\"\n                    },\n                    {\n                        \"percentage\": 15,\n                        \"placement\": \"DETAIL_PAGE\"\n                    },\n                    {\n                        \"percentage\": 15,\n                        \"placement\": \"OTHER\"\n                    }\n                ],\n                \"bidOptimizationStrategy\":\"MAXIMIZE_NEW_TO_BRAND_CUSTOMERS\"\n            }\n        }\n    ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/sb/v4/campaigns",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sb",
+												"v4",
+												"campaigns"
+											]
+										}
+									},
+									"status": "Multi-Status (WebDAV) (RFC 4918)",
+									"code": 207,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 28 Mar 2023 21:11:12 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "646"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "HR08RXRWYRA7SHMQQA6P"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "a9846f80-bba5-424d-9bd7-502b1c9ebdea"
+										},
+										{
+											"key": "x-amzn-Remapped-x-amzn-RequestId",
+											"value": "4e4101d4-5089-4644-bd4a-8826273c1e83"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "646"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "CgqtiEYZIAMFfoQ="
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-642357f0-7006b9611a265f5262a0b43a"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Tue, 28 Mar 2023 21:11:11 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"campaigns\": {\n        \"error\": [],\n        \"success\": [\n            {\n                \"campaign\": {\n                    \"bidding\": {\n                        \"bidAdjustmentsByPlacement\": [\n                            {\n                                \"percentage\": 15,\n                                \"placement\": \"DETAIL_PAGE\"\n                            },\n                            {\n                                \"percentage\": 15,\n                                \"placement\": \"OTHER\"\n                            },\n                            {\n                                \"percentage\": 20,\n                                \"placement\": \"HOME\"\n                            }\n                        ],\n                        \"bidAdjustmentsByShopperSegment\": [\n                            {\n                                \"percentage\": 200,\n                                \"shopperSegment\": \"NEW_TO_BRAND_PURCHASE\"\n                            }\n                        ],\n                        \"bidOptimization\": false,\n                        \"bidOptimizationStrategy\": \"MAXIMIZE_NEW_TO_BRAND_CUSTOMERS\"\n                    },\n                    \"budget\": 10,\n                    \"budgetType\": \"DAILY\",\n                    \"campaignId\": \"221517786174862\",\n                    \"isMultiAdGroupsEnabled\": true,\n                    \"name\": \"Test campaign bidding manual\",\n                    \"productLocation\": \"SOLD_ON_AMAZON\",\n                    \"startDate\": \"2023-05-21\",\n                    \"state\": \"ENABLED\"\n                },\n                \"campaignId\": \"221517786174862\",\n                \"index\": 0\n            }\n        ]\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "List campaigns",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"response should not be an error\", function () {",
+											"      pm.response.to.not.be.error;",
+											"});",
+											"",
+											"/*Save campaignId for first object to environemnt*/",
+											"var response = JSON.parse(responseBody);",
+											"var campaignId = response.campaigns[0].campaignId",
+											"postman.clearEnvironmentVariable(\"campaignId\");",
+											"postman.setEnvironmentVariable(\"campaignId\", campaignId);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.sbcampaignresource.v4+json",
+										"type": "default"
+									}
+								],
+								"url": {
+									"raw": "{{api_url}}/sb/v4/campaigns/list",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sb",
+										"v4",
+										"campaigns",
+										"list"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.sbcampaignresource.v4+json",
+												"type": "default"
+											}
+										],
+										"url": {
+											"raw": "{{api_url}}/sb/v4/campaigns/list",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sb",
+												"v4",
+												"campaigns",
+												"list"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 21 Mar 2023 22:10:49 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "692"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "7DZE3AP4MX2X68QBMR6A"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "1897d9e7-8465-4ec3-a69e-6fea175d9fe2"
+										},
+										{
+											"key": "x-amzn-Remapped-x-amzn-RequestId",
+											"value": "6edf729d-4e01-460e-8b3c-92bcd2fd6cba"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "692"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "CJu4iEB7IAMF2OA="
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-641a2b69-4fe45dd3eb189be947fbeeab"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Tue, 21 Mar 2023 22:10:48 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"campaigns\": [\n        {\n            \"bidding\": {\n                \"bidOptimization\": true,\n                \"bidOptimizationStrategy\": \"MAXIMIZE_IMMEDIATE_SALES\"\n            },\n            \"brandEntityId\": \"ENTITY21DWFJV45CH71\",\n            \"budget\": 10,\n            \"budgetType\": \"DAILY\",\n            \"campaignId\": \"203755086457166\",\n            \"isMultiAdGroupsEnabled\": true,\n            \"name\": \"Test v4 campaign store 2\",\n            \"productLocation\": \"SOLD_ON_AMAZON\",\n            \"startDate\": \"2023-05-21\",\n            \"state\": \"PAUSED\"\n        },\n        {\n            \"bidding\": {\n                \"bidOptimization\": true,\n                \"bidOptimizationStrategy\": \"MAXIMIZE_IMMEDIATE_SALES\"\n            },\n            \"brandEntityId\": \"ENTITY21DWFJV45CH71\",\n            \"budget\": 10,\n            \"budgetType\": \"DAILY\",\n            \"campaignId\": \"222860667662817\",\n            \"isMultiAdGroupsEnabled\": true,\n            \"name\": \"Test v4 campaign\",\n            \"productLocation\": \"SOLD_ON_AMAZON\",\n            \"startDate\": \"2023-05-21\",\n            \"state\": \"PAUSED\"\n        }\n    ],\n    \"totalCount\": 2\n}"
+								}
+							]
+						},
+						{
+							"name": "Update campaign",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"response should not be an error\", function () {",
+											"      pm.response.to.not.be.error;",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.updatecampaignsresponse.v4+json",
+										"type": "default"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"campaigns\": [\n    {\n      \"bidding\": {\n        \"bidOptimization\": true\n      },\n      \"campaignId\": \"{{campaignId}}\",\n      \"name\": \"string\",\n      \"state\": \"ENABLED\",\n      \"startDate\": \"2023-06-15\",\n      \"budget\": 100\n    }\n  ]\n}"
+								},
+								"url": {
+									"raw": "{{api_url}}/sb/v4/campaigns",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sb",
+										"v4",
+										"campaigns"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Update budget",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.updatecampaignsresponse.v4+json",
+												"type": "default"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"campaigns\": [\n    {\n      \"bidding\": {\n        \"bidOptimization\": true\n      },\n      \"campaignId\": \"{{campaignId}}\",\n      \"name\": \"string\",\n      \"state\": \"ENABLED\",\n      \"startDate\": \"2023-06-15\",\n      \"budget\": 100\n    }\n  ]\n}"
+										},
+										"url": {
+											"raw": "{{api_url}}/sb/v4/campaigns",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sb",
+												"v4",
+												"campaigns"
+											]
+										}
+									},
+									"status": "Multi-Status (WebDAV) (RFC 4918)",
+									"code": 207,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 21 Mar 2023 22:22:18 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "411"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "87GWMF4V56CDD8NR2FYY"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "e195ca5a-6778-4083-97b2-682d5d41a33f"
+										},
+										{
+											"key": "x-amzn-Remapped-x-amzn-RequestId",
+											"value": "888d9714-7df2-4738-8bb6-11bbd1c4ed26"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "411"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "CJwkJHE0IAMF7PA="
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-641a2e1a-a898b20ad8596a3844690d94"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Tue, 21 Mar 2023 22:22:18 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"campaigns\": {\n        \"error\": [],\n        \"success\": [\n            {\n                \"campaign\": {\n                    \"bidding\": {\n                        \"bidOptimization\": true,\n                        \"bidOptimizationStrategy\": \"MAXIMIZE_IMMEDIATE_SALES\"\n                    },\n                    \"brandEntityId\": \"ENTITY21DWFJV45CH71\",\n                    \"budget\": 100,\n                    \"budgetType\": \"DAILY\",\n                    \"campaignId\": \"203755086457166\",\n                    \"isMultiAdGroupsEnabled\": true,\n                    \"name\": \"string\",\n                    \"productLocation\": \"SOLD_ON_AMAZON\",\n                    \"startDate\": \"2023-06-15\",\n                    \"state\": \"ENABLED\"\n                },\n                \"campaignId\": \"203755086457166\",\n                \"index\": 0\n            }\n        ]\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "Delete campaign",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"response should not be an error\", function () {",
+											"      pm.response.to.not.be.error;",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "",
+										"value": "",
+										"type": "default",
+										"disabled": true
+									},
+									{
+										"key": "",
+										"value": "",
+										"type": "default",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"campaignIdFilter\": {\n    \"include\": [\n      \"{{campaignId}}\"\n    ]\n  }\n}"
+								},
+								"url": {
+									"raw": "{{api_url}}/sb/v4/campaigns/delete",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sb",
+										"v4",
+										"campaigns",
+										"delete"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.sbcampaignresource.v4+json",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"campaignIdFilter\": {\n    \"include\": [\n      \"{{campaignId}}\"\n    ]\n  }\n}"
+										},
+										"url": {
+											"raw": "{{api_url}}/sb/v4/campaigns/delete",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sb",
+												"v4",
+												"campaigns",
+												"delete"
+											]
+										}
+									},
+									"status": "Multi-Status (WebDAV) (RFC 4918)",
+									"code": 207,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Thu, 30 Mar 2023 16:18:10 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "397"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "BB8DXK9CJ174Z3TE60HE"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "5f7d7dd3-ac05-4c8a-b505-7a822b5f00f1"
+										},
+										{
+											"key": "x-amzn-Remapped-x-amzn-RequestId",
+											"value": "8d9794ce-0513-4e67-85ae-cd36e0abfcdd"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "397"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "CmlqcEUtoAMFggQ="
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6425b642-a1b0c476c8d27353a39d6f98"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Thu, 30 Mar 2023 16:18:09 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"campaigns\": {\n        \"error\": [],\n        \"success\": [\n            {\n                \"campaign\": {\n                    \"bidding\": {\n                        \"bidOptimization\": true,\n                        \"bidOptimizationStrategy\": \"MAXIMIZE_IMMEDIATE_SALES\"\n                    },\n                    \"brandEntityId\": \"ENTITY21DWFJV45CH71\",\n                    \"budget\": 50,\n                    \"budgetType\": \"DAILY\",\n                    \"campaignId\": \"38789817437281\",\n                    \"isMultiAdGroupsEnabled\": true,\n                    \"name\": \"Campaign - 2/20/2023 22:26:18\",\n                    \"startDate\": \"2023-02-20\",\n                    \"state\": \"ARCHIVED\"\n                },\n                \"campaignId\": \"38789817437281\",\n                \"index\": 0\n            }\n        ]\n    }\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Ad groups",
+					"item": [
+						{
+							"name": "Create ad groups",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = JSON.parse(responseBody);",
+											"",
+											"/*Save campaignId for first object to environment*/",
+											"if (response.adGroups.success[0] != null ) {",
+											"var adGroupId = response.adGroups.success[0].adGroupId",
+											"postman.clearEnvironmentVariable(\"adGroupId\");",
+											"postman.setEnvironmentVariable(\"adGroupId\", adGroupId);",
+											"} else {",
+											"    console.log(responseBody);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.sbadgroupresource.v4+json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"adGroups\": [\n    {\n      \"campaignId\": \"{{campaignId}}\",\n      \"name\": \"Name for ad group\",\n      \"state\": \"ENABLED\"\n    }\n  ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/sb/v4/adGroups",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sb",
+										"v4",
+										"adGroups"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.sbadgroupresource.v4+json",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"adGroups\": [\n    {\n      \"campaignId\": \"{{campaignId}}\",\n      \"name\": \"name of ad group\",\n      \"state\": \"ENABLED\"\n    }\n  ]\n}"
+										},
+										"url": {
+											"raw": "{{api_url}}/sb/beta/adGroups",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sb",
+												"beta",
+												"adGroups"
+											]
+										}
+									},
+									"status": "Multi-Status (WebDAV) (RFC 4918)",
+									"code": 207,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 05 Oct 2022 18:30:01 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "303"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "SHVNZHDQRZ5JVWVG1AQS"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "29f6acd1-2842-43c4-b2a7-286d2d832d4a"
+										},
+										{
+											"key": "x-amzn-Remapped-x-amzn-RequestId",
+											"value": "0e93e00d-0ab9-4fa7-adb1-4a9b086744b4"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "303"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "Ziz9_H0mIAMFysw="
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-633dcd29-2e45b97c7210ec290825930d"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Wed, 05 Oct 2022 18:30:01 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"adGroups\": {\n        \"error\": [],\n        \"success\": [\n            {\n                \"adGroup\": {\n                    \"adGroupId\": \"236888139321097\",\n                    \"campaignId\": \"50253512169230\",\n                    \"extendedData\": {\n                        \"creationDate\": 1664994599715,\n                        \"lastUpdateDate\": 1664994599715,\n                        \"servingStatus\": \"CAMPAIGN_PAUSED\"\n                    },\n                    \"name\": \"Test ad group\",\n                    \"state\": \"ENABLED\"\n                },\n                \"adGroupId\": \"236888139321097\",\n                \"index\": 0\n            }\n        ]\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "List ad groups",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"response should not be an error\", function () {",
+											"      pm.response.to.not.be.error;",
+											"});",
+											"",
+											"/*Save adGroupId for first object to environemnt*/",
+											"var response = JSON.parse(responseBody);",
+											"var adGroupId = response.adGroups[0].adGroupId",
+											"postman.clearEnvironmentVariable(\"adGroupId\");",
+											"postman.setEnvironmentVariable(\"adGroupId\", adGroupId);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.sbadgroupresource.v4+json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"includeExtendedDataFields\": true,\n  \"campaignIdFilter\": {\n    \"include\": []\n  },\n  \"stateFilter\": {\n    \"include\": [\n      \"ENABLED\"\n    ]\n  },\n  \"maxResults\": 10,\n  \"adGroupIdFilter\": {\n    \"include\": [\n    ]\n  },\n  \"nameFilter\": {\n    \"queryTermMatchType\": \"EXACT_MATCH\",\n    \"include\": []\n  }\n}"
+								},
+								"url": {
+									"raw": "{{api_url}}/sb/v4/adGroups/list",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sb",
+										"v4",
+										"adGroups",
+										"list"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.sbadgroupresource.v4+json",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"includeExtendedDataFields\": true,\n  \"campaignIdFilter\": {\n    \"include\": []\n  },\n  \"stateFilter\": {\n    \"include\": [\n      \"ENABLED\"\n    ]\n  },\n  \"maxResults\": 10,\n  \"adGroupIdFilter\": {\n    \"include\": [\n    ]\n  },\n  \"nameFilter\": {\n    \"queryTermMatchType\": \"EXACT_MATCH\",\n    \"include\": []\n  }\n}"
+										},
+										"url": {
+											"raw": "{{api_url}}/sb/beta/adGroups/list",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sb",
+												"beta",
+												"adGroups",
+												"list"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 05 Oct 2022 18:30:19 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "741"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "W51T4Z5BPS6K125AGAHP"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "e42c9342-29d5-4e21-8eb4-c018c824e944"
+										},
+										{
+											"key": "x-amzn-Remapped-x-amzn-RequestId",
+											"value": "3f1c110f-b918-482f-8bef-7e86d214de6b"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "741"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "Zi0BBHaiIAMF59Q="
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-633dcd39-7fda32f55bc033569c4de536"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Wed, 05 Oct 2022 18:30:19 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"adGroups\": [\n        {\n            \"adGroupId\": \"144346139432941903\",\n            \"campaignId\": \"144327786111035248\",\n            \"extendedData\": {\n                \"creationDate\": 1635983604000,\n                \"lastUpdateDate\": 1635983604000,\n                \"servingStatus\": \"CAMPAIGN_INCOMPLETE\"\n            },\n            \"name\": \"SbTestCampaign-02/11/2021 20:26:06\",\n            \"state\": \"ENABLED\"\n        },\n        {\n            \"adGroupId\": \"144370821579495226\",\n            \"campaignId\": \"144140792417656013\",\n            \"extendedData\": {\n                \"creationDate\": 1636727115000,\n                \"lastUpdateDate\": 1636727145000,\n                \"servingStatus\": \"AD_GROUP_STATUS_ENABLED\"\n            },\n            \"name\": \"SbTestCampaign-12/11/2021 14:24:44\",\n            \"state\": \"ENABLED\"\n        },\n        {\n            \"adGroupId\": \"236888139321097\",\n            \"campaignId\": \"50253512169230\",\n            \"extendedData\": {\n                \"creationDate\": 1664994599715,\n                \"lastUpdateDate\": 1664994599715,\n                \"servingStatus\": \"CAMPAIGN_PAUSED\"\n            },\n            \"name\": \"Test ad group\",\n            \"state\": \"ENABLED\"\n        }\n    ],\n    \"totalResults\": 3\n}"
+								}
+							]
+						},
+						{
+							"name": "List ad groups Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"response should not be an error\", function () {",
+											"      pm.response.to.not.be.error;",
+											"});",
+											"",
+											"/*Save adGroupId for first object to environemnt*/",
+											"var response = JSON.parse(responseBody);",
+											"var adGroupId = response.adGroups[0].adGroupId",
+											"postman.clearEnvironmentVariable(\"adGroupId\");",
+											"postman.setEnvironmentVariable(\"adGroupId\", adGroupId);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true,
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.sbadgroupresource.v4+json",
+										"type": "default",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{api_url}}/sb/adGroups",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sb",
+										"adGroups"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.sbadgroupresource.v4+json",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"includeExtendedDataFields\": true,\n  \"campaignIdFilter\": {\n    \"include\": []\n  },\n  \"stateFilter\": {\n    \"include\": [\n      \"ENABLED\"\n    ]\n  },\n  \"maxResults\": 10,\n  \"adGroupIdFilter\": {\n    \"include\": [\n    ]\n  },\n  \"nameFilter\": {\n    \"queryTermMatchType\": \"EXACT_MATCH\",\n    \"include\": []\n  }\n}"
+										},
+										"url": {
+											"raw": "{{api_url}}/sb/beta/adGroups/list",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sb",
+												"beta",
+												"adGroups",
+												"list"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 05 Oct 2022 18:30:19 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "741"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "W51T4Z5BPS6K125AGAHP"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "e42c9342-29d5-4e21-8eb4-c018c824e944"
+										},
+										{
+											"key": "x-amzn-Remapped-x-amzn-RequestId",
+											"value": "3f1c110f-b918-482f-8bef-7e86d214de6b"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "741"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "Zi0BBHaiIAMF59Q="
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-633dcd39-7fda32f55bc033569c4de536"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Wed, 05 Oct 2022 18:30:19 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"adGroups\": [\n        {\n            \"adGroupId\": \"144346139432941903\",\n            \"campaignId\": \"144327786111035248\",\n            \"extendedData\": {\n                \"creationDate\": 1635983604000,\n                \"lastUpdateDate\": 1635983604000,\n                \"servingStatus\": \"CAMPAIGN_INCOMPLETE\"\n            },\n            \"name\": \"SbTestCampaign-02/11/2021 20:26:06\",\n            \"state\": \"ENABLED\"\n        },\n        {\n            \"adGroupId\": \"144370821579495226\",\n            \"campaignId\": \"144140792417656013\",\n            \"extendedData\": {\n                \"creationDate\": 1636727115000,\n                \"lastUpdateDate\": 1636727145000,\n                \"servingStatus\": \"AD_GROUP_STATUS_ENABLED\"\n            },\n            \"name\": \"SbTestCampaign-12/11/2021 14:24:44\",\n            \"state\": \"ENABLED\"\n        },\n        {\n            \"adGroupId\": \"236888139321097\",\n            \"campaignId\": \"50253512169230\",\n            \"extendedData\": {\n                \"creationDate\": 1664994599715,\n                \"lastUpdateDate\": 1664994599715,\n                \"servingStatus\": \"CAMPAIGN_PAUSED\"\n            },\n            \"name\": \"Test ad group\",\n            \"state\": \"ENABLED\"\n        }\n    ],\n    \"totalResults\": 3\n}"
+								}
+							]
+						},
+						{
+							"name": "Update ad groups",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"response should not be an error\", function () {",
+											"      pm.response.to.not.be.error;",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.sbadgroupresource.v4+json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"adGroups\": [\n    {\n      \"adGroupId\": \"{{adGroupId}}\",\n      \"state\": \"ENABLED\"\n    }\n  ]\n}"
+								},
+								"url": {
+									"raw": "{{api_url}}/sb/beta/adGroups",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sb",
+										"beta",
+										"adGroups"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Update state",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.sbadgroupresource.v4+json",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"adGroups\": [\n    {\n      \"adGroupId\": \"236888139321097\",\n      \"state\": \"ENABLED\"\n    }\n  ]\n}"
+										},
+										"url": {
+											"raw": "{{api_url}}/sb/beta/adGroups",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sb",
+												"beta",
+												"adGroups"
+											]
+										}
+									},
+									"status": "Multi-Status (WebDAV) (RFC 4918)",
+									"code": 207,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 05 Oct 2022 18:36:56 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "303"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "TQRA7PDDPENDNC0PX0CY"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "93d86c3f-7064-45f7-aa8d-968819b369e3"
+										},
+										{
+											"key": "x-amzn-Remapped-x-amzn-RequestId",
+											"value": "eccafa96-8c49-4723-8869-6a391ea0dbab"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "303"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "Zi0-0GrFIAMFcAg="
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-633dcec5-c6cf56b45c4e656e9640e975"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Wed, 05 Oct 2022 18:36:56 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"adGroups\": {\n        \"error\": [],\n        \"success\": [\n            {\n                \"adGroup\": {\n                    \"adGroupId\": \"236888139321097\",\n                    \"campaignId\": \"50253512169230\",\n                    \"extendedData\": {\n                        \"creationDate\": 1664994599715,\n                        \"lastUpdateDate\": 1664994599715,\n                        \"servingStatus\": \"CAMPAIGN_PAUSED\"\n                    },\n                    \"name\": \"Test ad group\",\n                    \"state\": \"ENABLED\"\n                },\n                \"adGroupId\": \"236888139321097\",\n                \"index\": 0\n            }\n        ]\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "Delete ad groups",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"response should not be an error\", function () {",
+											"      pm.response.to.not.be.error;",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.sbadgroupresource.v4+json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"adGroupIdFilter\": {\n    \"include\": [\n      \"{{adGroupId}}\"\n    ]\n  }\n}"
+								},
+								"url": {
+									"raw": "{{api_url}}/sb/beta/adGroups/delete",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sb",
+										"beta",
+										"adGroups",
+										"delete"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.sbadgroupresource.v4+json",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"adGroupIdFilter\": {\n    \"include\": [\n      \"236888139321097\"\n    ]\n  }\n}"
+										},
+										"url": {
+											"raw": "{{api_url}}/sb/beta/adGroups/delete",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sb",
+												"beta",
+												"adGroups",
+												"delete"
+											]
+										}
+									},
+									"status": "Multi-Status (WebDAV) (RFC 4918)",
+									"code": 207,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 05 Oct 2022 18:37:38 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "304"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "QNRGJ172AN5VNGAXKTPQ"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "f2d7205f-730d-4efb-9a5e-51f876a48cf2"
+										},
+										{
+											"key": "x-amzn-Remapped-x-amzn-RequestId",
+											"value": "d11453ba-d857-4363-b45f-5b6c1f392775"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "304"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "Zi1FXEIGoAMFnXw="
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-633dcef2-cbc547d0e86667f84edb1e53"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Wed, 05 Oct 2022 18:37:38 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"adGroups\": {\n        \"error\": [],\n        \"success\": [\n            {\n                \"adGroup\": {\n                    \"adGroupId\": \"236888139321097\",\n                    \"campaignId\": \"50253512169230\",\n                    \"extendedData\": {\n                        \"creationDate\": 1664994599715,\n                        \"lastUpdateDate\": 1664995057306,\n                        \"servingStatus\": \"CAMPAIGN_PAUSED\"\n                    },\n                    \"name\": \"Test ad group\",\n                    \"state\": \"ARCHIVED\"\n                },\n                \"adGroupId\": \"236888139321097\",\n                \"index\": 0\n            }\n        ]\n    }\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Ads",
+					"item": [
+						{
+							"name": "Create product collection ad",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = JSON.parse(responseBody);",
+											"",
+											"/*Save adId for first object to environment*/",
+											"if (response.ads.success[0] != null ) {",
+											"var adId = response.ads.success[0].adId",
+											"postman.clearEnvironmentVariable(\"adId\");",
+											"postman.setEnvironmentVariable(\"adId\", adId);",
+											"} else {",
+											"    console.log(responseBody);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.sbadresource.v4+json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"ads\": [\n    {\n      \"landingPage\": {\n        \"pageType\": \"STORE\",\n        \"url\" : \"https://www.amazon.com/stores/page/xxxxxxxx\"\n        },\n      \"name\": \"Name of product collection\",\n      \"state\": \"ENABLED\",\n      \"adGroupId\": \"{{adGroupId}}\",\n      \"creative\": {\n        \"brandLogoCrop\": {\n          \"top\": 0,\n          \"left\": 0,\n          \"width\": 0,\n          \"height\": 0\n        },\n        \"asins\": [\n          \"B004QF0TFQ\",\n           \"B0787FVB5F\",\n            \"B00JVTNWB0\"\n        ],\n        \"brandName\": \"My Brand\",\n        \"customImageAssetId\": \"amzn1.assetlibrary.asset1.xxxxxx\",\n        \"customImageCrop\": {\n          \"top\": 0,\n          \"left\": 0,\n          \"width\": 1200,\n          \"height\": 630\n        },\n        \"brandLogoAssetID\": \"amzn1.assetlibrary.asset1.xxxxxx\",\n        \"headline\": \"My headline\"\n      }\n    }\n  ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/sb/v4/ads/productCollection",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sb",
+										"v4",
+										"ads",
+										"productCollection"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Product list success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.sbadresource.v4+json",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"ads\": [\n    {\n      \"landingPage\": {\n        \"asins\": [\n          \"B004QF0TFQ\",\n           \"B0787FVB5F\",\n            \"B00JVTNWB0\"\n        ],\n        \"pageType\": \"PRODUCT_LIST\"\n        },\n      \"name\": \"Name for product collection ad\",\n      \"state\": \"ENABLED\",\n      \"adGroupId\": \"{{adGroupId}}\",\n      \"creative\": {\n        \"brandLogoCrop\": {\n          \"top\": 0,\n          \"left\": 0,\n          \"width\": 0,\n          \"height\": 0\n        },\n        \"asins\": [\n          \"B004QF0TFQ\",\n           \"B0787FVB5F\",\n            \"B00JVTNWB0\"\n        ],\n        \"brandName\": \"My Brand\",\n        \"customImageAssetId\": \"amzn1.assetlibrary.asset1.xxxxxx\",\n        \"brandLogoAssetID\": \"amzn1.assetlibrary.asset1.xxxxxx\",\n        \"headline\": \"My headline\"\n      }\n    }\n  ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/sb/v4/ads/productCollection",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sb",
+												"v4",
+												"ads",
+												"productCollection"
+											]
+										}
+									},
+									"status": "Multi-Status (WebDAV) (RFC 4918)",
+									"code": 207,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 10 Mar 2023 23:30:41 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "1024"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "VTGEYYCR7THTRS57HFXC"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "c53f077f-7b16-4fad-8df0-f25211453343"
+										},
+										{
+											"key": "x-amzn-Remapped-x-amzn-RequestId",
+											"value": "91a96f21-80b8-495c-8b55-eba9c361748c"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "1024"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "BlqRDHB9oAMFdMQ="
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-640bbda1-5e25150a2c436327024cc450"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Fri, 10 Mar 2023 23:30:40 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"ads\": {\n        \"error\": [],\n        \"success\": [\n            {\n                \"ad\": {\n                    \"adGroupId\": \"194673602531002\",\n                    \"adId\": \"93865000442586\",\n                    \"campaignId\": \"38535897458758\",\n                    \"creative\": {\n                        \"asins\": [\n                            \"B004QF0TFQ\",\n                            \"B0787FVB5F\",\n                            \"B00JVTNWB0\"\n                        ],\n                        \"brandLogoAssetID\": \"amzn1.assetlibrary.asset1.xxxxxxxx:version_v1\",\n                        \"brandLogoUrl\": \"https://m.media-amazon.com/images/S/xxxxxxxx.jpeg\",\n                        \"brandName\": \"My Brand\",\n                        \"customImageAssetId\": \"amzn1.assetlibrary.asset1.xxxxxxx:version_v1\",\n                        \"customImageUrl\": \"https://m.media-amazon.com/images/S/xxxxxxxx.jpeg\",\n                        \"headline\": \"My headline\",\n                        \"type\": \"PRODUCT_COLLECTION\"\n                    },\n                    \"extendedData\": {\n                        \"creationDate\": 1678491041228,\n                        \"lastUpdateDate\": 1678491041491,\n                        \"servingStatus\": \"AD_POLICING_PENDING_REVIEW\"\n                    },\n                    \"landingPage\": {\n                        \"pageType\": \"PRODUCT_LIST\",\n                        \"url\": \"https://www.amazon.com/stores/page/248DF918-E3FB-470A-9B7C-B0280F61F23F\"\n                    },\n                    \"name\": \"Test seller product collection\",\n                    \"state\": \"ENABLED\"\n                },\n                \"adId\": \"93865000442586\",\n                \"index\": 0\n            }\n        ]\n    }\n}"
+								},
+								{
+									"name": "Store success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.sbadresource.v4+json",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"ads\": [\n    {\n      \"landingPage\": {\n        \"asins\": [\n          \"B004QF0TFQ\",\n           \"B0787FVB5F\",\n            \"B00JVTNWB0\"\n        ],\n        \"pageType\": \"STORE\"\n        },\n      \"name\": \"name of product collection ad\",\n      \"state\": \"ENABLED\",\n      \"adGroupId\": \"{{adGroupId}}\",\n      \"creative\": {\n        \"brandLogoCrop\": {\n          \"top\": 0,\n          \"left\": 0,\n          \"width\": 0,\n          \"height\": 0\n        },\n        \"asins\": [\n          \"B004QF0TFQ\",\n           \"B0787FVB5F\",\n            \"B00JVTNWB0\"\n        ],\n        \"brandName\": \"My Brand\",\n        \"customImageAssetId\": \"amzn1.assetlibrary.asset1.xxxxxxx:version_v1\",\n        \"customImageCrop\": {\n          \"top\": 0,\n          \"left\": 0,\n          \"width\": 1200,\n          \"height\": 630\n        },\n        \"brandLogoAssetID\": \"amzn1.assetlibrary.asset1.xxxxxxx:version_v1\",\n        \"headline\": \"My headline\"\n      }\n    }\n  ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/sb/v4/ads/productCollection",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sb",
+												"v4",
+												"ads",
+												"productCollection"
+											]
+										}
+									},
+									"status": "Multi-Status (WebDAV) (RFC 4918)",
+									"code": 207,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 22 Mar 2023 22:18:04 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "1024"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "KSC8YBKW4VYJY4G1B7CS"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "dae0739e-4ad5-4a63-a98a-5067aa7650fc"
+										},
+										{
+											"key": "x-amzn-Remapped-x-amzn-RequestId",
+											"value": "fc15cafa-cb8b-4743-acf9-a57a6d3dc244"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "1024"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "CNC4MGgAIAMFXJA="
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-641b7e9c-fbc894a64554712e9d402eca"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Wed, 22 Mar 2023 22:18:04 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"ads\": {\n        \"error\": [],\n        \"success\": [\n            {\n                \"ad\": {\n                    \"adGroupId\": \"99770401373052\",\n                    \"adId\": \"171499375771502\",\n                    \"campaignId\": \"80952013810414\",\n                    \"creative\": {\n                        \"asins\": [\n                            \"B004QF0TFQ\",\n                            \"B0787FVB5F\",\n                            \"B00JVTNWB0\"\n                        ],\n                        \"brandLogoAssetID\": \"amzn1.assetlibrary.asset1.36de5ea70704fc6372038cf1d3917540:version_v1\",\n                        \"brandLogoUrl\": \"https://m.media-amazon.com/images/S/xxxxxxxx.jpeg\",\n                        \"brandName\": \"Socks4Less\",\n                        \"customImageAssetId\": \"amzn1.assetlibrary.asset1.e59e684e7bdc380ca20e2cebb375adf5:version_v1\",\n                        \"customImageUrl\": \"https://m.media-amazon.com/images/S/xxxxxxxx.jpg\",\n                        \"headline\": \"My headline\",\n                        \"type\": \"PRODUCT_COLLECTION\"\n                    },\n                    \"extendedData\": {\n                        \"creationDate\": 1679523484141,\n                        \"lastUpdateDate\": 1679523484410,\n                        \"servingStatus\": \"AD_POLICING_PENDING_REVIEW\"\n                    },\n                    \"landingPage\": {\n                        \"pageType\": \"PRODUCT_LIST\",\n                        \"url\": \"https://www.amazon.com/stores/page/xxxxxxxx\"\n                    },\n                    \"name\": \"Test vendor product collection\",\n                    \"state\": \"ENABLED\"\n                },\n                \"adId\": \"171499375771502\",\n                \"index\": 0\n            }\n        ]\n    }\n}"
+								},
+								{
+									"name": "Custom_URL success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.sbadresource.v4+json",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"ads\": [\n    {\n      \"landingPage\": {\n        \"pageType\": \"CUSTOM_URL\",\n        \"url\": \"https://www.amazon.com/stores/page/0064AC34-18F6-4CD3-849F-531E7C5AE8D6\"\n        },\n      \"name\": \"Name of  product collection ad\",\n      \"state\": \"ENABLED\",\n      \"adGroupId\": \"{{adGroupId}}\",\n      \"creative\": {\n        \"brandLogoCrop\": {\n          \"top\": 0,\n          \"left\": 0,\n          \"width\": 0,\n          \"height\": 0\n        },\n        \"asins\": [\n          \"B08MV395Y1\",\n           \"B08VGX1BXG\",\n            \"B08VGYL7BM\"\n        ],\n        \"brandName\": \"Socks4Less\",\n        \"customImageAssetId\": \"amzn1.assetlibrary.asset1.e59e684e7bdc380ca20e2cebb375adf5:version_v1\",\n        \"customImageCrop\": {\n          \"top\": 0,\n          \"left\": 0,\n          \"width\": 1200,\n          \"height\": 630\n        },\n        \"brandLogoAssetID\": \"amzn1.assetlibrary.asset1.36de5ea70704fc6372038cf1d3917540:version_v1\",\n        \"headline\": \"High quality socks\"\n      }\n    }\n  ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/sb/v4/ads/productCollection",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sb",
+												"v4",
+												"ads",
+												"productCollection"
+											]
+										}
+									},
+									"status": "Multi-Status (WebDAV) (RFC 4918)",
+									"code": 207,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 22 Mar 2023 22:46:34 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "1017"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "T6D5S02F7NA4YZPC6B5Y"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "2dea6c8b-a8a0-4cf4-826c-ec28ae8f9a2a"
+										},
+										{
+											"key": "x-amzn-Remapped-x-amzn-RequestId",
+											"value": "3eb66a33-2dcf-4dcf-9d1e-83c6210ef52b"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "1017"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "CNHDfHHqIAMFc_w="
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-641b854a-ce0a67847f52cbf37972d372"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Wed, 22 Mar 2023 22:46:33 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"ads\": {\n        \"error\": [],\n        \"success\": [\n            {\n                \"ad\": {\n                    \"adGroupId\": \"42098488277205\",\n                    \"adId\": \"279885644138915\",\n                    \"campaignId\": \"80952013810414\",\n                    \"creative\": {\n                        \"asins\": [\n                            \"B08MV395Y1\",\n                            \"B08VGX1BXG\",\n                            \"B08VGYL7BM\"\n                        ],\n                        \"brandLogoAssetID\": \"amzn1.assetlibrary.asset1.xxxxxxxxx:version_v1\",\n                        \"brandLogoUrl\": \"https://m.media-amazon.com/images/S/xxxxxxjpeg\",\n                        \"brandName\": \"Socks4Less\",\n                        \"customImageAssetId\": \"amzn1.assetlibrary.asset1.xxxxxxxxx:version_v1\",\n                        \"customImageUrl\": \"https://m.media-amazon.com/images/S/xxxxxxxxxjpg\",\n                        \"headline\": \"High quality socks\",\n                        \"type\": \"PRODUCT_COLLECTION\"\n                    },\n                    \"extendedData\": {\n                        \"creationDate\": 1679525193742,\n                        \"lastUpdateDate\": 1679525194000,\n                        \"servingStatus\": \"AD_POLICING_PENDING_REVIEW\"\n                    },\n                    \"landingPage\": {\n                        \"pageType\": \"STORE\",\n                        \"url\": \"https://www.amazon.com/stores/page/xxxxxxxxx\"\n                    },\n                    \"name\": \"Test vendor product collection\",\n                    \"state\": \"ENABLED\"\n                },\n                \"adId\": \"279885644138915\",\n                \"index\": 0\n            }\n        ]\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "Create video ad",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = JSON.parse(responseBody);",
+											"",
+											"/*Save adId for first object to environment*/",
+											"if (response.ads.success[0] != null ) {",
+											"var adId = response.ads.success[0].adId",
+											"postman.clearEnvironmentVariable(\"adId\");",
+											"postman.setEnvironmentVariable(\"adId\", adId);",
+											"} else {",
+											"    console.log(responseBody);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.sbadresource.v4+json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"ads\": [\n    {\n      \"name\": \"Name of video ad\",\n      \"state\": \"ENABLED\",\n      \"adGroupId\": \"{{adGroupId}}\",\n      \"creative\": {\n        \"asins\": [\n          \"B07R7V6KS8\"\n        ],\n        \"videoAssetIds\": [\n          \"amzn1.assetlibrary.asset1.xxxxxx\"\n        ]\n      }\n    }\n  ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/sb/v4/ads/video",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sb",
+										"v4",
+										"ads",
+										"video"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.sbadresource.v4+json",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"ads\": [\n    {\n      \"name\": \"Name of video ad\",\n      \"state\": \"ENABLED\",\n      \"adGroupId\": \"{{adGroupId}}\",\n      \"creative\": {\n        \"asins\": [\n          \"B07R7V6KS8\"\n        ],\n        \"videoAssetIds\": [\n          \"amzn1.assetlibrary.asset1.xxxxxx\"\n        ]\n      }\n    }\n  ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/sb/v4/ads/video",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sb",
+												"v4",
+												"ads",
+												"video"
+											]
+										}
+									},
+									"status": "Multi-Status (WebDAV) (RFC 4918)",
+									"code": 207,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 07 Mar 2023 01:19:15 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "536"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "TE2CCGGWEJF3RH4VD0HA"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "103df5c9-d889-4f4d-b19c-b98bf34dac4c"
+										},
+										{
+											"key": "x-amzn-Remapped-x-amzn-RequestId",
+											"value": "e0e020dc-ff5b-4916-8269-cf5db0a56259"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "536"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "BYua_Hf0IAMFqhQ="
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-64069113-4fe19e6b04b9e1a4a16fc12e"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Tue, 07 Mar 2023 01:19:15 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"ads\": {\n        \"error\": [],\n        \"success\": [\n            {\n                \"ad\": {\n                    \"adGroupId\": \"233241812140955\",\n                    \"adId\": \"193008782828097\",\n                    \"campaignId\": \"38535897458758\",\n                    \"creative\": {\n                        \"asins\": [\n                            \"B07R7V6KS8\"\n                        ],\n                        \"videoAssetIds\": [\n                            \"amzn1.assetlibrary.asset1.xxxxxxxxx:version_v1\"\n                        ]\n                    },\n                    \"extendedData\": {\n                        \"creationDate\": 1678151955357,\n                        \"lastUpdateDate\": 1678151955627,\n                        \"servingStatus\": \"AD_POLICING_PENDING_REVIEW\"\n                    },\n                    \"landingPage\": {\n                        \"pageType\": \"DETAIL_PAGE\",\n                        \"url\": \"https://www.amazon.com/dp/xxxxxxxx\"\n                    },\n                    \"name\": \"Test video ad\",\n                    \"state\": \"ENABLED\"\n                },\n                \"adId\": \"193008782828097\",\n                \"index\": 0\n            }\n        ]\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "Create brand video ad",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = JSON.parse(responseBody);",
+											"",
+											"/*Save adId for first object to environment*/",
+											"if (response.ads.success[0] != null ) {",
+											"var adId = response.ads.success[0].adId",
+											"postman.clearEnvironmentVariable(\"adId\");",
+											"postman.setEnvironmentVariable(\"adId\", adId);",
+											"} else {",
+											"    console.log(responseBody);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.sbadresource.v4+json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"ads\": [\n        {\n            \"landingPage\": {\n                \"pageType\": \"STORE\",\n                \"url\": \"https://www.amazon.com/stores/page/xxxxxxxxxx\"\n            },\n            \"name\": \"Name of brand video ad\",\n            \"state\": \"ENABLED\",\n            \"adGroupId\": \"{{adGroupId}}\",\n            \"creative\": {\n                \"asins\": [\n                    \"B00JVTNWB0\"\n                ],\n                \"videoAssetIds\": [\n                    \"amzn1.assetlibrary.asset1.xxxxxx\"\n                ],\n                \"brandName\": \"My brand\",\n                \"brandLogoAssetID\": \"amzn1.assetlibrary.xxxxxx\",\n                \"headline\": \"My headline\"\n            }\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/sb/v4/ads/brandVideo",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sb",
+										"v4",
+										"ads",
+										"brandVideo"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Store success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.sbadresource.v4+json",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"ads\": [\n        {\n            \"landingPage\": {\n                \"pageType\": \"STORE\",\n                \"url\": \"https://www.amazon.com/stores/page/xxxxxxx\"\n            },\n            \"name\": \"name of brand video ad\",\n            \"state\": \"ENABLED\",\n            \"adGroupId\": \"{{adGroupId}}\",\n            \"creative\": {\n                \"asins\": [\n                    \"B00JVTNWB0\"\n                ],\n                \"videoAssetIds\": [\n                    \"amzn1.assetlibrary.asset1.xxxxxxxx:version_v1\"\n                ],\n                \"brandName\": \"My brand\",\n                \"brandLogoAssetID\": \"amzn1.assetlibrary.asset1.xxxxxx:version_v1\",\n                \"headline\": \"My headline\"\n            }\n        }\n    ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/sb/v4/ads/brandVideo",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sb",
+												"v4",
+												"ads",
+												"brandVideo"
+											]
+										}
+									},
+									"status": "Multi-Status (WebDAV) (RFC 4918)",
+									"code": 207,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Mon, 13 Mar 2023 20:22:11 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "747"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "SZ52V70RXHR22R4P5MC9"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "60df5cfe-fbea-4ee9-b4af-7a1a279d7f6d"
+										},
+										{
+											"key": "x-amzn-Remapped-x-amzn-RequestId",
+											"value": "fe03c73f-ade3-420b-b163-7607f73d1ba6"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "747"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "BvHduEDkIAMF7Jw="
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-640f85f3-db233f62bfbb876bfb4455a8"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Mon, 13 Mar 2023 20:22:11 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"ads\": {\n        \"error\": [],\n        \"success\": [\n            {\n                \"ad\": {\n                    \"adGroupId\": \"155603752538210\",\n                    \"adId\": \"139895623764517\",\n                    \"campaignId\": \"157902658409454\",\n                    \"creative\": {\n                        \"asins\": [\n                            \"B00JVTNWB0\"\n                        ],\n                        \"brandLogoAssetID\": \"amzn1.assetlibrary.asset1.xxxxxxx:version_v1\",\n                        \"brandName\": \"My brand\",\n                        \"headline\": \"My headline\",\n                        \"type\": \"BRAND_VIDEO\",\n                        \"videoAssetIds\": [\n                            \"amzn1.assetlibrary.asset1.xxxxxxxx\"\n                        ]\n                    },\n                    \"extendedData\": {\n                        \"creationDate\": 1678738930312,\n                        \"lastUpdateDate\": 1678738930594,\n                        \"servingStatus\": \"AD_POLICING_PENDING_REVIEW\"\n                    },\n                    \"landingPage\": {\n                        \"pageType\": \"STORE\",\n                        \"url\": \"https://www.amazon.com/stores/page/xxxxxxxxx\"\n                    },\n                    \"name\": \"Test video ad\",\n                    \"state\": \"ENABLED\"\n                },\n                \"adId\": \"139895623764517\",\n                \"index\": 0\n            }\n        ]\n    }\n}"
+								},
+								{
+									"name": "Detail_page success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.sbadresource.v4+json",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"ads\": [\n        {\n            \"landingPage\": {\n                \"pageType\": \"DETAIL_PAGE\",\n                \"url\": \"https://www.amazon.com/stores/page/xxxxxxx\"\n            },\n            \"name\": \"Name of brand video ad\",\n            \"state\": \"ENABLED\",\n            \"adGroupId\": \"{{adGroupId}}\",\n            \"creative\": {\n                \"asins\": [\n                    \"B00JVTNWB0\"\n                ],\n                \"videoAssetIds\": [\n                    \"amzn1.assetlibrary.asset1.xxxxxxx:version_v1\"\n                ],\n                \"brandName\": \"My brand\",\n                \"brandLogoAssetID\": \"amzn1.assetlibrary.asset1.xxxxxx:version_v1\",\n                \"headline\": \"My headline\"\n            }\n        }\n    ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/sb/v4/ads/brandVideo",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sb",
+												"v4",
+												"ads",
+												"brandVideo"
+											]
+										}
+									},
+									"status": "Multi-Status (WebDAV) (RFC 4918)",
+									"code": 207,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Thu, 23 Mar 2023 00:28:37 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "743"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "2SR4HMKWFPKHZFMMA1ZA"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "98696cdb-8c6b-4400-b80d-1afe38c4b0a8"
+										},
+										{
+											"key": "x-amzn-Remapped-x-amzn-RequestId",
+											"value": "66b91f9d-5284-48ab-b31f-9032999e68fa"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "743"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "CNV__FSbIAMFqHg="
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-641b9d35-f7bae61269a9a36b72398eb0"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Thu, 23 Mar 2023 00:28:36 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"ads\": {\n        \"error\": [],\n        \"success\": [\n            {\n                \"ad\": {\n                    \"adGroupId\": \"56304154454004\",\n                    \"adId\": \"89501604414217\",\n                    \"campaignId\": \"32387503176861\",\n                    \"creative\": {\n                        \"asins\": [\n                            \"B00JVTNWB0\"\n                        ],\n                        \"brandLogoAssetID\": \"amzn1.assetlibrary.asset1.xxxxxxxxx:version_v1\",\n                        \"brandName\": \"My brand\",\n                        \"headline\": \"My headline\",\n                        \"type\": \"BRAND_VIDEO\",\n                        \"videoAssetIds\": [\n                            \"amzn1.assetlibrary.asset1.xxxxxxx\"\n                        ]\n                    },\n                    \"extendedData\": {\n                        \"creationDate\": 1679531316035,\n                        \"lastUpdateDate\": 1679531316288,\n                        \"servingStatus\": \"AD_POLICING_PENDING_REVIEW\"\n                    },\n                    \"landingPage\": {\n                        \"pageType\": \"STORE\",\n                        \"url\": \"https://www.amazon.com/stores/page/xxxxxxxx\"\n                    },\n                    \"name\": \"Test video ad\",\n                    \"state\": \"ENABLED\"\n                },\n                \"adId\": \"89501604414217\",\n                \"index\": 0\n            }\n        ]\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "Create store spotlight ad",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = JSON.parse(responseBody);",
+											"",
+											"/*Save adId for first object to environment*/",
+											"if (response.ads.success[0] != null ) {",
+											"var adId = response.ads.success[0].adId",
+											"postman.clearEnvironmentVariable(\"adId\");",
+											"postman.setEnvironmentVariable(\"adId\", adId);",
+											"} else {",
+											"    console.log(responseBody);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.sbadresource.v4+json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"ads\": [\n    {\n      \"landingPage\": {\n        \"url\": \"https://www.amazon.com/stores/page/0064AC34-18F6-4CD3-849F-531E7C5AE8D6\"\n      },\n      \"name\": \"Name for store spotlight\",\n      \"state\": \"ENABLED\",\n      \"adGroupId\": \"{{adGroupId}}\",\n      \"creative\": {\n        \"brandName\": \"My brand name\",\n        \"subpages\": [\n          {\n            \"pageTitle\": \"Savannah\",\n            \"asin\": \"B08MV395Y1\",\n            \"url\": \"https://www.amazon.com/stores/page/2B2AE9C7-7EF4-4993-AA76-0FFF7EF7D050\"\n          },\n          {\n            \"pageTitle\": \"Miami\",\n            \"asin\": \"B08VGX1BXG\",\n            \"url\": \"https://www.amazon.com/stores/page/E411CCC7-B125-4076-A476-197441A2A23E\"\n          },\n          {\n            \"pageTitle\": \"San Fran\",\n            \"asin\": \"B08VGYL7BM\",\n            \"url\": \"https://www.amazon.com/stores/page/BE713C9E-F85F-4461-B42A-29740F5B61F5\"\n          }\n        ],\n        \"brandLogoAssetID\": \"amzn1.assetlibrary.asset1.xxxxxx\",\n        \"headline\": \"Cheap pants\"\n      }\n    }\n  ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/sb/v4/ads/storeSpotlight",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sb",
+										"v4",
+										"ads",
+										"storeSpotlight"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											},
+											{
+												"key": "Accept",
+												"value": "application/vnd.sbadresource.v4+json",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"ads\": [\n    {\n      \"landingPage\": {\n        \"url\": \"https://www.amazon.com/stores/page/xxxxxxxx\"\n      },\n      \"name\": \"name of store spotlight ad\",\n      \"state\": \"ENABLED\",\n      \"adGroupId\": \"{{adGroupId}}\",\n      \"creative\": {\n        \"brandName\": \"My store\",\n        \"subpages\": [\n          {\n            \"pageTitle\": \"Savannah\",\n            \"asin\": \"B08MV395Y1\",\n            \"url\": \"https://www.amazon.com/stores/page/xxxxxx\"\n          },\n          {\n            \"pageTitle\": \"Miami\",\n            \"asin\": \"B08VGX1BXG\",\n            \"url\": \"https://www.amazon.com/stores/page/xxxxxx\"\n          },\n          {\n            \"pageTitle\": \"San Fran\",\n            \"asin\": \"B08VGYL7BM\",\n            \"url\": \"https://www.amazon.com/stores/page/xxxxxx\"\n          }\n        ],\n        \"brandLogoAssetID\": \"amzn1.assetlibrary.asset1.xxxxx:version_v1\",\n        \"headline\": \"My headline\"\n      }\n    }\n  ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/sb/v4/ads/storeSpotlight",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sb",
+												"v4",
+												"ads",
+												"storeSpotlight"
+											]
+										}
+									},
+									"status": "Multi-Status (WebDAV) (RFC 4918)",
+									"code": 207,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 14 Mar 2023 16:48:23 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "1006"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "5V4EW676Y1M76TMT0MEV"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "33d0e022-1371-4c8f-af05-fe137f0639d6"
+										},
+										{
+											"key": "x-amzn-Remapped-x-amzn-RequestId",
+											"value": "e2c7593a-474c-4b6c-bb23-d9be68f50d5b"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "1006"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "Bx7EeHYYIAMFlsA="
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-6410a557-26f8f6cdd444d79be40aeee1"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Tue, 14 Mar 2023 16:48:22 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"ads\": {\n        \"error\": [],\n        \"success\": [\n            {\n                \"ad\": {\n                    \"adGroupId\": \"72598658504351\",\n                    \"adId\": \"185980120883864\",\n                    \"campaignId\": \"203755086457166\",\n                    \"creative\": {\n                        \"brandLogoAssetID\": \"amzn1.assetlibrary.asset1.xxxxxxx:version_v1\",\n                        \"brandName\": \"My store\",\n                        \"headline\": \"Cheap pants\",\n                        \"subpages\": [\n                            {\n                                \"asin\": \"B08MV395Y1\",\n                                \"pageTitle\": \"Savannah\",\n                                \"url\": \"https://www.amazon.com/stores/page/xxxxxxxxx\"\n                            },\n                            {\n                                \"asin\": \"B08VGX1BXG\",\n                                \"pageTitle\": \"Miami\",\n                                \"url\": \"https://www.amazon.com/stores/page/xxxxxxxx\"\n                            },\n                            {\n                                \"asin\": \"B08VGYL7BM\",\n                                \"pageTitle\": \"San Fran\",\n                                \"url\": \"https://www.amazon.com/stores/page/xxxxxxxx\"\n                            }\n                        ],\n                        \"type\": \"STORE_SPOTLIGHT\"\n                    },\n                    \"extendedData\": {\n                        \"creationDate\": 1678812501793,\n                        \"lastUpdateDate\": 1678812502131,\n                        \"servingStatus\": \"AD_POLICING_PENDING_REVIEW\"\n                    },\n                    \"landingPage\": {\n                        \"pageType\": \"STORE\",\n                        \"url\": \"https://www.amazon.com/stores/page/xxxxxx\"\n                    },\n                    \"name\": \"test landing store\",\n                    \"state\": \"ENABLED\"\n                },\n                \"adId\": \"185980120883864\",\n                \"index\": 0\n            }\n        ]\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "List ads",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"response should not be an error\", function () {",
+											"      pm.response.to.not.be.error;",
+											"});",
+											"",
+											"/*Save adId for first object to environemnt*/",
+											"var response = JSON.parse(responseBody);",
+											"var adId = response.ads[0].adId",
+											"postman.clearEnvironmentVariable(\"adId\");",
+											"postman.setEnvironmentVariable(\"adId\", adId);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.sbadresource.v4+json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{api_url}}/sb/v4/ads/list",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sb",
+										"v4",
+										"ads",
+										"list"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update ads",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"response should not be an error\", function () {",
+											"      pm.response.to.not.be.error;",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.sbadresource.v4+json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"ads\": [\n    {\n      \"adId\": \"{{adId}}\",\n      \"name\": \"New ad name\",\n      \"state\": \"PAUSED\"\n    }\n  ]\n}\n\n"
+								},
+								"url": {
+									"raw": "{{api_url}}/sb/v4/ads",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sb",
+										"v4",
+										"ads"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete ads",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"response should not be an error\", function () {",
+											"      pm.response.to.not.be.error;",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.sbadresource.v4+json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"adIdFilter\": {\n    \"include\": [\n      \"{{adId}}\"\n    ]\n  }\n}\n\n"
+								},
+								"url": {
+									"raw": "{{api_url}}/sb/v4/ads/delete",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sb",
+										"v4",
+										"ads",
+										"delete"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Get brands",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var response = JSON.parse(responseBody);",
+									"",
+									"/*Save brandEntityID for first object to environment*/",
+									"if(responseCode.code === 200) {",
+									"var brandEntityId = response.brandEntityId",
+									"postman.clearEnvironmentVariable(\"brandEntityId\");",
+									"postman.setEnvironmentVariable(\"brandEntityId\", brandEntityId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true,
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Amazon-Advertising-API-ClientId",
+								"value": "{{client_id}}",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Amazon-Advertising-API-Scope",
+								"value": "{{profileId}}",
+								"type": "default"
+							},
+							{
+								"key": "Accept",
+								"value": "application/vnd.brand.v3+json",
+								"type": "default"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/vnd.batchgetcampaignsresponse.v3.3+json",
+								"type": "default",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api_url}}/brands",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"brands"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.brand.v3+json",
+										"type": "default"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/vnd.batchgetcampaignsresponse.v3.3+json",
+										"type": "default",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{api_url}}/brands",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"brands"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Server",
+									"value": "Server"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 30 Mar 2023 16:30:37 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/vnd.brand.v3+json"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "x-amz-rid",
+									"value": "6Z5VDKFFBZ0M1CXJ7Y9J"
+								},
+								{
+									"key": "x-amz-request-id",
+									"value": "6Z5VDKFFBZ0M1CXJ7Y9J"
+								},
+								{
+									"key": "Vary",
+									"value": "Content-Type,Accept-Encoding,User-Agent"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=47474747; includeSubDomains; preload"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"brandId\": \"AXXXXXXXXX\",\n        \"brandEntityId\": \"ENTITYXXXXXXXXX\",\n        \"brandRegistryName\": \"MYBRAND\"\n    }\n]"
+						}
+					]
+				},
+				{
+					"name": "Get landing page ASINS",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "default"
+							},
+							{
+								"key": "Amazon-Advertising-API-ClientId",
+								"value": "{{client_id}}",
+								"type": "default"
+							},
+							{
+								"key": "Amazon-Advertising-API-Scope",
+								"value": "{{profileId}}",
+								"type": "default"
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "default"
+							},
+							{
+								"key": "Accept",
+								"value": "",
+								"type": "default",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/pageAsins?pageUrl=https://www.amazon.com/stores/page/XXXXXXXX",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"pageAsins"
+							],
+							"query": [
+								{
+									"key": "pageUrl",
+									"value": "https://www.amazon.com/stores/page/XXXXXXXX"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "",
+										"value": "",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "",
+										"type": "default",
+										"disabled": true
+									}
+								],
+								"url": {
+									"raw": "{{api_url}}/pageAsins?pageUrl=https://www.amazon.com/stores/page/XXXXXXX",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"pageAsins"
+									],
+									"query": [
+										{
+											"key": "pageUrl",
+											"value": "https://www.amazon.com/stores/page/XXXXXXX"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Server",
+									"value": "Server"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 30 Mar 2023 16:36:51 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/vnd.pageasins.v3+json"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "x-amz-rid",
+									"value": "0GGBJAD8K8DKMGPNMD7X"
+								},
+								{
+									"key": "x-amz-request-id",
+									"value": "0GGBJAD8K8DKMGPNMD7X"
+								},
+								{
+									"key": "Vary",
+									"value": "Content-Type,Accept-Encoding,User-Agent"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=47474747; includeSubDomains; preload"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": \"SUCCESS\",\n    \"asinList\": [\n        \"B09XXXXXXS\",\n        \"B09XXXXXXR\",\n        \"B09XXXXXXY\",\n        \"B09XXXXXXG\"\n    ]\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Stores",
+			"item": [
+				{
+					"name": "Get stores",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Amazon-Advertising-API-ClientId",
+								"value": "{{client_id}}",
+								"type": "default"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "default"
+							},
+							{
+								"key": "Amazon-Advertising-API-Scope",
+								"value": "{{profileId}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/v2/stores",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"v2",
+								"stores"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									}
+								],
+								"url": {
+									"raw": "{{api_url}}/v2/stores",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"v2",
+										"stores"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Server",
+									"value": "Server"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 30 Mar 2023 16:31:36 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "x-amz-rid",
+									"value": "6CWXYZ2NXT0XKXC7MD03"
+								},
+								{
+									"key": "x-amz-request-id",
+									"value": "6CWXYZ2NXT0XKXC7MD03"
+								},
+								{
+									"key": "Vary",
+									"value": "Content-Type,Accept-Encoding,User-Agent"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=47474747; includeSubDomains; preload"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"code\": \"SUCCESS\",\n        \"entityId\": \"ENTITYXXXXXXX\",\n        \"storeName\": \"Test Brand Seller\",\n        \"storePageInfo\": [\n            {\n                \"storePageId\": \"XXXXXX-XXXX-XXXX-XXXX-XXXXXXXX\",\n                \"storePageUrl\": \"https://www.amazon.com/stores/page/XXXXXX-XXXX-XXXX-XXXX-XXXXXXXX\",\n                \"storePageName\": \"Home\"\n            }\n        ],\n        \"brandEntityId\": \"ENTITYXXXXXXX\"\n    }\n]"
+						}
+					]
+				}
+			]
+		},
+		{
 			"name": "Product metadata",
 			"item": [
 				{
@@ -22758,6 +26418,973 @@
 							],
 							"cookie": [],
 							"body": "{\n    \"error\": [],\n    \"success\": [\n        {\n            \"budget\": 100,\n            \"budgetUsagePercent\": 0,\n            \"campaignId\": \"144765279800494\",\n            \"index\": 0,\n            \"usageUpdatedTimestamp\": \"2023-03-28T07:12:17Z\"\n        }\n    ]\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Creative asset library",
+			"item": [
+				{
+					"name": "Create URL",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response should not be an error\", function () {",
+									"      pm.response.to.not.be.error;",
+									"});",
+									"",
+									"/*Save mediaId to environment*/",
+									"var response = JSON.parse(responseBody);",
+									"var url = response.url",
+									"postman.clearEnvironmentVariable(\"url\");",
+									"postman.setEnvironmentVariable(\"url\", url);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Amazon-Advertising-API-ClientId",
+								"value": "{{client_id}}",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Amazon-Advertising-API-Scope",
+								"value": "{{profileId}}",
+								"type": "default"
+							},
+							{
+								"key": "Accept",
+								"value": "application/vnd.sbadresource.v4+json",
+								"type": "default",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filename\": \"myfile.mov\"\n}\n"
+						},
+						"url": {
+							"raw": "{{api_url}}/assets/upload",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"assets",
+								"upload"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.sbadresource.v4+json",
+										"type": "default",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"filename\": \"hd0992.mov\"\n}\n"
+								},
+								"url": {
+									"raw": "{{api_url}}/assets/upload",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"assets",
+										"upload"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Server",
+									"value": "Server"
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 17 Jan 2023 21:18:51 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "849"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "x-amz-rid",
+									"value": "T4F0C9H6K2RJKPQH6J7E"
+								},
+								{
+									"key": "x-amzn-RequestId",
+									"value": "d652e8db-b263-458c-8547-a7446eb77b28"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Headers",
+									"value": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
+								},
+								{
+									"key": "x-amz-apigw-id",
+									"value": "e5-NNG_gIAMF-eA="
+								},
+								{
+									"key": "Access-Control-Allow-Methods",
+									"value": "GET,OPTIONS,POST"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,customerid,entityid"
+								},
+								{
+									"key": "X-Amzn-Trace-Id",
+									"value": "Root=1-63c710bb-3d1f5986526dd990c4d7f3d8"
+								},
+								{
+									"key": "Vary",
+									"value": "Content-Type,Accept-Encoding,User-Agent"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=47474747; includeSubDomains; preload"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"url\": \"https://al-na-184b9306-7f8a.s3.amazonaws.com/5080709a-5705-41d4-9fdf-3d97c1bcb4fb.mov?x-amz-meta-filename=hd0992.mov&X-Amz-Security-Token=FwoGZXIvYXdzEPf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaDP33mYcnuRRWxlTjKyLIAaWFgKnWmAg8QWKQ%2BSM9LjiloYkTT8nEjrnIkG2%2BLjGZA4XIaHCZSipJ4GtEuRUqyM4VZnRfytXxS9fQoj9iU2xHPGFD%2F%2Ff5SIYmIhst%2BnNfJgvFoOK8yFUS8jswdPoEzlEL9LGXHieLTuB7etjce6VJP7TPY90PhylUeyakY5LSjAbCaBMlewHLnVmkOGf%2F%2FA6AOTboDgZeDkozq11iB0IZHS0NZJ7IkgXOD3TjdKDaohajSy1VDxr2Fn%2FHamGgm%2F09bCyPyLvNKKCfnJ4GMi26bZIm5R%2BI83frnm%2B8A1QX5ICFmA5904S93h%2BkDMwEbgvYQkSvE64rIlVazpY%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20230117T211851Z&X-Amz-SignedHeaders=host&X-Amz-Expires=3600&X-Amz-Credential=ASIAQSMWEWJEJPSR5EG5%2F20230117%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=55669130242c9a09bfbfd3f9403d529ef11769359faf5f8d94cd5688e47acf90\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Upload file",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "file",
+							"file": {
+								"src": ""
+							}
+						},
+						"url": {
+							"raw": "{{url}}",
+							"host": [
+								"{{url}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register asset",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response should not be an error\", function () {",
+									"      pm.response.to.not.be.error;",
+									"});",
+									"",
+									"/*Save mediaId to environment*/",
+									"var response = JSON.parse(responseBody);",
+									"var mediaId = response.mediaId",
+									"postman.clearEnvironmentVariable(\"mediaId\");",
+									"postman.setEnvironmentVariable(\"mediaId\", mediaId);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Amazon-Advertising-API-ClientId",
+								"value": "{{client_id}}",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Amazon-Advertising-API-Scope",
+								"value": "{{profileId}}",
+								"type": "default"
+							},
+							{
+								"key": "Accept",
+								"value": "application/vnd.sbadresource.v4+json",
+								"type": "default",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"url\": \"{{uploadUrl}}\",\n  \"name\": \"myVideoAsset2\",\n  \"asinList\": [\n    \"B07R7V6KS8\",\n    \"B07X2X4D5H\",\n    \"B003L1717K\"\n  ],\n  \"assetType\": \"VIDEO\",\n  \"assetSubTypeList\": [\n    \"BACKGROUND_VIDEO\"\n  ],\n  \"associatedSubEntityList\": [\n    {\n      \"brandEntityId\": \"{{brandEntityId}}\"\n    }\n  ]\n}\n\n"
+						},
+						"url": {
+							"raw": "{{api_url}}/assets/register",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"assets",
+								"register"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "SB video asset",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.sbadresource.v4+json",
+										"type": "default",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"url\": \"{{url}}\",\n  \"name\": \"myVideoAsset3\",\n  \"asinList\": [\n    \"B07R7V6KS8\",\n    \"B07X2X4D5H\",\n    \"B003L1717K\"\n  ],\n  \"assetType\": \"VIDEO\",\n  \"assetSubTypeList\": [\n    \"BACKGROUND_VIDEO\"\n  ],\n  \"associatedSubEntityList\": [\n    {\n      \"brandEntityId\": \"{{brandEntityId}}\"\n    }\n  ]\n}\n\n"
+								},
+								"url": {
+									"raw": "{{api_url}}/assets/register",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"assets",
+										"register"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Server",
+									"value": "Server"
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 17 Jan 2023 21:25:42 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "1488"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "x-amz-rid",
+									"value": "4RX68FW0Y0S947KFTVJH"
+								},
+								{
+									"key": "x-amzn-RequestId",
+									"value": "816e1e65-2231-4d07-8c0a-707a9f84ec08"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Headers",
+									"value": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
+								},
+								{
+									"key": "x-amz-apigw-id",
+									"value": "e5_MlHB1IAMF6sQ="
+								},
+								{
+									"key": "Access-Control-Allow-Methods",
+									"value": "GET,OPTIONS,POST"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,customerid,entityid"
+								},
+								{
+									"key": "X-Amzn-Trace-Id",
+									"value": "Root=1-63c71256-90ef6ddb70c746e22b2366c4"
+								},
+								{
+									"key": "Vary",
+									"value": "Content-Type,Accept-Encoding,User-Agent"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=47474747; includeSubDomains; preload"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"assetId\": \"amzn1.assetlibrary.asset1.b3a6cc6c0cd418beb0d1fa2bb9f9d632\",\n    \"failedSpecChecks\": [\n        {\n            \"Program\": \"AMAZON_DSP\",\n            \"specProgramName\": \"DEMAND_SIDE_PLATFORM_OLV\",\n            \"specifications\": [\n                {\n                    \"actualValue\": \"30.0\",\n                    \"arguments\": [\n                        \"23.98\",\n                        \"24.0\",\n                        \"25.0\",\n                        \"29.97\"\n                    ],\n                    \"failureReason\": \"Frame rate is not one of 23.98, 24.0, 25.0, 29.97.\",\n                    \"isPassed\": false,\n                    \"stringId\": \"al-spec-video-frame-rate\"\n                },\n                {\n                    \"actualValue\": \"0\",\n                    \"arguments\": [\n                        \"2\"\n                    ],\n                    \"failureReason\": \"Total number of audio channels across all audio streams is less than 2.\",\n                    \"isPassed\": false,\n                    \"stringId\": \"al-spec-min-audio-channel-count\"\n                }\n            ]\n        },\n        {\n            \"Program\": \"AMAZON_DSP\",\n            \"specProgramName\": \"DEMAND_SIDE_PLATFORM_OTT\",\n            \"specifications\": [\n                {\n                    \"actualValue\": \"30.0\",\n                    \"arguments\": [\n                        \"23.98\",\n                        \"24.0\",\n                        \"25.0\",\n                        \"29.97\"\n                    ],\n                    \"failureReason\": \"Frame rate is not one of 23.98, 24.0, 25.0, 29.97.\",\n                    \"isPassed\": false,\n                    \"stringId\": \"al-spec-video-frame-rate\"\n                },\n                {\n                    \"actualValue\": \"9.966667\",\n                    \"arguments\": [\n                        \"15.0\",\n                        \"30.0\"\n                    ],\n                    \"failureReason\": \"Duration is not one of 15.0, 30.0 seconds.\",\n                    \"isPassed\": false,\n                    \"stringId\": \"al-spec-video-duration\"\n                },\n                {\n                    \"actualValue\": \"0\",\n                    \"arguments\": [\n                        \"2\"\n                    ],\n                    \"failureReason\": \"Total number of audio channels across all audio streams is less than 2.\",\n                    \"isPassed\": false,\n                    \"stringId\": \"al-spec-min-audio-channel-count\"\n                }\n            ]\n        },\n        {\n            \"Program\": \"STORES\",\n            \"specProgramName\": \"STORES_INTRO_SPLASH\",\n            \"specifications\": [\n                {\n                    \"actualValue\": \"16:9\",\n                    \"arguments\": [\n                        \"9:16\"\n                    ],\n                    \"failureReason\": \"Aspect ratio is not 9:16.\",\n                    \"isPassed\": false,\n                    \"stringId\": \"al-spec-video-aspect-ratio\"\n                }\n            ]\n        }\n    ],\n    \"programPolicyValidationsList\": null,\n    \"versionId\": \"version_v1\"\n}"
+						},
+						{
+							"name": "SB custom image",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.sbadresource.v4+json",
+										"type": "default",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"url\": \"{{url}}\",\n  \"name\": \"myCustomImage\",\n  \"asinList\": [\n    \"B07XXXXX8\",\n    \"B07XXXXXH\",\n    \"B0XXXXXXK\"\n  ],\n  \"assetType\": \"IMAGE\",\n  \"assetSubTypeList\": [\n    \"LOGO\"\n  ],\n  \"associatedSubEntityList\": [\n    {\n      \"brandEntityId\": \"{{brandEntityId}}\"\n    }\n  ]\n}\n\n"
+								},
+								"url": {
+									"raw": "{{api_url}}/assets/register",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"assets",
+										"register"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Server",
+									"value": "Server"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 18 Jan 2023 16:07:50 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "155"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "x-amz-rid",
+									"value": "XTDRJHA8EV5375348865"
+								},
+								{
+									"key": "x-amzn-RequestId",
+									"value": "a0b33dfd-725e-4a94-a787-9c187bac55bc"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Headers",
+									"value": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
+								},
+								{
+									"key": "x-amz-apigw-id",
+									"value": "e8jjmEutoAMFpNA="
+								},
+								{
+									"key": "Access-Control-Allow-Methods",
+									"value": "GET,OPTIONS,POST"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,customerid,entityid"
+								},
+								{
+									"key": "X-Amzn-Trace-Id",
+									"value": "Root=1-63c81956-1769272d93fe79de2e6bd507"
+								},
+								{
+									"key": "Vary",
+									"value": "Content-Type,Accept-Encoding,User-Agent"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=47474747; includeSubDomains; preload"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"assetId\": \"amzn1.assetlibrary.asset1.de8262bd1e344573be2e713b5832b920\",\n    \"failedSpecChecks\": [],\n    \"programPolicyValidationsList\": null,\n    \"versionId\": \"version_v1\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Assets",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response should not be an error\", function () {",
+									"      pm.response.to.not.be.error;",
+									"});",
+									"",
+									"/*Save mediaId to environment*/",
+									"var response = JSON.parse(responseBody);",
+									"var url = response.url",
+									"postman.clearEnvironmentVariable(\"url\");",
+									"postman.setEnvironmentVariable(\"url\", url);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Amazon-Advertising-API-ClientId",
+								"value": "{{client_id}}",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Amazon-Advertising-API-Scope",
+								"value": "{{profileId}}",
+								"type": "default"
+							},
+							{
+								"key": "Accept",
+								"value": "application/vnd.sbadresource.v4+json",
+								"type": "default",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/assets?assetId={{assetId}}",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"assets"
+							],
+							"query": [
+								{
+									"key": "assetId",
+									"value": "{{assetId}}"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.sbadresource.v4+json",
+										"type": "default",
+										"disabled": true
+									}
+								],
+								"url": {
+									"raw": "{{api_url}}/assets?assetId=amzn1.assetlibrary.asset1.XXXXXXX",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"assets"
+									],
+									"query": [
+										{
+											"key": "assetId",
+											"value": "amzn1.assetlibrary.asset1.XXXXXXX"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Server",
+									"value": "Server"
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 14 Mar 2023 16:53:59 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "2313"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "x-amz-rid",
+									"value": "JYAX4118B31CBCJQD1W3"
+								},
+								{
+									"key": "x-amzn-RequestId",
+									"value": "0cf536f6-089f-4605-a226-7f6b8fc6db81"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Headers",
+									"value": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
+								},
+								{
+									"key": "x-amz-apigw-id",
+									"value": "Bx76JF3FoAMFmsg="
+								},
+								{
+									"key": "Access-Control-Allow-Methods",
+									"value": "GET,OPTIONS,POST"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,customerid,entityid"
+								},
+								{
+									"key": "X-Amzn-Trace-Id",
+									"value": "Root=1-6410a6a7-b87cb2dd9cdec10189d90191"
+								},
+								{
+									"key": "Vary",
+									"value": "Content-Type,Accept-Encoding,User-Agent"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=47474747; includeSubDomains; preload"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"assetGlobal\": {\n        \"accountIds\": [\n            \"ADVERTISER:ENTITYXXXXXXX\"\n        ],\n        \"assetId\": \"amzn1.assetlibrary.asset1.XXXXXXX\",\n        \"assetType\": \"IMAGE\",\n        \"marketplaceId\": [\n            \"ATVPDKIKX0DER\"\n        ]\n    },\n    \"assetVersionList\": [\n        {\n            \"assetFiles\": {\n                \"defaultUrl\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/731a5378-8437-4b79-ac24-67102260ca63.png\",\n                \"processedFiles\": [\n                    {\n                        \"fileMetadata\": null,\n                        \"imageCroppingData\": null,\n                        \"profile\": \"IMAGE_THUMBNAIL_500\",\n                        \"programs\": [],\n                        \"url\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/731a5378-8437-4b79-ac24-67102260ca63._SL500_.png\"\n                    },\n                    {\n                        \"fileMetadata\": null,\n                        \"imageCroppingData\": null,\n                        \"profile\": \"MODERATION\",\n                        \"programs\": [],\n                        \"url\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/731a5378-8437-4b79-ac24-67102260ca63.png\"\n                    }\n                ],\n                \"relatedFiles\": []\n            },\n            \"assetIdentifier\": {\n                \"assetId\": \"amzn1.assetlibrary.asset1.244a164b7e592cf42b125cbdd0ee7712\",\n                \"version\": \"version_v1\"\n            },\n            \"assetStatus\": \"ACTIVE\",\n            \"assetSubTypes\": [\n                \"LOGO\"\n            ],\n            \"createdBy\": \"A8WE7O8XSB7G4\",\n            \"creationTime\": 1676950071460,\n            \"failedSpecChecks\": [],\n            \"fileMetadata\": {\n                \"aspectRatio\": \"1:1\",\n                \"audioSampleRateInHz\": 0,\n                \"contentHash\": null,\n                \"contentType\": \"image/png\",\n                \"durationInSeconds\": 0,\n                \"extension\": \"PNG\",\n                \"height\": 400,\n                \"resolutionHeight\": 0,\n                \"resolutionWidth\": 0,\n                \"sizeInBytes\": 1307,\n                \"width\": 400\n            },\n            \"focalPoint\": null,\n            \"lastUpdatedBy\": \"A8WE7O8XSB7G4\",\n            \"lastUpdatedTime\": 1678466679857,\n            \"moderationContentList\": [\n                {\n                    \"adPolicyModerationResultList\": [\n                        {\n                            \"locale\": \"en_US\",\n                            \"marketplaceId\": \"ATVPDKIKX0DER\",\n                            \"moderationStatus\": \"APPROVED\",\n                            \"policyName\": \"HSA4V_PRODUCTS\",\n                            \"rejectionReasonList\": [],\n                            \"rejectionReasons\": null\n                        }\n                    ],\n                    \"assetSubType\": \"LOGO\",\n                    \"moderationContentStatus\": \"COMPLETED\"\n                }\n            ],\n            \"moderationRequestStatus\": \"SKIPPED\",\n            \"name\": \"400.png\",\n            \"otherMetadata\": {},\n            \"programPolicyValidationsList\": null,\n            \"specCheckApprovedPrograms\": null,\n            \"stockInformation\": null,\n            \"storageLocationUrls\": {\n                \"defaultUrl\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/731a5378-8437-4b79-ac24-67102260ca63.png\",\n                \"processedUrls\": {\n                    \"IMAGE_THUMBNAIL_500\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/731a5378-8437-4b79-ac24-67102260ca63._SL500_.png\",\n                    \"MODERATION\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/731a5378-8437-4b79-ac24-67102260ca63.png\"\n                },\n                \"relatedUrls\": {}\n            },\n            \"url\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/731a5378-8437-4b79-ac24-67102260ca63.png\",\n            \"versionNotes\": null\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Assets search",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response should not be an error\", function () {",
+									"      pm.response.to.not.be.error;",
+									"});",
+									"",
+									"/*Save mediaId to environment*/",
+									"var response = JSON.parse(responseBody);",
+									"var url = response.url",
+									"postman.clearEnvironmentVariable(\"url\");",
+									"postman.setEnvironmentVariable(\"url\", url);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"accept": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Amazon-Advertising-API-ClientId",
+								"value": "{{client_id}}",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Amazon-Advertising-API-Scope",
+								"value": "{{profileId}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{{\n  \"filterCriteria\": {\n    \"valueFilters\": [\n      {\n        \"values\": [\n          \"IMAGE\"\n        ],\n        \"valueField\": \"ASSET_TYPE\"\n      }\n    ],\n    \"rangeFilters\": [\n      {\n        \"rangeField\": \"SIZE\"\n        \"range\": [\n          {\n            \"start\": \"1\",\n            \"end\": \"100\"\n          }\n        ]\n      }\n    ]\n  },\n  \"sortCriteria\": {\n    \"field\": \"CREATED_TIME\",\n    \"order\": \"ASC\"\n  },\n}}"
+						},
+						"url": {
+							"raw": "{{api_url}}/assets/search",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"assets",
+								"search"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "All assets",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.sbadresource.v4+json",
+										"type": "default",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{}"
+								},
+								"url": {
+									"raw": "{{api_url}}/assets/search",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"assets",
+										"search"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Server",
+									"value": "Server"
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 14 Mar 2023 16:53:33 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "10761"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "x-amz-rid",
+									"value": "CQT6MS8FATNVAJ0F0A74"
+								},
+								{
+									"key": "x-amzn-RequestId",
+									"value": "c0ef56be-15ad-467b-8531-07c00a90c26c"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Headers",
+									"value": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
+								},
+								{
+									"key": "x-amz-apigw-id",
+									"value": "Bx72JEAcIAMFQJQ="
+								},
+								{
+									"key": "Access-Control-Allow-Methods",
+									"value": "GET,OPTIONS,POST"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,customerid,entityid"
+								},
+								{
+									"key": "X-Amzn-Trace-Id",
+									"value": "Root=1-6410a68d-cb2dbb08a4bb0644ad95b881"
+								},
+								{
+									"key": "Vary",
+									"value": "Content-Type,Accept-Encoding,User-Agent"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=47474747; includeSubDomains; preload"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"assetList\": [\n        {\n            \"assetId\": \"amzn1.assetlibrary.asset1.244a164b7e592cf42b125cbdd0ee7712\",\n            \"assetSubTypeList\": [\n                \"LOGO\"\n            ],\n            \"assetType\": \"IMAGE\",\n            \"associatedAccountIds\": [\n                \"ADVERTISER:ENTITYXXXXXXX\"\n            ],\n            \"associatedContexts\": {\n                \"ASIN\": [\n                    {\n                        \"id\": \"B07XXXXXX\",\n                        \"name\": null\n                    },\n                    {\n                        \"id\": \"B07XXXXXX\",\n                        \"name\": null\n                    },\n                    {\n                        \"id\": \"B00XXXXXX\",\n                        \"name\": null\n                    }\n                ],\n                \"HSA\": [\n                    {\n                        \"id\": \"38789817437281\",\n                        \"name\": \"Campaign - 2/20/2023 22:26:18\"\n                    }\n                ],\n                \"PROGRAM\": [\n                    {\n                        \"id\": \"HSA\",\n                        \"name\": null\n                    },\n                    {\n                        \"id\": \"SB\",\n                        \"name\": null\n                    }\n                ]\n            },\n            \"collections\": [],\n            \"createdBy\": \"A8WE7O8XSB7G4\",\n            \"creationTime\": 1676950071460,\n            \"fileMetadata\": {\n                \"aspectRatio\": \"1:1\",\n                \"audioSampleRateInHz\": 0,\n                \"contentHash\": null,\n                \"contentType\": \"image/png\",\n                \"durationInSeconds\": 0,\n                \"extension\": \"PNG\",\n                \"height\": 400,\n                \"resolutionHeight\": 0,\n                \"resolutionWidth\": 0,\n                \"sizeInBytes\": 1307,\n                \"width\": 400\n            },\n            \"focalPoint\": null,\n            \"lastUpdatedBy\": \"AdvertisingAssetContextEventsLambda\",\n            \"lastUpdatedTime\": 1678466679794,\n            \"marketplaces\": [\n                \"ATVPDKIKX0DER\"\n            ],\n            \"moderationPolicyMap\": {\n                \"Logo\": \"REJECTED\"\n            },\n            \"moderationRequestStatus\": \"SKIPPED\",\n            \"name\": \"400.png\",\n            \"specCheckApprovedPrograms\": null,\n            \"status\": \"ACTIVE\",\n            \"stockInformation\": null,\n            \"storageLocationUrls\": {\n                \"defaultUrl\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/731a5378-8437-4b79-ac24-67102260ca63.png\",\n                \"processedUrls\": {\n                    \"IMAGE_THUMBNAIL_500\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/731a5378-8437-4b79-ac24-67102260ca63._SL500_.png\",\n                    \"MODERATION\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/731a5378-8437-4b79-ac24-67102260ca63.png\"\n                },\n                \"relatedUrls\": null\n            },\n            \"tags\": [],\n            \"version\": \"version_v1\"\n        },\n        {\n            \"assetId\": \"amzn1.assetlibrary.asset1.b961e17bb562aba838c0816adf3fe16c\",\n            \"assetSubTypeList\": [],\n            \"assetType\": \"VIDEO\",\n            \"associatedAccountIds\": [\n                \"ADVERTISER:ENTITY1XXXXXX\"\n            ],\n            \"associatedContexts\": {\n                \"PROGRAM\": [\n                    {\n                        \"id\": \"SB\",\n                        \"name\": null\n                    }\n                ]\n            },\n            \"collections\": [],\n            \"createdBy\": \"A8WE7O8XSB7G4\",\n            \"creationTime\": 1678295739836,\n            \"fileMetadata\": {\n                \"aspectRatio\": null,\n                \"audioSampleRateInHz\": 0,\n                \"contentHash\": null,\n                \"contentType\": \"video/quicktime\",\n                \"durationInSeconds\": 9,\n                \"extension\": \"mov\",\n                \"height\": 0,\n                \"resolutionHeight\": 1080,\n                \"resolutionWidth\": 1920,\n                \"sizeInBytes\": 44243886,\n                \"width\": 0\n            },\n            \"focalPoint\": null,\n            \"lastUpdatedBy\": \"A8WE7O8XSB7G4\",\n            \"lastUpdatedTime\": 1678311675207,\n            \"marketplaces\": [\n                \"ATVPDKIKX0DER\"\n            ],\n            \"moderationPolicyMap\": {},\n            \"moderationRequestStatus\": \"SKIPPED\",\n            \"name\": \"hd0992.mov\",\n            \"specCheckApprovedPrograms\": [\n                \"SPONSORED_BRANDS_VIDEO\",\n                \"STORES_VIDEO_TILE\",\n                \"STORES_BACKGROUND_VIDEO_TILE\",\n                \"SPONSORED_DISPLAY_VIDEO\"\n            ],\n            \"status\": \"ACTIVE\",\n            \"stockInformation\": null,\n            \"storageLocationUrls\": {\n                \"defaultUrl\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov\",\n                \"processedUrls\": {\n                    \"BACKGROUND_VIDEO_TILE\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/backgroundVideoTile.mp4\",\n                    \"INTRO_SPLASH\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/introSplash.mp4\",\n                    \"MODERATION\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/moderation\",\n                    \"MP4_10000KBS_30FPS_48KHZ_320KBS_1080P\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_10000kbs_30fps_48khz_320Kbs_1080p.mp4\",\n                    \"MP4_10000KBS_30FPS_48KHZ_320KBS_1080P_H264_HIGH\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_10000Kbs_30fps_48khz_320Kbs_1080p_H264_high.mp4\",\n                    \"MP4_1350KBS_25FPS_48KHZ_128KBS_540P_H264_MAIN\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_1350Kbs_25fps_48khz_128Kbs_540p_H264_main.mp4\",\n                    \"MP4_1350KBS_30FPS_48KHZ_96KBS_720P\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_1350kbs_30fps_48khz_96Kbs_720p.mp4\",\n                    \"MP4_1350KBS_30FPS_48KHZ_96KBS_720P_H264_HIGH\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_1350Kbs_30fps_48khz_96Kbs_720p_H264_high.mp4\",\n                    \"MP4_1500KBS_24FPS_48KHZ_96KBS_576P\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_1500Kbs_24fps_48khz_96Kbs_576p.mp4\",\n                    \"MP4_1500KBS_25FPS_48KHZ_128KBS_576P_H264_HIGH\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_1500Kbs_25fps_48khz_128Kbs_576p_H264_high.mp4\",\n                    \"MP4_1500KBS_30FPS_48KHZ_192KBS_540P_H264_HIGH\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_1500Kbs_30fps_48khz_192Kbs_540p_H264_high.mp4\",\n                    \"MP4_20000KBS_AUTOFPS_48KHZ_320KBS\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_20000kbs_autofps_48khz_320Kbs.mp4\",\n                    \"MP4_20000KBS_AUTOFPS_48KHZ_320KBS_1080P_H264_HIGH\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_20000Kbs_autofps_48khz_320Kbs_1080p_H264_high.mp4\",\n                    \"MP4_2000KBS_30FPS_48KHZ_192KBS_720P_H264_HIGH\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_2000Kbs_30fps_48khz_192Kbs_720p_H264_high.mp4\",\n                    \"MP4_2000KBS_30FPS_48KHZ_96KBS_720P\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_2000kbs_30fps_48khz_96Kbs_720p.mp4\",\n                    \"MP4_2000KBS_30FPS_48KHZ_96KBS_720P_H264_HIGH\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_2000Kbs_30fps_48khz_96Kbs_720p_H264_high.mp4\",\n                    \"MP4_2100KBS_30FPS_48KHZ_192KBS_480P_H264_MAIN\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_2100Kbs_30fps_48khz_192Kbs_480p_H264_main.mp4\",\n                    \"MP4_2100KBS_30FPS_48KHZ_192KBS_576P_H264_HIGH\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_2100Kbs_30fps_48khz_192Kbs_576p_H264_high.mp4\",\n                    \"MP4_25000KBS_30FPS_48KHZ_192KBS_1080P_H264_HIGH\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_25000Kbs_30fps_48khz_192Kbs_1080p_H264_high.mp4\",\n                    \"MP4_25000KBS_30FPS_48KHZ_192KBS_1080P_H264_MAIN\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_25000Kbs_30fps_48khz_192Kbs_1080p_H264_main.mp4\",\n                    \"MP4_260KBS_25FPS_48KHZ_64KBS_180P_H264_BASELINE\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_260Kbs_25fps_48khz_64Kbs_180p_H264_baseline.mp4\",\n                    \"MP4_300KBS_15FPS_48KHZ_96KBS_360P\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_300Kbs_15fps_48khz_96Kbs_360p.mp4\",\n                    \"MP4_300KBS_30FPS_48KHZ_96KBS_360P_H264_BASELINE\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_300Kbs_30fps_48khz_96Kbs_360p_H264_baseline.mp4\",\n                    \"MP4_320KBS_25FPS_48KHZ_96KBS_576P_H264_HIGH\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_320Kbs_25fps_48khz_96Kbs_576p_H264_high.mp4\",\n                    \"MP4_3400KBS_30FPS_48KHZ_192KBS_1080P_H264_HIGH\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_3400Kbs_30fps_48khz_192Kbs_1080p_H264_high.mp4\",\n                    \"MP4_3500KBS_24FPS_48KHZ_96KBS_1080P\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_3500Kbs_24fps_48khz_96Kbs_1080p.mp4\",\n                    \"MP4_3500KBS_30FPS_48KHZ_128KBS_720P_H264_HIGH\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_3500Kbs_30fps_48khz_128Kbs_720p_H264_high.mp4\",\n                    \"MP4_375KBS_30FPS_48KHZ_192KBS_360P_H264_HIGH\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_375Kbs_30fps_48khz_192Kbs_360p_H264_high.mp4\",\n                    \"MP4_4000KBS_30FPS_48KHZ_192KBS_1080P\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_4000kbs_30fps_48khz_192Kbs_1080p.mp4\",\n                    \"MP4_4000KBS_30FPS_48KHZ_192KBS_1080P_H264_HIGH\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_4000Kbs_30fps_48khz_192Kbs_1080p_H264_high.mp4\",\n                    \"MP4_450KBS_15FPS_48KHZ_96KBS_360P\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_450Kbs_15fps_48khz_96Kbs_360p.mp4\",\n                    \"MP4_450KBS_30FPS_48KHZ_96KBS_360P_H264_BASELINE\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_450Kbs_30fps_48khz_96Kbs_360p_H264_baseline.mp4\",\n                    \"MP4_600KBS_15FPS_48KHZ_96KBS_480P\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_600Kbs_15fps_48khz_96Kbs_480p.mp4\",\n                    \"MP4_600KBS_25FPS_48KHZ_128KBS_360P_H264_BASELINE\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_600Kbs_25fps_48khz_128Kbs_360p_H264_baseline.mp4\",\n                    \"MP4_600KBS_30FPS_48KHZ_128KBS_360P_H264_BASELINE\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_600Kbs_30fps_48khz_128Kbs_360p_H264_baseline.mp4\",\n                    \"MP4_600KBS_30FPS_48KHZ_96KBS_480P_H264_BASELINE\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_600Kbs_30fps_48khz_96Kbs_480p_H264_baseline.mp4\",\n                    \"MP4_700KBS_24FPS_48KHZ_96KBS_360P\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_700Kbs_24fps_48khz_96Kbs_360p.mp4\",\n                    \"MP4_750KBS_25FPS_48KHZ_96KBS_576P_H264_HIGH\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_750Kbs_25fps_48khz_96Kbs_576p_H264_high.mp4\",\n                    \"MP4_750KBS_30FPS_48KHZ_192KBS_432P_H264_HIGH\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_750Kbs_30fps_48khz_192Kbs_432p_H264_high.mp4\",\n                    \"MP4_900KBS_15FPS_48KHZ_96KBS_480P\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_900Kbs_15fps_48khz_96Kbs_480p.mp4\",\n                    \"MP4_900KBS_30FPS_48KHZ_96KBS_480P_H264_BASELINE\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/mp4_900Kbs_30fps_48khz_96Kbs_480p_H264_baseline.mp4\",\n                    \"PRODUCT_VIDEO_OPTIMIZED\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/productVideoOptimized.mp4\",\n                    \"VIDEO_DEFAULT_OPTIMIZED\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/videoDefaultOptimized\",\n                    \"VIDEO_TILE\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/0de54885-4fa0-47a6-b0f5-b4dba2549817.mov/videoTile.mp4\"\n                },\n                \"relatedUrls\": null\n            },\n            \"tags\": [],\n            \"version\": \"version_v1\"\n        }\n    ],\n    \"token\": null,\n    \"totalRecords\": 2\n}"
+						},
+						{
+							"name": "With filters",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"filterCriteria\": {\n    \"valueFilters\": [\n      {\n        \"values\": [\n          \"IMAGE\"\n        ],\n        \"valueField\": \"ASSET_TYPE\"\n      }\n    ],\n    \"rangeFilters\": [\n      {\n        \"ranges\": [\n          {\n            \"start\": \"1\",\n            \"end\": \"5000\"\n          }\n        ],\n        \"rangeField\": \"SIZE\"\n      }\n    ]\n  },\n  \"sortCriteria\": {\n    \"field\": \"CREATED_TIME\",\n    \"order\": \"ASC\"\n  }\n}"
+								},
+								"url": {
+									"raw": "{{api_url}}/assets/search",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"assets",
+										"search"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Server",
+									"value": "Server"
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 14 Mar 2023 17:06:02 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "1547"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "x-amz-rid",
+									"value": "AZ5363ZACATKEEM6KSQF"
+								},
+								{
+									"key": "x-amzn-RequestId",
+									"value": "814891a8-f0d3-4c8e-8074-869c02d831ae"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Headers",
+									"value": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
+								},
+								{
+									"key": "x-amz-apigw-id",
+									"value": "Bx9rFHOOoAMF6ug="
+								},
+								{
+									"key": "Access-Control-Allow-Methods",
+									"value": "GET,OPTIONS,POST"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,customerid,entityid"
+								},
+								{
+									"key": "X-Amzn-Trace-Id",
+									"value": "Root=1-6410a97a-ae91b8120abfad4e0de20737"
+								},
+								{
+									"key": "Vary",
+									"value": "Content-Type,Accept-Encoding,User-Agent"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=47474747; includeSubDomains; preload"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"assetList\": [\n        {\n            \"assetId\": \"amzn1.assetlibrary.asset1.xxxxxxx\",\n            \"assetSubTypeList\": [\n                \"LOGO\"\n            ],\n            \"assetType\": \"IMAGE\",\n            \"associatedAccountIds\": [\n                \"ADVERTISER:ENTITYXXXXXXXX\"\n            ],\n            \"associatedContexts\": {\n                \"ASIN\": [\n                    {\n                        \"id\": \"B07X2X4D5H\",\n                        \"name\": null\n                    },\n                    {\n                        \"id\": \"B07R7V6KS8\",\n                        \"name\": null\n                    },\n                    {\n                        \"id\": \"B003L1717K\",\n                        \"name\": null\n                    }\n                ],\n                \"HSA\": [\n                    {\n                        \"id\": \"XXXXXXXXX\",\n                        \"name\": \"Campaign - 2/20/2023 22:26:18\"\n                    }\n                ],\n                \"PROGRAM\": [\n                    {\n                        \"id\": \"HSA\",\n                        \"name\": null\n                    },\n                    {\n                        \"id\": \"SB\",\n                        \"name\": null\n                    }\n                ]\n            },\n            \"collections\": [],\n            \"createdBy\": \"A8WE7O8XSB7G4\",\n            \"creationTime\": 1676950071460,\n            \"fileMetadata\": {\n                \"aspectRatio\": \"1:1\",\n                \"audioSampleRateInHz\": 0,\n                \"contentHash\": null,\n                \"contentType\": \"image/png\",\n                \"durationInSeconds\": 0,\n                \"extension\": \"PNG\",\n                \"height\": 400,\n                \"resolutionHeight\": 0,\n                \"resolutionWidth\": 0,\n                \"sizeInBytes\": 1307,\n                \"width\": 400\n            },\n            \"focalPoint\": null,\n            \"lastUpdatedBy\": \"AdvertisingAssetContextEventsLambda\",\n            \"lastUpdatedTime\": 1678466679794,\n            \"marketplaces\": [\n                \"ATVPDKIKX0DER\"\n            ],\n            \"moderationPolicyMap\": {\n                \"Logo\": \"REJECTED\"\n            },\n            \"moderationRequestStatus\": \"SKIPPED\",\n            \"name\": \"400.png\",\n            \"specCheckApprovedPrograms\": null,\n            \"status\": \"ACTIVE\",\n            \"stockInformation\": null,\n            \"storageLocationUrls\": {\n                \"defaultUrl\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/731a5378-8437-4b79-ac24-67102260ca63.png\",\n                \"processedUrls\": {\n                    \"IMAGE_THUMBNAIL_500\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/731a5378-8437-4b79-ac24-67102260ca63._SL500_.png\",\n                    \"MODERATION\": \"https://m.media-amazon.com/images/S/al-na-9d5791cf-3faf/731a5378-8437-4b79-ac24-67102260ca63.png\"\n                },\n                \"relatedUrls\": null\n            },\n            \"tags\": [],\n            \"version\": \"version_v1\"\n        }\n    ],\n    \"token\": null,\n    \"totalRecords\": 1\n}"
 						}
 					]
 				}
