@@ -37,6 +37,8 @@ Find setup instructions in the Amazon Ads advanced tools center for:
 - [New users of the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/getting-started/using-postman-collection)
 - [Users with an existing refresh token](https://advertising.amazon.com/API/docs/en-us/tutorials/postman) 
 
+You can also view a [video walkthrough of the collection setup steps on YouTube](https://www.youtube.com/watch?v=SWqOPN33phw).
+
 ## Issues and support
 
 For technical support for the Amazon Ads API, see [Technical support](https://advertising.amazon.com/API/docs/en-us/info/support) in the Amazon Ads advanced tools center.
