@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "23b8b875-057b-4514-92bf-f07e8fb759f3",
-		"name": "Amazon Ads API",
+		"_postman_id": "356bbb9f-0c6d-4325-9b6c-076ceebda87c",
+		"name": "Amazon Ads API- Clean",
 		"description": "# Amazon Ads API Postman collection\n\nThis collection includes commonly used endpoints for the Amazon Ads API. The collection also includes pre- and post-request scripts to automate management of auth credentials.\n\nVisit the [Amazon Ads advanced tools center](https://advertising.amazon.com/API/docs/en-us/) for API documentation.\n\n## Setup\n\nTo use this collection, you will need credentials for the Amazon Ads API. For information about acquiring credentials, see the [onboarding overview for the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/onboarding/overview).\n\nFind setup instructions in the Amazon Ads advanced tools center for:\n\n- [New users of the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/getting-started/using-postman-collection)\n- [Users with an existing refresh token](https://advertising.amazon.com/API/docs/en-us/tutorials/postman) \n\n## Issues and support\n\nFor technical support for the Amazon Ads API, see [Technical support](https://advertising.amazon.com/API/docs/en-us/info/support) in the Amazon Ads advanced tools center.\n\nTo report a bug or suggest an improvement relating to this collection or the documentation, [create an issue](https://github.com/amzn/ads-advanced-tools-docs/issues/new/choose).",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -19512,10 +19512,6 @@
 										"disabled": true
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "{{api_url}}/brands",
 									"host": [
@@ -19715,6 +19711,1813 @@
 							],
 							"cookie": [],
 							"body": "{\n    \"code\": \"SUCCESS\",\n    \"asinList\": [\n        \"B09XXXXXXS\",\n        \"B09XXXXXXR\",\n        \"B09XXXXXXY\",\n        \"B09XXXXXXG\"\n    ]\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Sponsored Display",
+			"item": [
+				{
+					"name": "Campaigns",
+					"item": [
+						{
+							"name": "Create campaigns",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = JSON.parse(responseBody);",
+											"",
+											"/*Save campaignId for first object to environment*/",
+											"",
+											"var campaignId = response[0].campaignId;",
+											"postman.clearEnvironmentVariable(\"campaignId\");",
+											"postman.setEnvironmentVariable(\"campaignId\", campaignId);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "[\n    {\n        \"name\": \"Off-Amazon-Test-4\",\n        \"budgetType\": \"daily\",\n        \"budget\": \"10.00\",\n        \"startDate\": \"20231010\",\n        \"endDate\": \"20231101\",\n        \"costType\": \"cpc\",\n        \"state\": \"paused\",\n        \"tactic\": \"T00030\"\n    }\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/sd/campaigns",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sd",
+										"campaigns"
+									]
+								},
+								"description": "brandEntityID is required for sellers"
+							},
+							"response": [
+								{
+									"name": "Audience targeting (T00030)",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "[\n    {\n        \"name\": \"test-campaign-1\",\n        \"budgetType\": \"daily\",\n        \"budget\": \"10.00\",\n        \"startDate\": \"20231010\",\n        \"endDate\": \"20231101\",\n        \"costType\": \"cpc\",\n        \"state\": \"paused\",\n        \"tactic\": \"T00030\"\n    }\n]",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/sd/campaigns",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sd",
+												"campaigns"
+											]
+										}
+									},
+									"status": "Multi-Status",
+									"code": 207,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Thu, 13 Jul 2023 21:17:22 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "99KYKTTP91N1BNT4C3AN"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "[\n    {\n        \"campaignId\": 361249207815999,\n        \"code\": \"SUCCESS\"\n    }\n]"
+								}
+							]
+						},
+						{
+							"name": "List campaigns",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = JSON.parse(responseBody);",
+											"",
+											"/*Save campaignId for first object to environment*/",
+											"",
+											"var campaignId = response[0].campaignId;",
+											"postman.clearEnvironmentVariable(\"campaignId\");",
+											"postman.setEnvironmentVariable(\"campaignId\", campaignId);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {}
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									}
+								],
+								"url": {
+									"raw": "{{api_url}}/sd/campaigns",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sd",
+										"campaigns"
+									]
+								},
+								"description": "brandEntityID is required for sellers"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Ad groups",
+					"item": [
+						{
+							"name": "Create ad groups",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = JSON.parse(responseBody);",
+											"",
+											"/*Save adGroupId for first object to environment*/",
+											"var adGroupId = response[0].adGroupId;",
+											"postman.clearEnvironmentVariable(\"adGroupId\");",
+											"postman.setEnvironmentVariable(\"adGroupId\", adGroupId);",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "[\n    {\n        \"name\": \"test-adgroup-1\",\n        \"campaignId\": {{campaignId}},\n        \"defaultBid\": 1,\n        \"bidOptimization\": \"clicks\",\n        \"state\": \"enabled\",\n        \"creativeType\": \"IMAGE\"\n    }\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/sd/adGroups",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sd",
+										"adGroups"
+									]
+								},
+								"description": "brandEntityID is required for sellers"
+							},
+							"response": [
+								{
+									"name": "Success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "[\n    {\n        \"name\": \"test-adgroup-1\",\n        \"campaignId\": 123456789,\n        \"defaultBid\": 1,\n        \"bidOptimization\": \"clicks\",\n        \"state\": \"enabled\",\n        \"creativeType\": \"IMAGE\"\n    }\n]",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/sd/adGroups",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sd",
+												"adGroups"
+											]
+										}
+									},
+									"status": "Multi-Status",
+									"code": 207,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Thu, 13 Jul 2023 21:23:26 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "ZNP46YA7H9GCAQF9GS46"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "[\n    {\n        \"code\": \"SUCCESS\",\n        \"adGroupId\": 510480088424692\n    }\n]"
+								}
+							]
+						},
+						{
+							"name": "Get ad groups",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = JSON.parse(responseBody);",
+											"",
+											"/*Save adGroupId for first object to environment*/",
+											"var adGroupId = response[0].adGroupId;",
+											"postman.clearEnvironmentVariable(\"adGroupId\");",
+											"postman.setEnvironmentVariable(\"adGroupId\", adGroupId);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {}
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									}
+								],
+								"url": {
+									"raw": "{{api_url}}/sd/adGroups",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sd",
+										"adGroups"
+									]
+								},
+								"description": "brandEntityID is required for sellers"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Product ads",
+					"item": [
+						{
+							"name": "Create product ads",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = JSON.parse(responseBody);",
+											"",
+											"/*Save adId for first object to environment*/",
+											"var adId = response[0].adId;",
+											"postman.clearEnvironmentVariable(\"adId\");",
+											"postman.setEnvironmentVariable(\"adId\", adId);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "[\n  {\n    \"adGroupId\": {{adGroupId}},\n    \"campaignId\": {{campaignId}},\n    \"landingPageURL\": \"https://www.myurl.com\",\n    \"landingPageType\": \"OFF_AMAZON_LINK\",\n    \"state\": \"enabled\",\n    \"adName\": \"My ad\"\n  }\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/sd/productAds",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sd",
+										"productAds"
+									]
+								},
+								"description": "brandEntityID is required for sellers"
+							},
+							"response": [
+								{
+									"name": "Off-Amazon ad",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "[\n  {\n    \"adGroupId\": 1234567890,\n    \"campaignId\": 10987654321,\n    \"landingPageURL\": \"https://www.myurl.com\",\n    \"landingPageType\": \"OFF_AMAZON_LINK\",\n    \"state\": \"enabled\",\n    \"adName\": \"My ad\"\n  }\n]",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/sd/productAds",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sd",
+												"productAds"
+											]
+										}
+									},
+									"status": "Multi-Status",
+									"code": 207,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Mon, 17 Jul 2023 18:06:32 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "JV8J81YW47ESH3AY9WJ9"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "[\n    {\n        \"code\": \"SUCCESS\",\n        \"adId\": 538691658400674\n    }\n]"
+								}
+							]
+						},
+						{
+							"name": "Get product ads",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = JSON.parse(responseBody);",
+											"",
+											"/*Save adId for first object to environment*/",
+											"var adId = response[0].adId;",
+											"postman.clearEnvironmentVariable(\"adId\");",
+											"postman.setEnvironmentVariable(\"adId\", adId);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {}
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									}
+								],
+								"url": {
+									"raw": "{{api_url}}/sd/productAds",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sd",
+										"productAds"
+									]
+								},
+								"description": "brandEntityID is required for sellers"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Targeting",
+					"item": [
+						{
+							"name": "Create targets",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = JSON.parse(responseBody);",
+											"",
+											"/*Save targetId for first object to environment*/",
+											"var targetId = response[0].targetId;",
+											"postman.clearEnvironmentVariable(\"targetId\");",
+											"postman.setEnvironmentVariable(\"targetId\", targetId);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "[\n    {\n        \"expression\": [\n            {\n                \"type\": \"audience\",\n                \"value\": [\n                    {\n                        \"type\": \"audienceSameAs\",\n                        \"value\": \"370208451989309147\"\n                    }\n                ]\n            }\n        ],\n        \"bid\": \"1.25\",\n        \"adGroupId\": {{adGroupId}},\n        \"expressionType\": \"manual\",\n        \"state\": \"enabled\"\n    }\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/sd/targets",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sd",
+										"targets"
+									]
+								},
+								"description": "brandEntityID is required for sellers"
+							},
+							"response": [
+								{
+									"name": "Audience",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "[\n    {\n        \"expression\": [\n            {\n                \"type\": \"audience\",\n                \"value\": [\n                    {\n                        \"type\": \"audienceSameAs\",\n                        \"value\": \"370208451989309147\"\n                    }\n                ]\n            }\n        ],\n        \"bid\": \"1.25\",\n        \"adGroupId\": {{adGroupId}},\n        \"expressionType\": \"manual\",\n        \"state\": \"enabled\"\n    }\n]",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/sd/targets",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sd",
+												"targets"
+											]
+										}
+									},
+									"status": "Multi-Status",
+									"code": 207,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Mon, 17 Jul 2023 18:26:06 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "8415HNMD4MBM5KPYEQ70"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "[\n    {\n        \"code\": \"SUCCESS\",\n        \"description\": \"Estimated audience size: 4.5MM - 5MM\",\n        \"targetId\": 527772488260916\n    }\n]"
+								}
+							]
+						},
+						{
+							"name": "Get targets",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = JSON.parse(responseBody);",
+											"",
+											"/*Save targetId for first object to environment*/",
+											"var targetId = response[0].targetId;",
+											"postman.clearEnvironmentVariable(\"targetId\");",
+											"postman.setEnvironmentVariable(\"targetId\", targetId);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {}
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									}
+								],
+								"url": {
+									"raw": "{{api_url}}/sd/targets",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sd",
+										"targets"
+									]
+								},
+								"description": "brandEntityID is required for sellers"
+							},
+							"response": []
+						},
+						{
+							"name": "Audience taxonomy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"adType\": \"SD\",\n    \"categoryPath\": [\"In-market\"]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/audiences/taxonomy/list",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"audiences",
+										"taxonomy",
+										"list"
+									]
+								},
+								"description": "brandEntityID is required for sellers"
+							},
+							"response": [
+								{
+									"name": "Success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"adType\": \"SD\",\n    \"categoryPath\": []\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/audiences/taxonomy/list",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"audiences",
+												"taxonomy",
+												"list"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Mon, 17 Jul 2023 18:14:23 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "213"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "4DVNN0ZC256RMEZ9S8CC"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "34c0a69e-61fe-446c-afe9-a2a5b2eae337"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "IOG38FhzIAMFsDg="
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-64b584ff-c07ee477de6a83041ea53ede"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"categoryPath\": [],\n    \"categories\": [\n        {\n            \"category\": \"In-market\",\n            \"audienceCount\": 6236\n        },\n        {\n            \"category\": \"Interest\",\n            \"audienceCount\": 968\n        },\n        {\n            \"category\": \"Lifestyle\",\n            \"audienceCount\": 672\n        },\n        {\n            \"category\": \"Life event\",\n            \"audienceCount\": 8\n        }\n    ]\n}"
+								}
+							]
+						},
+						{
+							"name": "Audience discovery",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"adType\": \"SD\",\n    \"filters\": [\n        {\n            \"field\": \"categoryPath\",\n            \"values\": [\n                \"In-market\"\n            ]\n        },\n        {\n            \"field\": \"audienceName\",\n            \"values\": [\n                \"*\"\n            ]\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/audiences/list",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"audiences",
+										"list"
+									]
+								},
+								"description": "brandEntityID is required for sellers"
+							},
+							"response": [
+								{
+									"name": "Success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"adType\": \"SD\",\n    \"filters\": [\n        {\n            \"field\": \"categoryPath\",\n            \"values\": [\n                \"In-market\"\n            ]\n        },\n        {\n            \"field\": \"audienceName\",\n            \"values\": [\n                \"*\"\n            ]\n        }\n    ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/audiences/list",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"audiences",
+												"list"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Mon, 17 Jul 2023 18:18:28 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "25727"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "GE5KZFTZ609ABA4JE408"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "c676c798-10f8-457b-8b80-65404ed7af3e"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "IOHeLEqNIAMFmVg="
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-64b585f4-2b2d75d59d84ce8a94b78281"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"audiences\": [\n        {\n            \"audienceId\": \"370208451989309147\",\n            \"audienceName\": \"IM - Off-Amazon Nail Polish Shoppers\",\n            \"description\": \"Lookalike Audiences based on people whose off-Amazon shopping activities indicate that they shop nail polish products - Powered by Amazon Shopper Panel.\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-03-22T09:12:30.534Z\",\n            \"updateDate\": \"2023-04-17T04:39:14.834Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 2000000,\n                            \"upperBoundExclusive\": 2500000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"422525420928672195\",\n            \"audienceName\": \"IM - Off-Amazon  Cat Food Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Cat Food  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2022-09-08T21:17:16.240Z\",\n            \"updateDate\": \"2023-04-17T07:20:22.862Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 3000000,\n                            \"upperBoundExclusive\": 3500000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"371622057943434872\",\n            \"audienceName\": \"IM - Off-Amazon  Men's Shoes Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Men's Shoes  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2022-12-14T17:08:39.448Z\",\n            \"updateDate\": \"2023-04-17T08:57:51.052Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 7000000,\n                            \"upperBoundExclusive\": 8000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"363444722732945841\",\n            \"audienceName\": \"IM - Off Amazon Womens Tops, Tees & Blouses Shoppers\",\n            \"description\": \"Lookalike Audiences based on people whose off-Amazon shopping activities indicate that they shop womens tops, tees & blouses- Powered by Amazon Shopper Panel.\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-02-08T09:29:53.394Z\",\n            \"updateDate\": \"2023-04-17T10:09:26.851Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 5000000,\n                            \"upperBoundExclusive\": 6000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"406787621652464743\",\n            \"audienceName\": \"IM - Off-Amazon  Baking Tools & Accessories Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Baking Tools & Accessories  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2022-12-14T17:13:15.867Z\",\n            \"updateDate\": \"2023-04-17T04:43:44.005Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 3000000,\n                            \"upperBoundExclusive\": 3500000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"423026853221779920\",\n            \"audienceName\": \"IM - Off-Amazon Chips & Crisps Shoppers\",\n            \"description\": \"Lookalike Audiences based on people whose off-Amazon shopping activities indicate that they shop chips & crisps products - Powered by Amazon Shopper Panel.\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-03-31T14:14:08.118Z\",\n            \"updateDate\": \"2023-05-05T12:27:21.845Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 1500000,\n                            \"upperBoundExclusive\": 2000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"363554659630454476\",\n            \"audienceName\": \"IM - Off-Amazon  Stuffed Animals & Plush Toys Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Stuffed Animals & Plush Toys  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2022-11-21T16:48:31.378Z\",\n            \"updateDate\": \"2023-04-17T07:23:07.109Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 4500000,\n                            \"upperBoundExclusive\": 5000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"365921606591106231\",\n            \"audienceName\": \"IM - Off-Amazon Breads & Bakery Shoppers\",\n            \"description\": \"Lookalike Audiences based on people whose off-Amazon shopping activities indicate that they shop breads & bakery products - Powered by Amazon Shopper Panel.\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-02-24T15:28:09.381Z\",\n            \"updateDate\": \"2023-05-09T19:21:01.555Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 3500000,\n                            \"upperBoundExclusive\": 4000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"381838682832671118\",\n            \"audienceName\": \"IM - Off-Amazon  Sport Specific Clothing Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Sport Specific Clothing  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2022-12-14T17:00:17.947Z\",\n            \"updateDate\": \"2023-04-17T06:07:46.642Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 5000000,\n                            \"upperBoundExclusive\": 6000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"378056944086897893\",\n            \"audienceName\": \"IM - Off-Amazon  Baby Clothes, Shoes & Jewlery Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Baby Clothes, Shoes & Jewlery  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-02-01T09:24:16.247Z\",\n            \"updateDate\": \"2023-06-24T17:52:37.937Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 5000000,\n                            \"upperBoundExclusive\": 6000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"367553436757816547\",\n            \"audienceName\": \"IM - Off-Amazon  Creams & Moisturizers Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Creams & Moisturizers  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2022-12-06T17:36:53.413Z\",\n            \"updateDate\": \"2023-04-17T15:53:30.911Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 3500000,\n                            \"upperBoundExclusive\": 4000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"428887410821646975\",\n            \"audienceName\": \"IM - Off-Amazon  Multivitamins Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Multivitamins  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2022-12-06T17:29:37.685Z\",\n            \"updateDate\": \"2023-04-17T07:23:25.634Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 3000000,\n                            \"upperBoundExclusive\": 3500000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"410897008144634449\",\n            \"audienceName\": \"IM - Off-Amazon  Coffee/Coffee Product Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Coffee/Coffee Product  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2022-09-09T14:12:22.530Z\",\n            \"updateDate\": \"2023-04-17T15:52:42.878Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 6000000,\n                            \"upperBoundExclusive\": 7000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"380676799746441277\",\n            \"audienceName\": \"IM - Off-Amazon  Fragrance Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Fragrance  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2022-11-21T16:40:44.249Z\",\n            \"updateDate\": \"2023-04-17T08:31:46.525Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 2500000,\n                            \"upperBoundExclusive\": 3000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"387775763799759615\",\n            \"audienceName\": \"IM - Off-Amazon  Dolls Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Dolls  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-02-01T09:16:06.997Z\",\n            \"updateDate\": \"2023-04-17T15:52:31.975Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 1500000,\n                            \"upperBoundExclusive\": 2000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"419499037829697646\",\n            \"audienceName\": \"IM - Off-Amazon  Dog Treats Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Dog Treats  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-01-23T14:19:44.975Z\",\n            \"updateDate\": \"2023-04-17T04:39:13.999Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 6000000,\n                            \"upperBoundExclusive\": 7000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"409827680095158132\",\n            \"audienceName\": \"IM - Off-Amazon Video Game Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Video Game Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2022-12-06T17:39:30.668Z\",\n            \"updateDate\": \"2023-04-17T05:27:29.378Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 3500000,\n                            \"upperBoundExclusive\": 4000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"424437997240241413\",\n            \"audienceName\": \"IM - Off-Amazon  Cooking & Baking Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Cooking & Baking  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-01-13T12:52:07.330Z\",\n            \"updateDate\": \"2023-04-17T05:15:10.651Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 6000000,\n                            \"upperBoundExclusive\": 7000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"363398204086941416\",\n            \"audienceName\": \"IM - Off-Amazon  Bath Accessories Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Bath Accessories  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-01-23T14:23:30.846Z\",\n            \"updateDate\": \"2023-04-17T05:27:29.919Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 2500000,\n                            \"upperBoundExclusive\": 3000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"368368172300811321\",\n            \"audienceName\": \"IM - Off Amazon Mouthwash Shoppers\",\n            \"description\": \"Lookalike Audiences based on people whose off-Amazon shopping activities indicate that they shop mouthwash products - Powered by Amazon Shopper Panel.\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-03-10T10:57:44.441Z\",\n            \"updateDate\": \"2023-04-17T15:54:20.029Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 2000000,\n                            \"upperBoundExclusive\": 2500000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"400084644640013530\",\n            \"audienceName\": \"IM - Off-Amazon  Womens Jeans Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Womens Jeans  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-01-26T14:17:47.919Z\",\n            \"updateDate\": \"2023-04-17T09:10:55.077Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 2500000,\n                            \"upperBoundExclusive\": 3000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"377065750794216518\",\n            \"audienceName\": \"IM - Off-Amazon  Action Figures Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Action Figures  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-02-01T09:12:51.021Z\",\n            \"updateDate\": \"2023-04-17T08:09:28.517Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 3500000,\n                            \"upperBoundExclusive\": 4000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"361097856378222489\",\n            \"audienceName\": \"IM - Off-Amazon  Candy & Chocolate Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Candy & Chocolate  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-01-12T18:34:37.614Z\",\n            \"updateDate\": \"2023-04-17T08:06:03.755Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 6000000,\n                            \"upperBoundExclusive\": 7000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"410736468479799899\",\n            \"audienceName\": \"IM - Off-Amazon  Frozen Meals & Entrees Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Frozen Meals & Entrees  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2022-12-14T17:06:03.447Z\",\n            \"updateDate\": \"2023-04-17T05:22:32.684Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 3500000,\n                            \"upperBoundExclusive\": 4000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"378111840300279090\",\n            \"audienceName\": \"IM - Financial Services\",\n            \"description\": \"People who use apps related to Finance on Fire Tablet\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2017-08-29T18:34:42.727Z\",\n            \"updateDate\": \"2023-03-28T10:53:46.929Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 80000,\n                            \"upperBoundExclusive\": 90000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"408766101482993546\",\n            \"audienceName\": \"IM - Off Amazon Diaper Wipes & Holders Shoppers\",\n            \"description\": \"Lookalike Audiences based on people whose off-Amazon shopping activities indicate that they shop diaper wipes & holders - Powered by Amazon Shopper Panel.\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-03-23T11:34:50.917Z\",\n            \"updateDate\": \"2023-04-17T04:39:13.246Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 2000000,\n                            \"upperBoundExclusive\": 2500000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"413017137524785359\",\n            \"audienceName\": \"IM - Off-Amazon  Skin Care Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Skin Care  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2022-11-25T11:05:27.166Z\",\n            \"updateDate\": \"2023-04-17T05:15:15.020Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 9000000,\n                            \"upperBoundExclusive\": 10000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"430501340540733716\",\n            \"audienceName\": \"IM - Business Shoppers - BISS \",\n            \"description\": \" Customers who exhibit purchasing behaviour similar to those with Amazon Business accounts.\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-01-17T15:23:22.200Z\",\n            \"updateDate\": \"2023-01-17T15:39:54.311Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 100000,\n                            \"upperBoundExclusive\": 150000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"378115464992189883\",\n            \"audienceName\": \"IM - Off-Amazon Mineral Water Shoppers\",\n            \"description\": \"Lookalike Audiences based on people whose off-Amazon shopping activities indicate that they shop mineral water products - Powered by Amazon Shopper Panel.\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-03-22T08:59:14.530Z\",\n            \"updateDate\": \"2023-04-17T07:24:45.746Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 1000000,\n                            \"upperBoundExclusive\": 1500000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"410560969471178661\",\n            \"audienceName\": \"IM - Off-Amazon Protein Bars Shoppers\",\n            \"description\": \"Lookalike Audiences based on people whose off-Amazon shopping activities indicate that they shop protein bars products - Powered by Amazon Shopper Panel.\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-03-22T09:07:54.989Z\",\n            \"updateDate\": \"2023-04-17T04:39:10.725Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 2500000,\n                            \"upperBoundExclusive\": 3000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"407158297315137866\",\n            \"audienceName\": \"IM - Off-Amazon  Dolls & Accessories Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Dolls & Accessories  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2022-11-21T16:46:29.621Z\",\n            \"updateDate\": \"2023-04-17T05:22:29.565Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 5000000,\n                            \"upperBoundExclusive\": 6000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"417077341456261572\",\n            \"audienceName\": \"IM - Off-Amazon  Probiotics Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Probiotics  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-02-01T09:32:16.525Z\",\n            \"updateDate\": \"2023-04-17T05:22:35.858Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 4000000,\n                            \"upperBoundExclusive\": 4500000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"382679652378387105\",\n            \"audienceName\": \"IM - Off Amazon Snack Bars Shoppers\",\n            \"description\": \"Lookalike Audiences based on people whose off-Amazon shopping activities indicate that they shop snack bars - Powered by Amazon Shopper Panel.\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-02-16T17:24:14.173Z\",\n            \"updateDate\": \"2023-04-17T05:15:11.904Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 2500000,\n                            \"upperBoundExclusive\": 3000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"368582925015727908\",\n            \"audienceName\": \"IM - Off-Amazon Facial Tissues Shoppers\",\n            \"description\": \"Lookalike Audiences based on people whose off-Amazon shopping activities indicate that they shop facial tissue products - Powered by Amazon Shopper Panel.\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-03-23T11:42:47.733Z\",\n            \"updateDate\": \"2023-04-17T05:27:30.697Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 1000000,\n                            \"upperBoundExclusive\": 1500000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"363276719870120161\",\n            \"audienceName\": \"IM - Off-Amazon  Cat Treats Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Cat Treats  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-01-23T14:21:39.661Z\",\n            \"updateDate\": \"2023-05-03T21:09:55.203Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 1000000,\n                            \"upperBoundExclusive\": 1500000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"420080217834842977\",\n            \"audienceName\": \"IM - Off-Amazon  Disposable Diapers Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Disposable Diapers  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-01-17T16:32:15.062Z\",\n            \"updateDate\": \"2023-04-17T07:43:29.984Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 3000000,\n                            \"upperBoundExclusive\": 3500000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"372843524184795098\",\n            \"audienceName\": \"IM - Off-Amazon Iced Tea Shoppers\",\n            \"description\": \"Lookalike Audiences based on people whose off-Amazon shopping activities indicate that they shop iced tea products - Powered by Amazon Shopper Panel.\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-03-23T11:41:00.634Z\",\n            \"updateDate\": \"2023-04-16T22:44:58.849Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 800000,\n                            \"upperBoundExclusive\": 900000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"402540857203459227\",\n            \"audienceName\": \"IM - Off-Amazon Amazon Camera, Photo and Video Accessories Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Amazon Camera, Photo and Video Accessories Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2022-12-06T17:31:10.786Z\",\n            \"updateDate\": \"2023-04-17T08:06:04.109Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 2000000,\n                            \"upperBoundExclusive\": 2500000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"411385783262868222\",\n            \"audienceName\": \"IM - Off-Amazon  Styling Products Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Styling Products  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2022-12-14T17:07:40.534Z\",\n            \"updateDate\": \"2023-04-17T08:31:49.388Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 4500000,\n                            \"upperBoundExclusive\": 5000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"387426467697012473\",\n            \"audienceName\": \"IM - Off Amazon Boys Clothing Shoppers\",\n            \"description\": \"Lookalike Audiences based on people whose off-Amazon shopping activities indicate that they shop boys clothing - Powered by Amazon Shopper Panel.\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-02-15T09:15:59.981Z\",\n            \"updateDate\": \"2023-04-17T09:10:53.558Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 3500000,\n                            \"upperBoundExclusive\": 4000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"390356410476971186\",\n            \"audienceName\": \"IM - Off Amazon Antioxidants Shoppers\",\n            \"description\": \"Lookalike Audiences based on people whose off-Amazon shopping activities indicate that they shop antioxidants - Powered by Amazon Shopper Panel.\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-02-08T10:36:19.026Z\",\n            \"updateDate\": \"2023-04-17T05:15:10.317Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 1500000,\n                            \"upperBoundExclusive\": 2000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"370913498296837792\",\n            \"audienceName\": \"IM - Off-Amazon  Greeting Cards Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Greeting Cards  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2022-12-13T17:31:08.322Z\",\n            \"updateDate\": \"2023-04-17T05:27:29.662Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 2500000,\n                            \"upperBoundExclusive\": 3000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"406558287865637089\",\n            \"audienceName\": \"IM - Off-Amazon  Toy Figures & Playsets Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Toy Figures & Playsets  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2022-11-21T16:44:20.008Z\",\n            \"updateDate\": \"2023-04-17T05:22:34.031Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 3000000,\n                            \"upperBoundExclusive\": 3500000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"392347874148224062\",\n            \"audienceName\": \"IM - Off-Amazon Nutrition Bars & Drinks Shoppers\",\n            \"description\": \"Lookalike Audiences based on people whose off-Amazon shopping activities indicate that they shop nutrition bars & drinks - Powered by Amazon Shopper Panel.\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-02-24T13:56:41.966Z\",\n            \"updateDate\": \"2023-04-17T04:43:46.942Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 2000000,\n                            \"upperBoundExclusive\": 2500000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"423539876137820239\",\n            \"audienceName\": \"IM - Off-Amazon Plush Figures Shoppers\",\n            \"description\": \"Lookalike Audiences based on people whose off-Amazon shopping activities indicate that they shop plush figures products - Powered by Amazon Shopper Panel.\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-02-24T15:30:05.614Z\",\n            \"updateDate\": \"2023-04-17T04:43:46.368Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 2000000,\n                            \"upperBoundExclusive\": 2500000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"412827258347610760\",\n            \"audienceName\": \"IM - Off Amazon Hair Sprays Shoppers\",\n            \"description\": \"Lookalike Audiences based on people whose off-Amazon shopping activities indicate that they shop hair sprays - Powered by Amazon Shopper Panel.\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-02-08T09:32:31.696Z\",\n            \"updateDate\": \"2023-04-17T12:48:10.117Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 4000000,\n                            \"upperBoundExclusive\": 4500000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"379578597240077407\",\n            \"audienceName\": \"IM - Off-Amazon  Personal Cleansing Wipes Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Personal Cleansing Wipes  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-02-01T09:40:15.684Z\",\n            \"updateDate\": \"2023-04-17T08:09:24.303Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 1500000,\n                            \"upperBoundExclusive\": 2000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"396323902175655491\",\n            \"audienceName\": \"IM - Auto Intender\",\n            \"description\": \"Auto intenders for US market based on propensity model\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2023-07-06T10:12:25.459Z\",\n            \"updateDate\": \"2023-07-06T10:12:56.048Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {}\n            }\n        },\n        {\n            \"audienceId\": \"400681955407785615\",\n            \"audienceName\": \"IM - Off-Amazon  Team Sports Equipments Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Team Sports Equipments  Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2022-12-14T17:12:03.504Z\",\n            \"updateDate\": \"2023-04-17T04:39:13.512Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 4500000,\n                            \"upperBoundExclusive\": 5000000\n                        }\n                    }\n                }\n            }\n        },\n        {\n            \"audienceId\": \"410487260666979393\",\n            \"audienceName\": \"IM - Off-Amazon Automotive Oils & Fluids Shoppers\",\n            \"description\": \"Lookalikes of people whose shopping activity indicates that they are Off-Amazon Automotive Oils & Fluids Shoppers. Powered by Amazon Shopper Panel (https://panel.amazon.com/)\",\n            \"category\": \"In-market\",\n            \"createDate\": \"2022-12-14T17:14:22.003Z\",\n            \"updateDate\": \"2023-04-17T05:22:31.859Z\",\n            \"status\": \"Active\",\n            \"forecasts\": {\n                \"inventoryForecasts\": {\n                    \"all\": {\n                        \"dailyReach\": {\n                            \"lowerBoundInclusive\": 1500000,\n                            \"upperBoundExclusive\": 2000000\n                        }\n                    }\n                }\n            }\n        }\n    ],\n    \"matchCount\": 100,\n    \"nextToken\": \"nLjqaQ0Q2INb0zXe1pwhlIpVInxEkIIGFcYGe35W607l4ui_TmcbYJBKrVf1Ezgaqg6_keKcKlfCBuN_raETnj0k70RkLaTAlSzthW1LOQhkm4YBluoTz7MjXYEJjFWUQeu4RYVU5GIISdzo2bg2_EzQIBA9D0h8H6j4BwdA6STJH4qkkgDgay6NVJyy_uUnvB5wVyOd71eO9SnIOuql6F3m1q0fTxrlqS0kqDLhPDtvpEkTHuSv8vSpK3E9P1W1wz3Y-grJgO0FOdpK-c2iZ31JssPph7maJH4u\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Creatives",
+					"item": [
+						{
+							"name": "Add creatives",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = JSON.parse(responseBody);",
+											"",
+											"/*Save creativeId for first object to environment*/",
+											"var creativeId = response[0].creativeId;",
+											"postman.clearEnvironmentVariable(\"creativeId\");",
+											"postman.setEnvironmentVariable(\"creativeId\", creativeId);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text",
+										"description": "(Required) The identifier of a client associated with a \"Login with Amazon\" account."
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "text",
+										"description": "(Required) The identifier of a profile associated with the advertiser account. Use `GET` method on Profiles resource to list profiles associated with the access token passed in the HTTP Authorization header."
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "[\n    {\n        \"adGroupId\": {{adGroupId}},\n        \"properties\": {\n            \"headline\": \"Test_Headline\",\n            \"brandLogo\": {\n                \"assetId\": \"amzn1.assetlibrary.asset1.b5a289e461ea715400e0b91948fdb074\",\n                \"assetVersion\": \"version_v1\",\n                \"croppingCoordinates\": {\n                    \"top\": 0,\n                    \"left\": 0,\n                    \"width\": 600,\n                    \"height\": 100\n                }\n            },\n            \"contentType\": \"CUSTOM_IMAGE\",\n            \"rectCustomImage\": {\n                \"assetId\": \"amzn1.assetlibrary.asset1.2521ca7dcfdeb3f98bca7447d64ae797\",\n                \"assetVersion\": \"version_v1\",\n                \"croppingCoordinates\": {\n                    \"top\": 0,\n                    \"left\": 0,\n                    \"width\": 1200,\n                    \"height\": 628\n                }\n            },\n            \"squareCustomImage\": {\n                \"assetId\": \"amzn1.assetlibrary.asset1.2521ca7dcfdeb3f98bca7447d64ae797\",\n                \"assetVersion\": \"version_v1\",\n                \"croppingCoordinates\": {\n                    \"top\": 0,\n                    \"left\": 0,\n                    \"width\": 628,\n                    \"height\": 628\n                }\n            }\n        }\n    }\n]"
+								},
+								"url": {
+									"raw": "{{api_url}}/sd/creatives",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sd",
+										"creatives"
+									]
+								},
+								"description": "**Note that this operation is not currently supported. This note will be removed when this operation is available.** Creates one or more creatives."
+							},
+							"response": [
+								{
+									"name": "Custom image, logo, and headline",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text",
+												"description": "(Required) The identifier of a client associated with a \"Login with Amazon\" account."
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "text",
+												"description": "(Required) The identifier of a profile associated with the advertiser account. Use `GET` method on Profiles resource to list profiles associated with the access token passed in the HTTP Authorization header."
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "[\n    {\n        \"adGroupId\": {{adGroupId}},\n        \"properties\": {\n            \"headline\": \"Test_Headline\",\n            \"brandLogo\": {\n                \"assetId\": \"amzn1.assetlibrary.asset1.xxxxxxxxxx1\",\n                \"assetVersion\": \"version_v1\",\n                \"croppingCoordinates\": {\n                    \"top\": 0,\n                    \"left\": 0,\n                    \"width\": 600,\n                    \"height\": 100\n                }\n            },\n            \"contentType\": \"CUSTOM_IMAGE\",\n            \"rectCustomImage\": {\n                \"assetId\": \"amzn1.assetlibrary.asset1.xxxxxxxxxxxx2\",\n                \"assetVersion\": \"version_v1\",\n                \"croppingCoordinates\": {\n                    \"top\": 0,\n                    \"left\": 0,\n                    \"width\": 1200,\n                    \"height\": 628\n                }\n            },\n            \"squareCustomImage\": {\n                \"assetId\": \"amzn1.assetlibrary.asset1.xxxxxxxxxxxxx2\",\n                \"assetVersion\": \"version_v1\",\n                \"croppingCoordinates\": {\n                    \"top\": 0,\n                    \"left\": 0,\n                    \"width\": 628,\n                    \"height\": 628\n                }\n            }\n        }\n    }\n]"
+										},
+										"url": {
+											"raw": "{{api_url}}/sd/creatives",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sd",
+												"creatives"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 18 Jul 2023 16:17:17 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "52"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "DCMVCAWHCW6TNPQSRA6S"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "ad96bc5f-6431-4be4-8b63-7cba2530127b"
+										},
+										{
+											"key": "x-amzn-Remapped-x-amzn-RequestId",
+											"value": "DCMVCAWHCW6TNPQSRA6S"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "52"
+										},
+										{
+											"key": "x-amzn-Remapped-Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "IRIqFHLXIAMFmYw="
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-64b6bb0d-4d2cad003cfe8e820eb82296"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Tue, 18 Jul 2023 16:17:17 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "[\n    {\n        \"creativeId\": 873112658567083590,\n        \"code\": \"SUCCESS\"\n    }\n]"
+								}
+							]
+						},
+						{
+							"name": "List creatives",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = JSON.parse(responseBody);",
+											"",
+											"/*Save creativeId for first object to environment*/",
+											"var creativeId = response[0].creativeId;",
+											"postman.clearEnvironmentVariable(\"creativeId\");",
+											"postman.setEnvironmentVariable(\"creativeId\", creativeId);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text",
+										"description": "(Required) The identifier of a client associated with a \"Login with Amazon\" account."
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "text",
+										"description": "(Required) The identifier of a profile associated with the advertiser account. Use `GET` method on Profiles resource to list profiles associated with the access token passed in the HTTP Authorization header."
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{api_url}}/sd/creatives?adGroupIdFilter={{adGroupId}}",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sd",
+										"creatives"
+									],
+									"query": [
+										{
+											"key": "adGroupIdFilter",
+											"value": "{{adGroupId}}"
+										}
+									]
+								},
+								"description": "**Note that this operation is not currently supported. This note will be removed when this operation is available.** Creates one or more creatives."
+							},
+							"response": []
+						},
+						{
+							"name": "Update creatives",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text",
+										"description": "(Required) The identifier of a client associated with a \"Login with Amazon\" account."
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "text",
+										"description": "(Required) The identifier of a profile associated with the advertiser account. Use `GET` method on Profiles resource to list profiles associated with the access token passed in the HTTP Authorization header."
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "[\n    {\n        \"properties\": {\n            \"headline\": \"Test_Headline\",\n            \"brandLogo\": {\n                \"assetId\": \"{{assetId}}\",\n                \"assetVersion\": \"version_v1\",\n                \"croppingCoordinates\": {\n                    \"top\": 0,\n                    \"left\": 0,\n                    \"width\": 600,\n                    \"height\": 100\n                }\n            },\n            \"contentType\": \"CUSTOM_IMAGE\",\n            \"rectCustomImage\": {\n                \"assetId\": \"{{assetId}}\",\n                \"assetVersion\": \"version_v1\",\n                \"croppingCoordinates\": {\n                    \"top\": 0,\n                    \"left\": 0,\n                    \"width\": 1200,\n                    \"height\": 628\n                }\n            },\n            \"squareCustomImage\": {\n                \"assetId\": \"{{assetId}}\",\n                \"assetVersion\": \"version_v1\",\n                \"croppingCoordinates\": {\n                    \"top\": 0,\n                    \"left\": 0,\n                    \"width\": 628,\n                    \"height\": 628\n                }\n            }\n           \n        },\n        \"creativeId\": 880210367106070471\n    }\n]\n\n\n\n"
+								},
+								"url": {
+									"raw": "{{api_url}}/sd/creatives",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sd",
+										"creatives"
+									]
+								},
+								"description": "**Note that this operation is not currently supported. This note will be removed when this operation is available.** Creates one or more creatives."
+							},
+							"response": [
+								{
+									"name": "Success",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text",
+												"description": "(Required) The identifier of a client associated with a \"Login with Amazon\" account."
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "text",
+												"description": "(Required) The identifier of a profile associated with the advertiser account. Use `GET` method on Profiles resource to list profiles associated with the access token passed in the HTTP Authorization header."
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "[\n    {\n        \"properties\": {\n            \"headline\": \"Test_Headline\",\n            \"brandLogo\": {\n                \"assetId\": \"amzn1.assetlibrary.asset1.xxxxxxxxxx1\",\n                \"assetVersion\": \"version_v1\",\n                \"croppingCoordinates\": {\n                    \"top\": 0,\n                    \"left\": 0,\n                    \"width\": 600,\n                    \"height\": 100\n                }\n            },\n            \"contentType\": \"CUSTOM_IMAGE\",\n            \"rectCustomImage\": {\n                \"assetId\": \"amzn1.assetlibrary.asset1.xxxxxxxxxxx2\",\n                \"assetVersion\": \"version_v1\",\n                \"croppingCoordinates\": {\n                    \"top\": 0,\n                    \"left\": 0,\n                    \"width\": 1200,\n                    \"height\": 628\n                }\n            },\n            \"squareCustomImage\": {\n                \"assetId\": \"amzn1.assetlibrary.asset1.xxxxxxxxxxx2\",\n                \"assetVersion\": \"version_v1\",\n                \"croppingCoordinates\": {\n                    \"top\": 0,\n                    \"left\": 0,\n                    \"width\": 628,\n                    \"height\": 628\n                }\n            }\n           \n        },\n        \"creativeId\": 880210367106070471\n    }\n]\n\n\n\n"
+										},
+										"url": {
+											"raw": "{{api_url}}/sd/creatives",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sd",
+												"creatives"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Tue, 18 Jul 2023 16:14:05 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Content-Length",
+											"value": "52"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "6CHE21XDRWJR9883QDGM"
+										},
+										{
+											"key": "x-amzn-RequestId",
+											"value": "f686ccf4-9a80-417a-907e-4c6ef74cdefb"
+										},
+										{
+											"key": "x-amzn-Remapped-x-amzn-RequestId",
+											"value": "6CHE21XDRWJR9883QDGM"
+										},
+										{
+											"key": "x-amzn-Remapped-Content-Length",
+											"value": "52"
+										},
+										{
+											"key": "x-amzn-Remapped-Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-apigw-id",
+											"value": "IRIMIFWJIAMFU1g="
+										},
+										{
+											"key": "X-Amzn-Trace-Id",
+											"value": "Root=1-64b6ba4d-7c7b7afcd75c666a3204bf8d"
+										},
+										{
+											"key": "x-amzn-Remapped-Date",
+											"value": "Tue, 18 Jul 2023 16:14:05 GMT"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "[\n    {\n        \"creativeId\": 880210367106070471,\n        \"code\": \"SUCCESS\"\n    }\n]"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Locations",
+					"item": [
+						{
+							"name": "Locations",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "[\n    {\n        \"adGroupId\": {{adGroupId}},\n        \"expressionType\": \"manual\",\n        \"state\": \"enabled\",\n        \"expression\": [\n            {\n                \"type\": \"location\",\n                \"value\": \"amzn1.ad-geo.GP-US-10005\"\n            }\n        ]\n    }\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/sd/locations",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sd",
+										"locations"
+									]
+								},
+								"description": "brandEntityID is required for sellers"
+							},
+							"response": [
+								{
+									"name": "Success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "[\n    {\n        \"adGroupId\": {{adGroupId}},\n        \"expressionType\": \"manual\",\n        \"state\": \"enabled\",\n        \"expression\": [\n            {\n                \"type\": \"location\",\n                \"value\": \"amzn1.ad-geo.GP-US-10005\"\n            }\n        ]\n    }\n]",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/sd/locations",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sd",
+												"locations"
+											]
+										}
+									},
+									"status": "Multi-Status",
+									"code": 207,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 19 Jul 2023 20:40:13 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "4RND2VT8N42JM1YF7237"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "[\n    {\n        \"code\": \"SUCCESS\",\n        \"locationExpressionId\": 303747983880114\n    }\n]"
+								}
+							]
+						},
+						{
+							"name": "Locations",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {}
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									}
+								],
+								"url": {
+									"raw": "{{api_url}}/sd/locations",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sd",
+										"locations"
+									]
+								},
+								"description": "brandEntityID is required for sellers"
+							},
+							"response": [
+								{
+									"name": "Success",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											}
+										],
+										"url": {
+											"raw": "{{api_url}}/sd/locations",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sd",
+												"locations"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Server",
+											"value": "Server"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 19 Jul 2023 20:40:29 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "x-amz-rid",
+											"value": "9N2JMHNWZ5B3NZS1W9P6"
+										},
+										{
+											"key": "Vary",
+											"value": "Content-Type,Accept-Encoding,User-Agent"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=47474747; includeSubDomains; preload"
+										}
+									],
+									"cookie": [],
+									"body": "[\n    {\n        \"adGroupId\": 413803530857698,\n        \"expression\": [\n            {\n                \"type\": \"location\",\n                \"value\": \"amzn1.ad-geo.GP-US-10005\"\n            }\n        ],\n        \"expressionType\": \"manual\",\n        \"resolvedExpression\": [\n            {\n                \"type\": \"location\",\n                \"value\": \"New York, New York, US - 10005\"\n            }\n        ],\n        \"state\": \"enabled\",\n        \"locationExpressionId\": 303747983880114\n    }\n]"
+								}
+							]
 						}
 					]
 				}
@@ -27389,6 +29192,292 @@
 					]
 				}
 			]
+		},
+		{
+			"name": "Locations",
+			"item": [
+				{
+					"name": "Browse locations",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Amazon-Advertising-API-ClientId",
+								"value": "{{client_id}}",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Amazon-Advertising-API-Scope",
+								"value": "{{profileId}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n \"filters\": [\n        {\n            \"field\": \"name\",\n            \"values\": [\n                \"New Yor\"\n            ]\n        },\n        {\n            \"field\": \"category\",\n            \"values\": [\n                \"STATE\"\n            ]\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_url}}/locations/list",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"locations",
+								"list"
+							]
+						},
+						"description": "brandEntityID is required for sellers"
+					},
+					"response": [
+						{
+							"name": "State filter",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n \"filters\": [\n        {\n            \"field\": \"name\",\n            \"values\": [\n                \"New Yor\"\n            ]\n        },\n        {\n            \"field\": \"category\",\n            \"values\": [\n                \"STATE\"\n            ]\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/locations/list",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"locations",
+										"list"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Server",
+									"value": "Server"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 20 Jul 2023 15:21:49 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "101"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "x-amz-rid",
+									"value": "SDJSEYVT2QZJNE4SWT6W"
+								},
+								{
+									"key": "x-amzn-RequestId",
+									"value": "e8ddd8df-2d7d-4b65-af42-87c16925d9dd"
+								},
+								{
+									"key": "x-amzn-Remapped-x-amzn-RequestId",
+									"value": "SDJSEYVT2QZJNE4SWT6W"
+								},
+								{
+									"key": "x-amzn-Remapped-Content-Length",
+									"value": "101"
+								},
+								{
+									"key": "x-amzn-Remapped-Connection",
+									"value": "close"
+								},
+								{
+									"key": "x-amz-apigw-id",
+									"value": "IXmZ8EnIoAMFXFw="
+								},
+								{
+									"key": "x-amzn-Remapped-Server",
+									"value": "Apache-Coyote/1.1"
+								},
+								{
+									"key": "X-Amzn-Trace-Id",
+									"value": "Root=1-64b9510d-f962190fdabfb75db656949d"
+								},
+								{
+									"key": "x-amzn-Remapped-Date",
+									"value": "Thu, 20 Jul 2023 15:21:49 GMT"
+								},
+								{
+									"key": "Vary",
+									"value": "Content-Type,Accept-Encoding,User-Agent"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=47474747; includeSubDomains; preload"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"locations\": [\n        {\n            \"category\": \"STATE\",\n            \"locationId\": \"amzn1.ad-geo.G23XLKJV9KV95N\",\n            \"name\": \"New York, US\"\n        }\n    ]\n}"
+						},
+						{
+							"name": "ZIP code filter",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"filters\": [\n        {\n            \"field\": \"name\",\n            \"values\": [\n                \"9800\"\n            ]\n        },\n        {\n            \"field\": \"category\",\n            \"values\": [\n                \"POSTAL_CODE\"\n            ]\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/locations/list",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"locations",
+										"list"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Server",
+									"value": "Server"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 20 Jul 2023 15:22:33 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "995"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "x-amz-rid",
+									"value": "TSVSVE9N5RHZV4S3Y9BY"
+								},
+								{
+									"key": "x-amzn-RequestId",
+									"value": "64246c2f-e647-4a6a-b3b1-0f0c88f867be"
+								},
+								{
+									"key": "x-amzn-Remapped-x-amzn-RequestId",
+									"value": "TSVSVE9N5RHZV4S3Y9BY"
+								},
+								{
+									"key": "x-amzn-Remapped-Content-Length",
+									"value": "995"
+								},
+								{
+									"key": "x-amz-apigw-id",
+									"value": "IXmg_HVwoAMFXkQ="
+								},
+								{
+									"key": "x-amzn-Remapped-Server",
+									"value": "Apache-Coyote/1.1"
+								},
+								{
+									"key": "X-Amzn-Trace-Id",
+									"value": "Root=1-64b95139-1b293824678a66c3b8ff3489"
+								},
+								{
+									"key": "x-amzn-Remapped-Date",
+									"value": "Thu, 20 Jul 2023 15:22:33 GMT"
+								},
+								{
+									"key": "Vary",
+									"value": "Content-Type,Accept-Encoding,User-Agent"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=47474747; includeSubDomains; preload"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"locations\": [\n        {\n            \"category\": \"POSTAL_CODE\",\n            \"locationId\": \"amzn1.ad-geo.GP-US-98001\",\n            \"name\": \"Auburn, Washington, US - 98001\"\n        },\n        {\n            \"category\": \"POSTAL_CODE\",\n            \"locationId\": \"amzn1.ad-geo.GP-US-98002\",\n            \"name\": \"Auburn, Washington, US - 98002\"\n        },\n        {\n            \"category\": \"POSTAL_CODE\",\n            \"locationId\": \"amzn1.ad-geo.GP-US-98003\",\n            \"name\": \"Federal Way, Washington, US - 98003\"\n        },\n        {\n            \"category\": \"POSTAL_CODE\",\n            \"locationId\": \"amzn1.ad-geo.GP-US-98004\",\n            \"name\": \"Bellevue, Washington, US - 98004\"\n        },\n        {\n            \"category\": \"POSTAL_CODE\",\n            \"locationId\": \"amzn1.ad-geo.GP-US-98005\",\n            \"name\": \"Bellevue, Washington, US - 98005\"\n        },\n        {\n            \"category\": \"POSTAL_CODE\",\n            \"locationId\": \"amzn1.ad-geo.GP-US-98006\",\n            \"name\": \"Bellevue, Washington, US - 98006\"\n        },\n        {\n            \"category\": \"POSTAL_CODE\",\n            \"locationId\": \"amzn1.ad-geo.GP-US-98007\",\n            \"name\": \"Bellevue, Washington, US - 98007\"\n        },\n        {\n            \"category\": \"POSTAL_CODE\",\n            \"locationId\": \"amzn1.ad-geo.GP-US-98008\",\n            \"name\": \"Bellevue, Washington, US - 98008\"\n        },\n        {\n            \"category\": \"POSTAL_CODE\",\n            \"locationId\": \"amzn1.ad-geo.GP-US-98009\",\n            \"name\": \"Bellevue, Washington, US - 98009\"\n        }\n    ]\n}"
+						}
+					]
+				}
+			]
 		}
 	],
 	"event": [
@@ -27457,7 +29546,7 @@
 					"}",
 					"",
 					"/**Add custom header containing the collection version to all collection requests*/",
-					"pm.request.headers.add({key: 'Postman-Collection', value: 'Amazon-Ads-API-v1.5'}) "
+					"pm.request.headers.add({key: 'Postman-Collection', value: 'Amazon-Ads-API-v1.6'}) "
 				]
 			}
 		},
