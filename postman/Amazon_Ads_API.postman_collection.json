@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "ecae1235-1af4-4b33-996f-d827c59e35e1",
+		"_postman_id": "c989028e-441d-4289-95b8-5a9f899ac451",
 		"name": "Amazon Ads API",
 		"description": "# Amazon Ads API Postman collection\n\nThis collection includes commonly used endpoints for the Amazon Ads API. The collection also includes pre- and post-request scripts to automate management of auth credentials.\n\nVisit the [Amazon Ads advanced tools center](https://advertising.amazon.com/API/docs/en-us/) for API documentation.\n\n## Setup\n\nTo use this collection, you will need credentials for the Amazon Ads API. For information about acquiring credentials, see the [onboarding overview for the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/onboarding/overview).\n\nFind setup instructions in the Amazon Ads advanced tools center for:\n\n- [New users of the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/getting-started/using-postman-collection)\n- [Users with an existing refresh token](https://advertising.amazon.com/API/docs/en-us/tutorials/postman) \n\n## Issues and support\n\nFor technical support for the Amazon Ads API, see [Technical support](https://advertising.amazon.com/API/docs/en-us/info/support) in the Amazon Ads advanced tools center.\n\nTo report a bug or suggest an improvement relating to this collection or the documentation, [create an issue](https://github.com/amzn/ads-advanced-tools-docs/issues/new/choose).",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -20005,12 +20005,11 @@
 													}
 												},
 												"url": {
-													"raw": "{{api_url}}//sb/recommendations/bids",
+													"raw": "{{api_url}}/sb/recommendations/bids",
 													"host": [
 														"{{api_url}}"
 													],
 													"path": [
-														"",
 														"sb",
 														"recommendations",
 														"bids"
@@ -20092,12 +20091,11 @@
 													}
 												},
 												"url": {
-													"raw": "{{api_url}}//sb/recommendations/bids",
+													"raw": "{{api_url}}/sb/recommendations/bids",
 													"host": [
 														"{{api_url}}"
 													],
 													"path": [
-														"",
 														"sb",
 														"recommendations",
 														"bids"
@@ -20147,6 +20145,421 @@
 											],
 											"cookie": [],
 											"body": "{\n    \"keywordsBidsRecommendationSuccessResults\": [],\n    \"keywordsBidsRecommendationErrorResults\": [],\n    \"targetsBidsRecommendationSuccessResults\": [\n        {\n            \"targets\": [\n                {\n                    \"type\": \"asinCategorySameAs\",\n                    \"value\": \"2522102011\"\n                }\n            ],\n            \"targetsIndex\": 0,\n            \"recommendationId\": \"f9cafef70ec838243976893a28be669f\",\n            \"recommendedBid\": {\n                \"rangeStart\": 0.42,\n                \"rangeEnd\": 2.37,\n                \"recommended\": 1.25\n            }\n        }\n    ],\n    \"targetsBidsRecommendationErrorResults\": [],\n    \"themesRecommendationSuccessResults\": [],\n    \"themesRecommendationErrorResults\": []\n}"
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "Theme targeting",
+							"item": [
+								{
+									"name": "Create theme targeting",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"var response = JSON.parse(responseBody);",
+													"",
+													"/*Save themeId for first object to environment*/",
+													"if (response.success[0] != null ) {",
+													"var themeId = response.success[0].themeId;",
+													"console.log(themeId);",
+													"postman.clearEnvironmentVariable(\"themeId\");",
+													"postman.setEnvironmentVariable(\"themeId\", themeId);",
+													"} else {",
+													"    console.log(responseBody);",
+													"}"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"themes\": [\n    {\n      \"adGroupId\": \"{{adGroupId}}\",\n      \"campaignId\": \"{{campaignId}}\",\n      \"themeType\": \"KEYWORDS_RELATED_TO_YOUR_LANDING_PAGES\",\n      \"bid\": 10.0\n    }\n  ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/sb/themes",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sb",
+												"themes"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Success",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Amazon-Advertising-API-ClientId",
+														"value": "{{client_id}}",
+														"type": "default"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer {{access_token}}",
+														"type": "default"
+													},
+													{
+														"key": "Amazon-Advertising-API-Scope",
+														"value": "{{profileId}}",
+														"type": "default"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"themes\": [\n    {\n      \"adGroupId\": \"{{adGroupId}}\",\n      \"campaignId\": \"{{campaignId}}\",\n      \"themeType\": \"KEYWORDS_RELATED_TO_YOUR_LANDING_PAGES\",\n      \"bid\": 10.0\n    }\n  ]\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{api_url}}/sb/themes",
+													"host": [
+														"{{api_url}}"
+													],
+													"path": [
+														"sb",
+														"themes"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Server",
+													"value": "Server"
+												},
+												{
+													"key": "Date",
+													"value": "Mon, 14 Aug 2023 18:13:01 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/vnd.sbthemescreateresponse.v3+json"
+												},
+												{
+													"key": "Transfer-Encoding",
+													"value": "chunked"
+												},
+												{
+													"key": "Connection",
+													"value": "keep-alive"
+												},
+												{
+													"key": "x-amz-rid",
+													"value": "JWFWCTYD4CDYVHVCPZTQ"
+												},
+												{
+													"key": "x-amz-request-id",
+													"value": "JWFWCTYD4CDYVHVCPZTQ"
+												},
+												{
+													"key": "Vary",
+													"value": "Content-Type,Accept-Encoding,User-Agent"
+												},
+												{
+													"key": "Strict-Transport-Security",
+													"value": "max-age=47474747; includeSubDomains; preload"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"success\": [\n        {\n            \"themeId\": \"374248029885448\",\n            \"index\": 0\n        }\n    ],\n    \"error\": []\n}"
+										}
+									]
+								},
+								{
+									"name": "Update theme targets",
+									"request": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"themes\": [\n    {\n      \"themeId\": \"{{themeId}}\",\n      \"adGroupId\": \"{{adGroupId}}\",\n      \"campaignId\": \"{{campaignId}}\",\n      \"state\": \"enabled\",\n      \"bid\": 8.0\n    }\n  ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/sb/themes",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sb",
+												"themes"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Success",
+											"originalRequest": {
+												"method": "PUT",
+												"header": [
+													{
+														"key": "Amazon-Advertising-API-ClientId",
+														"value": "{{client_id}}",
+														"type": "default"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer {{access_token}}",
+														"type": "default"
+													},
+													{
+														"key": "Amazon-Advertising-API-Scope",
+														"value": "{{profileId}}",
+														"type": "default"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"themes\": [\n    {\n      \"themeId\": \"{{themeId}}\",\n      \"adGroupId\": \"{{adGroupId}}\",\n      \"campaignId\": \"{{campaignId}}\",\n      \"state\": \"enabled\",\n      \"bid\": 8.0\n    }\n  ]\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{api_url}}/sb/themes",
+													"host": [
+														"{{api_url}}"
+													],
+													"path": [
+														"sb",
+														"themes"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Server",
+													"value": "Server"
+												},
+												{
+													"key": "Date",
+													"value": "Mon, 14 Aug 2023 18:19:15 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/vnd.sbthemesupdateresponse.v3+json"
+												},
+												{
+													"key": "Transfer-Encoding",
+													"value": "chunked"
+												},
+												{
+													"key": "Connection",
+													"value": "keep-alive"
+												},
+												{
+													"key": "x-amz-rid",
+													"value": "KHH24BVZATTEXR0253RV"
+												},
+												{
+													"key": "x-amz-request-id",
+													"value": "KHH24BVZATTEXR0253RV"
+												},
+												{
+													"key": "Vary",
+													"value": "Content-Type,Accept-Encoding,User-Agent"
+												},
+												{
+													"key": "Strict-Transport-Security",
+													"value": "max-age=47474747; includeSubDomains; preload"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"success\": [\n        {\n            \"themeId\": \"374248029885448\",\n            \"index\": 0\n        }\n    ],\n    \"error\": []\n}"
+										}
+									]
+								},
+								{
+									"name": "List themes",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Amazon-Advertising-API-ClientId",
+												"value": "{{client_id}}",
+												"type": "default"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{access_token}}",
+												"type": "default"
+											},
+											{
+												"key": "Amazon-Advertising-API-Scope",
+												"value": "{{profileId}}",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"maxResults\": 1,\n  \"themeIdFilter\": {\n    \"include\": [\n      {{themeId}}\n    ]\n  },\n  \"adGroupIdFilter\": {\n    \"include\": [\n      {{adGroupId}}\n    ]\n  },\n  \"campaignIdFilter\": {\n    \"include\": [\n      {{campaignId}}\n    ]\n  },\n  \"stateFilter\": {\n    \"include\": [\n      \"enabled\"\n    ]\n  },\n  \"themeTypeFilter\": {\n    \"include\": [\n      \"KEYWORDS_RELATED_TO_YOUR_BRAND\",\n      \"KEYWORDS_RELATED_TO_YOUR_LANDING_PAGES\"\n    ]\n  }\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{api_url}}/sb/themes/list",
+											"host": [
+												"{{api_url}}"
+											],
+											"path": [
+												"sb",
+												"themes",
+												"list"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Success",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Amazon-Advertising-API-ClientId",
+														"value": "{{client_id}}",
+														"type": "default"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer {{access_token}}",
+														"type": "default"
+													},
+													{
+														"key": "Amazon-Advertising-API-Scope",
+														"value": "{{profileId}}",
+														"type": "default"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"maxResults\": 1,\n  \"themeIdFilter\": {\n    \"include\": [\n      {{themeId}}\n    ]\n  },\n  \"adGroupIdFilter\": {\n    \"include\": [\n      {{adGroupId}}\n    ]\n  },\n  \"campaignIdFilter\": {\n    \"include\": [\n      {{campaignId}}\n    ]\n  },\n  \"stateFilter\": {\n    \"include\": [\n      \"enabled\"\n    ]\n  },\n  \"themeTypeFilter\": {\n    \"include\": [\n      \"KEYWORDS_RELATED_TO_YOUR_BRAND\",\n      \"KEYWORDS_RELATED_TO_YOUR_LANDING_PAGES\"\n    ]\n  }\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{api_url}}/sb/themes/list",
+													"host": [
+														"{{api_url}}"
+													],
+													"path": [
+														"sb",
+														"themes",
+														"list"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Server",
+													"value": "Server"
+												},
+												{
+													"key": "Date",
+													"value": "Mon, 14 Aug 2023 18:27:04 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/vnd.sbthemeslistresponse.v3+json"
+												},
+												{
+													"key": "Transfer-Encoding",
+													"value": "chunked"
+												},
+												{
+													"key": "Connection",
+													"value": "keep-alive"
+												},
+												{
+													"key": "x-amz-rid",
+													"value": "JNR8QW2ZP16QH335CCYW"
+												},
+												{
+													"key": "x-amz-request-id",
+													"value": "JNR8QW2ZP16QH335CCYW"
+												},
+												{
+													"key": "Vary",
+													"value": "Content-Type,Accept-Encoding,User-Agent"
+												},
+												{
+													"key": "Strict-Transport-Security",
+													"value": "max-age=47474747; includeSubDomains; preload"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"themes\": [\n        {\n            \"themeId\": \"374248029885448\",\n            \"adGroupId\": \"291025936425876\",\n            \"campaignId\": \"357090364785907\",\n            \"themeType\": \"KEYWORDS_RELATED_TO_YOUR_LANDING_PAGES\",\n            \"state\": \"enabled\",\n            \"bid\": 8\n        }\n    ]\n}"
 										}
 									]
 								}
@@ -20752,12 +21165,11 @@
 									}
 								},
 								"url": {
-									"raw": "{{api_url}}//sb/negativeKeywords",
+									"raw": "{{api_url}}/sb/negativeKeywords",
 									"host": [
 										"{{api_url}}"
 									],
 									"path": [
-										"",
 										"sb",
 										"negativeKeywords"
 									]
@@ -20795,12 +21207,11 @@
 											}
 										},
 										"url": {
-											"raw": "{{api_url}}//sb/negativeKeywords",
+											"raw": "{{api_url}}/sb/negativeKeywords",
 											"host": [
 												"{{api_url}}"
 											],
 											"path": [
-												"",
 												"sb",
 												"negativeKeywords"
 											]
@@ -20894,12 +21305,11 @@
 									}
 								},
 								"url": {
-									"raw": "{{api_url}}//sb/negativeKeywords",
+									"raw": "{{api_url}}/sb/negativeKeywords",
 									"host": [
 										"{{api_url}}"
 									],
 									"path": [
-										"",
 										"sb",
 										"negativeKeywords"
 									]
@@ -20937,12 +21347,11 @@
 											}
 										},
 										"url": {
-											"raw": "{{api_url}}//sb/negativeKeywords",
+											"raw": "{{api_url}}/sb/negativeKeywords",
 											"host": [
 												"{{api_url}}"
 											],
 											"path": [
-												"",
 												"sb",
 												"negativeKeywords"
 											]
@@ -21039,12 +21448,11 @@
 									}
 								},
 								"url": {
-									"raw": "{{api_url}}//sb/negativeKeywords/{{negativeKeywordId}}",
+									"raw": "{{api_url}}/sb/negativeKeywords/{{negativeKeywordId}}",
 									"host": [
 										"{{api_url}}"
 									],
 									"path": [
-										"",
 										"sb",
 										"negativeKeywords",
 										"{{negativeKeywordId}}"
@@ -21073,22 +21481,12 @@
 												"type": "default"
 											}
 										],
-										"body": {
-											"mode": "raw",
-											"raw": "",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
 										"url": {
-											"raw": "{{api_url}}//sb/negativeKeywords/{{negativeKeywordId}}",
+											"raw": "{{api_url}}/sb/negativeKeywords/{{negativeKeywordId}}",
 											"host": [
 												"{{api_url}}"
 											],
 											"path": [
-												"",
 												"sb",
 												"negativeKeywords",
 												"{{negativeKeywordId}}"
@@ -21183,12 +21581,11 @@
 									}
 								},
 								"url": {
-									"raw": "{{api_url}}//sb/negativeKeywords/{{negativeKeywordId}}",
+									"raw": "{{api_url}}/sb/negativeKeywords/{{negativeKeywordId}}",
 									"host": [
 										"{{api_url}}"
 									],
 									"path": [
-										"",
 										"sb",
 										"negativeKeywords",
 										"{{negativeKeywordId}}"
@@ -21227,12 +21624,11 @@
 											}
 										},
 										"url": {
-											"raw": "{{api_url}}//sb/negativeKeywords/{{negativeKeywordId}}",
+											"raw": "{{api_url}}/sb/negativeKeywords/{{negativeKeywordId}}",
 											"host": [
 												"{{api_url}}"
 											],
 											"path": [
-												"",
 												"sb",
 												"negativeKeywords",
 												"{{negativeKeywordId}}"
