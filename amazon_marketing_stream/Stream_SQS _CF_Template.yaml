@@ -25,6 +25,10 @@ Parameters:
       - sb-conversion
       - sb-clickstream
       - sb-rich-media
+      - adsp-campaigns
+      - adsp-campaign-flights
+      - adsp-adgroups
+      - adsp-adgroup-targets
   StreamRealm:
     Type: String
     Description: The realm to stream
@@ -69,6 +73,14 @@ Mappings:
       Account: 091028706140
     sb-rich-media:
       Account: 010312603579
+    adsp-campaigns:
+      Account: 153247821255
+    adsp-campaign-flights:
+      Account: 700228448367
+    adsp-adgroups:
+      Account: 222778752755
+    adsp-adgroup-targets:
+      Account: 419834811630
   EU:
     sp-traffic:
       Account: 668473351658
@@ -98,6 +110,14 @@ Mappings:
       Account: 219513501272
     sb-rich-media:
       Account: 662188760626
+    adsp-campaigns:
+      Account: 599052634802
+    adsp-campaign-flights:
+      Account: 633559263003
+    adsp-adgroups:
+      Account: 682324742468
+    adsp-adgroup-targets:
+      Account: 764057072099
   FE:
     sp-traffic:
       Account: 074266271188
@@ -127,6 +147,14 @@ Mappings:
       Account: 632322331982
     sb-rich-media:
       Account: 618223300352
+    adsp-campaigns:
+      Account: 216875695489
+    adsp-campaign-flights:
+      Account: 451213518288
+    adsp-adgroups:
+      Account: 360850786875
+    adsp-adgroup-targets:
+      Account: 178122609971
 Rules:
   NA:
     RuleCondition:
