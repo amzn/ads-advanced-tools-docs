@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "c989028e-441d-4289-95b8-5a9f899ac451",
+		"_postman_id": "8480eb8a-b7c8-40f3-93c0-84cfc8097e24",
 		"name": "Amazon Ads API",
 		"description": "# Amazon Ads API Postman collection\n\nThis collection includes commonly used endpoints for the Amazon Ads API. The collection also includes pre- and post-request scripts to automate management of auth credentials.\n\nVisit the [Amazon Ads advanced tools center](https://advertising.amazon.com/API/docs/en-us/) for API documentation.\n\n## Setup\n\nTo use this collection, you will need credentials for the Amazon Ads API. For information about acquiring credentials, see the [onboarding overview for the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/onboarding/overview).\n\nFind setup instructions in the Amazon Ads advanced tools center for:\n\n- [New users of the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/getting-started/using-postman-collection)\n- [Users with an existing refresh token](https://advertising.amazon.com/API/docs/en-us/tutorials/postman) \n\n## Issues and support\n\nFor technical support for the Amazon Ads API, see [Technical support](https://advertising.amazon.com/API/docs/en-us/info/support) in the Amazon Ads advanced tools center.\n\nTo report a bug or suggest an improvement relating to this collection or the documentation, [create an issue](https://github.com/amzn/ads-advanced-tools-docs/issues/new/choose).",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -2017,7 +2017,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n        \"name\":\"\",\n        \"startDate\":\"YYYY-MM-DD\",\n        \"endDate\":\"YYYY-MM-DD\",\n        \"configuration\":{\n            \"adProduct\":\"SPONSORED_PRODUCTS\",\n            \"groupBy\":[\"campaign\",\"adGroup\"],\n            \"columns\":[\"adGroupId\",\"campaignId\", \"impressions\", \"clicks\", \"cost\", \"purchases1d\", \"purchases7d\", \"purchases14d\", \"purchases30d\",\"date\"],\n            \"reportTypeId\":\"spCampaigns\",\n            \"timeUnit\":\"DAILY\",\n            \"format\":\"GZIP_JSON\"\n        }\n    }"
+									"raw": "{\n        \"name\":\"SP campaigns report 7/5-7/10\",\n        \"startDate\":\"2023-09-05\",\n        \"endDate\":\"2023-09-10\",\n        \"configuration\":{\n            \"adProduct\":\"SPONSORED_PRODUCTS\",\n            \"groupBy\":[\"campaign\",\"adGroup\"],\n            \"columns\":[\"adGroupId\",\"campaignId\", \"impressions\", \"clicks\", \"cost\", \"purchases1d\", \"purchases7d\", \"purchases14d\", \"purchases30d\",\"date\"],\n            \"reportTypeId\":\"spCampaigns\",\n            \"timeUnit\":\"DAILY\",\n            \"format\":\"GZIP_JSON\"\n        }\n    }"
 								},
 								"url": {
 									"raw": "{{api_url}}/reporting/reports",
@@ -33084,6 +33084,606 @@
 							],
 							"cookie": [],
 							"body": "{\n    \"locations\": [\n        {\n            \"category\": \"POSTAL_CODE\",\n            \"locationId\": \"amzn1.ad-geo.GP-US-98001\",\n            \"name\": \"Auburn, Washington, US - 98001\"\n        },\n        {\n            \"category\": \"POSTAL_CODE\",\n            \"locationId\": \"amzn1.ad-geo.GP-US-98002\",\n            \"name\": \"Auburn, Washington, US - 98002\"\n        },\n        {\n            \"category\": \"POSTAL_CODE\",\n            \"locationId\": \"amzn1.ad-geo.GP-US-98003\",\n            \"name\": \"Federal Way, Washington, US - 98003\"\n        },\n        {\n            \"category\": \"POSTAL_CODE\",\n            \"locationId\": \"amzn1.ad-geo.GP-US-98004\",\n            \"name\": \"Bellevue, Washington, US - 98004\"\n        },\n        {\n            \"category\": \"POSTAL_CODE\",\n            \"locationId\": \"amzn1.ad-geo.GP-US-98005\",\n            \"name\": \"Bellevue, Washington, US - 98005\"\n        },\n        {\n            \"category\": \"POSTAL_CODE\",\n            \"locationId\": \"amzn1.ad-geo.GP-US-98006\",\n            \"name\": \"Bellevue, Washington, US - 98006\"\n        },\n        {\n            \"category\": \"POSTAL_CODE\",\n            \"locationId\": \"amzn1.ad-geo.GP-US-98007\",\n            \"name\": \"Bellevue, Washington, US - 98007\"\n        },\n        {\n            \"category\": \"POSTAL_CODE\",\n            \"locationId\": \"amzn1.ad-geo.GP-US-98008\",\n            \"name\": \"Bellevue, Washington, US - 98008\"\n        },\n        {\n            \"category\": \"POSTAL_CODE\",\n            \"locationId\": \"amzn1.ad-geo.GP-US-98009\",\n            \"name\": \"Bellevue, Washington, US - 98009\"\n        }\n    ]\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Exports",
+			"item": [
+				{
+					"name": "Request campaign export",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"/**Sets the returned exportId as an environment variable to be used in subsequent calls */",
+									"postman.clearEnvironmentVariable(\"exportId\");",
+									"var response = JSON.parse(responseBody);",
+									"",
+									"if (response && response.status === 'IN_PROGRESS') {",
+									"    postman.setEnvironmentVariable(\"exportId\", response.exportId);",
+									"    console.log('exportId = ' + pm.environment.get(\"exportId\"));",
+									"}",
+									"else {",
+									"    console.log('Error creating campaign with error = ' + response.description);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Amazon-Advertising-API-ClientId",
+								"value": "{{client_id}}",
+								"type": "default"
+							},
+							{
+								"key": "Amazon-Advertising-API-Scope",
+								"value": "{{profileId}}",
+								"type": "default"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/vnd.campaignsexport.v1+json",
+								"type": "default"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "default"
+							},
+							{
+								"key": "Accept",
+								"value": "application/vnd.campaignsexport.v1+json",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"adProductFilter\": [\n        \"SPONSORED_BRANDS\",\"SPONSORED_PRODUCTS\", \"SPONSORED_DISPLAY\"\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{api_url}}/campaigns/export",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"campaigns",
+								"export"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/vnd.campaignsexport.v1+json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.campaignsexport.v1+json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"adProductFilter\": [\n        \"SPONSORED_BRANDS\",\"SPONSORED_PRODUCTS\", \"SPONSORED_DISPLAY\"\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{api_url}}/campaigns/export",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"campaigns",
+										"export"
+									]
+								}
+							},
+							"status": "Accepted",
+							"code": 202,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Server",
+									"value": "Server"
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 26 Sep 2023 15:32:02 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/vnd.campaignsexport.v1+json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "89"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "x-amz-rid",
+									"value": "3ZN9V830HZC5TAPJZVY1"
+								},
+								{
+									"key": "x-amzn-RequestId",
+									"value": "0a2f2859-b12d-4854-af7f-9954c31991f7"
+								},
+								{
+									"key": "x-amz-apigw-id",
+									"value": "L3vp3FE3oAMFdlQ="
+								},
+								{
+									"key": "X-Amzn-Trace-Id",
+									"value": "Root=1-6512f972-1a8df3331e7670ae5f82e0a5"
+								},
+								{
+									"key": "Vary",
+									"value": "Content-Type,Accept-Encoding,User-Agent"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=47474747; includeSubDomains; preload"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"exportId\": \"xxxxxxxxxxxxx\",\n    \"status\": \"IN_PROGRESS\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Request ad group export",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"/**Sets the returned exportId as an environment variable to be used in subsequent calls */",
+									"postman.clearEnvironmentVariable(\"exportId\");",
+									"var response = JSON.parse(responseBody);",
+									"",
+									"if (response && response.status === 'IN_PROGRESS') {",
+									"    postman.setEnvironmentVariable(\"exportId\", response.exportId);",
+									"    console.log('exportId = ' + pm.environment.get(\"exportId\"));",
+									"}",
+									"else {",
+									"    console.log('Error creating campaign with error = ' + response.description);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Amazon-Advertising-API-ClientId",
+								"value": "{{client_id}}",
+								"type": "default"
+							},
+							{
+								"key": "Amazon-Advertising-API-Scope",
+								"value": "{{profileId}}",
+								"type": "default"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/vnd.adgroupsexport.v1+json",
+								"type": "default"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "default"
+							},
+							{
+								"key": "Accept",
+								"value": "application/vnd.adgroupsexport.v1+json",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"adProductFilter\": [\n        \"SPONSORED_BRANDS\",\"SPONSORED_PRODUCTS\", \"SPONSORED_DISPLAY\"\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{api_url}}/adGroups/export",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"adGroups",
+								"export"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/vnd.adgroupsexport.v1+json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.adgroupsexport.v1+json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"adProductFilter\": [\n        \"SPONSORED_BRANDS\",\"SPONSORED_PRODUCTS\", \"SPONSORED_DISPLAY\"\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{api_url}}/adGroups/export",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"adGroups",
+										"export"
+									]
+								}
+							},
+							"status": "Accepted",
+							"code": 202,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Server",
+									"value": "Server"
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 26 Sep 2023 15:33:04 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/vnd.adgroupsexport.v1+json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "89"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "x-amz-rid",
+									"value": "6GJJMR04JZBZYWZFVADP"
+								},
+								{
+									"key": "x-amzn-RequestId",
+									"value": "b088dfb2-1e45-4901-a569-23a578c29bf1"
+								},
+								{
+									"key": "x-amz-apigw-id",
+									"value": "L3vzeE-DIAMFleQ="
+								},
+								{
+									"key": "X-Amzn-Trace-Id",
+									"value": "Root=1-6512f9b0-6978f3cc86dbc5033f63e1e5"
+								},
+								{
+									"key": "Vary",
+									"value": "Content-Type,Accept-Encoding,User-Agent"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=47474747; includeSubDomains; preload"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"exportId\": \"xxxxxxxxxxx\",\n    \"status\": \"IN_PROGRESS\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Exports status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Amazon-Advertising-API-ClientId",
+								"value": "{{client_id}}",
+								"type": "default"
+							},
+							{
+								"key": "Amazon-Advertising-API-Scope",
+								"value": "{{profileId}}",
+								"type": "default"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/vnd.adgroupssexport.v1+json",
+								"type": "default"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "default"
+							},
+							{
+								"key": "Accept",
+								"value": "application/vnd.adgroupsexport.v1+json",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/exports/{{exportId}}",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"exports",
+								"{{exportId}}"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Campaigns export",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/vnd.campaignssexport.v1+json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.campaignsexport.v1+json",
+										"type": "default"
+									}
+								],
+								"url": {
+									"raw": "{{api_url}}/exports/{{exportId}}",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"exports",
+										"{{exportId}}"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Server",
+									"value": "Server"
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 26 Sep 2023 15:38:44 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/vnd.campaignsexport.v1+json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "1601"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "x-amz-rid",
+									"value": "2RTMY94WX1VW155XSHBQ"
+								},
+								{
+									"key": "x-amzn-RequestId",
+									"value": "e1c96053-a1be-48e9-84ed-3fd9f9fdc4c5"
+								},
+								{
+									"key": "x-amz-apigw-id",
+									"value": "L3wowEvBoAMFneQ="
+								},
+								{
+									"key": "X-Amzn-Trace-Id",
+									"value": "Root=1-6512fb04-c9eea8e6cffb20e8b8f349d5"
+								},
+								{
+									"key": "Vary",
+									"value": "Content-Type,Accept-Encoding,User-Agent"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=47474747; includeSubDomains; preload"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"exportId\": \"OTZlODY4NTQtN2ZhZi00YWQwLWFmMDEtYjU4NDE0YzUwYWFhLEM\",\n    \"status\": \"COMPLETED\",\n    \"url\": \"https://snapshots-prod-us-east-1.s3.us-east-1.amazonaws.com/CAMPAIGN/amzn1.application-oa2-client.xxxxxxxxxxxxxxxxx\",\n    \"fileSize\": 782,\n    \"urlExpiresAt\": \"2023-09-26T16:38:44.604Z\",\n    \"generatedAt\": \"2023-09-26T15:38:16.609Z\",\n    \"createdAt\": \"2023-09-26T15:38:15.938Z\"\n}"
+						},
+						{
+							"name": "Ad groups export",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/vnd.adgroupssexport.v1+json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.adgroupsexport.v1+json",
+										"type": "default"
+									}
+								],
+								"url": {
+									"raw": "{{api_url}}/exports/{{exportId}}",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"exports",
+										"{{exportId}}"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Server",
+									"value": "Server"
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 26 Sep 2023 15:39:24 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/vnd.adgroupsexport.v1+json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "1601"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "x-amz-rid",
+									"value": "7DYKBGGQJPJ6JSFVYJ98"
+								},
+								{
+									"key": "x-amzn-RequestId",
+									"value": "6907ca70-9f8d-48d2-869e-f807958da769"
+								},
+								{
+									"key": "x-amz-apigw-id",
+									"value": "L3wvAHcmoAMFYvw="
+								},
+								{
+									"key": "X-Amzn-Trace-Id",
+									"value": "Root=1-6512fb2c-9df8b09ba63f1968bd741e48"
+								},
+								{
+									"key": "Vary",
+									"value": "Content-Type,Accept-Encoding,User-Agent"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=47474747; includeSubDomains; preload"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"exportId\": \"MjJmNWZiZmYtY2NlZC00MzFhLWI5NjAtMmE3MjQzMGFiMDIwLEE\",\n    \"status\": \"COMPLETED\",\n    \"url\": \"https://snapshots-prod-us-east-1.s3.us-east-1.amazonaws.com/AD_GROUP/amzn1.application-oa2-client.xxxxxxxxxxxxxx\",\n    \"fileSize\": 515,\n    \"urlExpiresAt\": \"2023-09-26T16:39:24.673Z\",\n    \"generatedAt\": \"2023-09-26T15:39:09.958Z\",\n    \"createdAt\": \"2023-09-26T15:39:09.336Z\"\n}"
 						}
 					]
 				}
