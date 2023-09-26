@@ -29,6 +29,7 @@ The Amazon Ads API Postman collection currently supports the following features:
 - Stores
 - Locations
 - Sponsored Display
+- Exports
 
 ## Setup
 
