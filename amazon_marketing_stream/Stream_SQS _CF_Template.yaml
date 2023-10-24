@@ -29,6 +29,7 @@ Parameters:
       - adsp-campaign-flights
       - adsp-adgroups
       - adsp-adgroup-targets
+      - sp-budget-recommendations
   StreamRealm:
     Type: String
     Description: The realm to stream
@@ -81,6 +82,8 @@ Mappings:
       Account: 222778752755
     adsp-adgroup-targets:
       Account: 419834811630
+    sp-budget-recommendations:
+      Account: 678715897637
   EU:
     sp-traffic:
       Account: 668473351658
@@ -118,6 +121,8 @@ Mappings:
       Account: 682324742468
     adsp-adgroup-targets:
       Account: 764057072099
+    sp-budget-recommendations:
+      Account: 158915609581
   FE:
     sp-traffic:
       Account: 074266271188
@@ -155,6 +160,8 @@ Mappings:
       Account: 360850786875
     adsp-adgroup-targets:
       Account: 178122609971
+    sp-budget-recommendations:
+      Account: 007292432803
 Rules:
   NA:
     RuleCondition:
