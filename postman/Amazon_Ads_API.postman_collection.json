@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "8480eb8a-b7c8-40f3-93c0-84cfc8097e24",
+		"_postman_id": "f3aca397-80ef-43b1-b64f-3fab82e7729f",
 		"name": "Amazon Ads API",
 		"description": "# Amazon Ads API Postman collection\n\nThis collection includes commonly used endpoints for the Amazon Ads API. The collection also includes pre- and post-request scripts to automate management of auth credentials.\n\nVisit the [Amazon Ads advanced tools center](https://advertising.amazon.com/API/docs/en-us/) for API documentation.\n\n## Setup\n\nTo use this collection, you will need credentials for the Amazon Ads API. For information about acquiring credentials, see the [onboarding overview for the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/onboarding/overview).\n\nFind setup instructions in the Amazon Ads advanced tools center for:\n\n- [New users of the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/getting-started/using-postman-collection)\n- [Users with an existing refresh token](https://advertising.amazon.com/API/docs/en-us/tutorials/postman) \n\n## Issues and support\n\nFor technical support for the Amazon Ads API, see [Technical support](https://advertising.amazon.com/API/docs/en-us/info/support) in the Amazon Ads advanced tools center.\n\nTo report a bug or suggest an improvement relating to this collection or the documentation, [create an issue](https://github.com/amzn/ads-advanced-tools-docs/issues/new/choose).",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -23014,6 +23014,286 @@
 									]
 								},
 								"description": "categoryRefinementId can be obtained by using the Get all categories request"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Ad creatives",
+					"item": [
+						{
+							"name": "Store spotlight",
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.sbAdCreativeResource.v4+json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"adId\": \"{{adId}}\",\n    \"creative\": {\n        \"brandName\": \"My brand name\",\n        \"subpages\": [\n            {\n                \"pageTitle\": \"Savannah\",\n                \"asin\": \"B08MV395Y1\",\n                \"url\": \"https://www.amazon.com/stores/page/2B2AE9C7-7EF4-4993-AA76-0FFF7EF7D050\"\n            },\n            {\n                \"pageTitle\": \"Miami\",\n                \"asin\": \"B08VGX1BXG\",\n                \"url\": \"https://www.amazon.com/stores/page/E411CCC7-B125-4076-A476-197441A2A23E\"\n            },\n            {\n                \"pageTitle\": \"San Fran\",\n                \"asin\": \"B08VGYL7BM\",\n                \"url\": \"https://www.amazon.com/stores/page/BE713C9E-F85F-4461-B42A-29740F5B61F5\"\n            }\n        ],\n        \"consentToTranslate\": false,\n        \"brandLogoAssetId\": \"amzn1.assetlibrary.asset1.XXXXXX\",\n        \"headline\": \"Cheap pants\"\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/sb/ads/creatives/storeSpotlight",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sb",
+										"ads",
+										"creatives",
+										"storeSpotlight"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Brand video",
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.sbAdCreativeResource.v4+json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"adId\": \"{{adId}}\",\n    \"creative\": {\n        \"asins\": [\n            \"B00JVTNWB0\"\n        ],\n        \"brandLogoAssetID\": \"amzn1.assetlibrary.asset1.xxxxxxx\",\n        \"brandName\": \"My brand\",\n        \"headline\": \"My headline\",\n        \"consentToTranslate\": false,\n        \"videoAssetIds\": [\n            \"amzn1.assetlibrary.asset1.xxxxxxxx\"\n        ]\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/sb/ads/creatives/brandVideo",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sb",
+										"ads",
+										"creatives",
+										"brandVideo"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Product collection",
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.sbAdCreativeResource.v4+json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"adId\": \"{{adId}}\",\n    \"creative\": {\n        \"asins\": [\n            \"B00JVTNWB0\"\n        ],\n        \"brandLogoAssetID\": \"amzn1.assetlibrary.asset1.xxxxxxx\",\n        \"brandName\": \"My brand\",\n        \"headline\": \"My headline\"\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/sb/ads/creatives/productCollection",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sb",
+										"ads",
+										"creatives",
+										"productCollection"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Video",
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.sbAdCreativeResource.v4+json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"adId\": \"{{adId}}\",\n    \"creative\": {\n        \"consentToTranslate\": false,\n        \"videoAssetIds\": [\n            \"amzn1.assetlibrary.asset1.xxxxxxxx\"\n        ]\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/sb/ads/creatives/video",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sb",
+										"ads",
+										"creatives",
+										"video"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "List ad creatives",
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.sbAdCreativeResource.v4+json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"adId\": \"{{adId}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/sb/ads/creatives/list",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sb",
+										"ads",
+										"creatives",
+										"list"
+									]
+								}
 							},
 							"response": []
 						}
