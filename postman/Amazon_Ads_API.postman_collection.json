@@ -33924,7 +33924,7 @@
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/vnd.adgroupssexport.v1+json",
+								"value": "application/vnd.adgroupsexport.v1+json",
 								"type": "default"
 							},
 							{
@@ -33967,7 +33967,7 @@
 									},
 									{
 										"key": "Content-Type",
-										"value": "application/vnd.campaignssexport.v1+json",
+										"value": "application/vnd.campaignsexport.v1+json",
 										"type": "default"
 									},
 									{
@@ -34061,7 +34061,7 @@
 									},
 									{
 										"key": "Content-Type",
-										"value": "application/vnd.adgroupssexport.v1+json",
+										"value": "application/vnd.adgroupsexport.v1+json",
 										"type": "default"
 									},
 									{
