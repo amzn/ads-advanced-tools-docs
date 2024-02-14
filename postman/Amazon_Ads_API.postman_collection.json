@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "67969e5f-0d44-4487-a883-a5dc30cd223d",
+		"_postman_id": "09e4cdee-999c-4295-b3de-94791d6b97cd",
 		"name": "Amazon Ads API",
 		"description": "# Amazon Ads API Postman collection\n\nThis collection includes commonly used endpoints for the Amazon Ads API. The collection also includes pre- and post-request scripts to automate management of auth credentials.\n\nVisit the [Amazon Ads advanced tools center](https://advertising.amazon.com/API/docs/en-us/) for API documentation.\n\n## Setup\n\nTo use this collection, you will need credentials for the Amazon Ads API. For information about acquiring credentials, see the [onboarding overview for the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/onboarding/overview).\n\nFind setup instructions in the Amazon Ads advanced tools center for:\n\n- [New users of the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/getting-started/using-postman-collection)\n- [Users with an existing refresh token](https://advertising.amazon.com/API/docs/en-us/tutorials/postman) \n\n## Issues and support\n\nFor technical support for the Amazon Ads API, see [Technical support](https://advertising.amazon.com/API/docs/en-us/info/support) in the Amazon Ads advanced tools center.\n\nTo report a bug or suggest an improvement relating to this collection or the documentation, [create an issue](https://github.com/amzn/ads-advanced-tools-docs/issues/new/choose).",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -33719,7 +33719,7 @@
 					]
 				},
 				{
-					"name": "Request ad group export Copy",
+					"name": "Request target export",
 					"event": [
 						{
 							"listen": "test",
@@ -33892,6 +33892,179 @@
 					]
 				},
 				{
+					"name": "Request ad export",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"/**Sets the returned exportId as an environment variable to be used in subsequent calls */",
+									"postman.clearEnvironmentVariable(\"exportId\");",
+									"var response = JSON.parse(responseBody);",
+									"",
+									"if (response && response.status === 'IN_PROGRESS') {",
+									"    postman.setEnvironmentVariable(\"exportId\", response.exportId);",
+									"    console.log('exportId = ' + pm.environment.get(\"exportId\"));",
+									"}",
+									"else {",
+									"    console.log('Error creating campaign with error = ' + response.description);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Amazon-Advertising-API-ClientId",
+								"value": "{{client_id}}",
+								"type": "default"
+							},
+							{
+								"key": "Amazon-Advertising-API-Scope",
+								"value": "{{profileId}}",
+								"type": "default"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/vnd.targetsexport.v1+json",
+								"type": "default"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "default"
+							},
+							{
+								"key": "Accept",
+								"value": "application/vnd.targetsexport.v1+json",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"adProductFilter\": [\n        \"SPONSORED_BRANDS\",\"SPONSORED_PRODUCTS\", \"SPONSORED_DISPLAY\"\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{api_url}}/targets/export",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"targets",
+								"export"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/vnd.adsexport.v1+json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.adsexport.v1+json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"adProductFilter\": [\n        \"SPONSORED_BRANDS\",\"SPONSORED_PRODUCTS\", \"SPONSORED_DISPLAY\"\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{api_url}}/ads/export",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"ads",
+										"export"
+									]
+								}
+							},
+							"status": "Accepted",
+							"code": 202,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Server",
+									"value": "Server"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 14 Feb 2024 17:10:08 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/vnd.adsexport.v1+json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "89"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "x-amz-rid",
+									"value": "R555YQAT9Q7BA1PJXWT0"
+								},
+								{
+									"key": "x-amzn-RequestId",
+									"value": "a6b0e711-7ee2-4a59-b570-57f083254313"
+								},
+								{
+									"key": "x-amz-apigw-id",
+									"value": "TIsNhE7MIAMFlIw="
+								},
+								{
+									"key": "X-Amzn-Trace-Id",
+									"value": "Root=1-65ccf3f0-5109ac8d2c60682952dfc886"
+								},
+								{
+									"key": "Vary",
+									"value": "Content-Type,Accept-Encoding,User-Agent"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=47474747; includeSubDomains; preload"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"exportId\": \"NDUxYTIyMzgtZTFjMi00MDcxLTlhOTMtZDMxYjRkMzFhNzY2LFI\",\n    \"status\": \"IN_PROGRESS\"\n}"
+						}
+					]
+				},
+				{
 					"name": "Exports status",
 					"event": [
 						{
@@ -33924,7 +34097,7 @@
 							},
 							{
 								"key": "Content-Type",
-								"value": "application/vnd.adgroupsexport.v1+json",
+								"value": "application/vnd.targetsexport.v1+json",
 								"type": "default"
 							},
 							{
@@ -33934,7 +34107,7 @@
 							},
 							{
 								"key": "Accept",
-								"value": "application/vnd.adgroupsexport.v1+json",
+								"value": "application/vnd.targetsexport.v1+json",
 								"type": "default"
 							}
 						],
@@ -34137,6 +34310,194 @@
 							],
 							"cookie": [],
 							"body": "{\n    \"exportId\": \"MjJmNWZiZmYtY2NlZC00MzFhLWI5NjAtMmE3MjQzMGFiMDIwLEE\",\n    \"status\": \"COMPLETED\",\n    \"url\": \"https://snapshots-prod-us-east-1.s3.us-east-1.amazonaws.com/AD_GROUP/amzn1.application-oa2-client.xxxxxxxxxxxxxx\",\n    \"fileSize\": 515,\n    \"urlExpiresAt\": \"2023-09-26T16:39:24.673Z\",\n    \"generatedAt\": \"2023-09-26T15:39:09.958Z\",\n    \"createdAt\": \"2023-09-26T15:39:09.336Z\"\n}"
+						},
+						{
+							"name": "Targets export",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/vnd.targetsexport.v1+json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.targetsexport.v1+json",
+										"type": "default"
+									}
+								],
+								"url": {
+									"raw": "{{api_url}}/exports/{{exportId}}",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"exports",
+										"{{exportId}}"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Server",
+									"value": "Server"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 14 Feb 2024 17:11:26 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/vnd.targetsexport.v1+json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "1624"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "x-amz-rid",
+									"value": "Q3NGD0Y892ZB553H7WWY"
+								},
+								{
+									"key": "x-amzn-RequestId",
+									"value": "c7821c55-0e90-42e8-8778-05144ae7e7c9"
+								},
+								{
+									"key": "x-amz-apigw-id",
+									"value": "TIsZ1EmcoAMFa2A="
+								},
+								{
+									"key": "X-Amzn-Trace-Id",
+									"value": "Root=1-65ccf43e-9a69dac2102de4241b78bde8"
+								},
+								{
+									"key": "Vary",
+									"value": "Content-Type,Accept-Encoding,User-Agent"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=47474747; includeSubDomains; preload"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"exportId\": \"NDA4Y2M5MDItY2I5My00MzRlLWFjMWYtMDg2NGMzYjFhYzNhLFQ\",\n    \"status\": \"COMPLETED\",\n    \"url\": \"https://snapshots-prod-us-east-1.s3.us-east-1.amazonaws.com/TARGET/amzn1.application-oa2-client.xxxxxxxxxx\",\n    \"fileSize\": 3301,\n    \"urlExpiresAt\": \"2024-02-14T18:11:26.804Z\",\n    \"generatedAt\": \"2024-02-14T17:11:13.590Z\",\n    \"createdAt\": \"2024-02-14T17:11:12.845Z\"\n}"
+						},
+						{
+							"name": "Ads export",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/vnd.adsexport.v1+json",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.adsexport.v1+json",
+										"type": "default"
+									}
+								],
+								"url": {
+									"raw": "{{api_url}}/exports/{{exportId}}",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"exports",
+										"{{exportId}}"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Server",
+									"value": "Server"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 14 Feb 2024 17:10:36 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/vnd.adsexport.v1+json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "1629"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "x-amz-rid",
+									"value": "45QQABTVYDFBHAHE240S"
+								},
+								{
+									"key": "x-amzn-RequestId",
+									"value": "295fec12-b54c-447d-8415-b04b64f991b8"
+								},
+								{
+									"key": "x-amz-apigw-id",
+									"value": "TIsR6F0WoAMFXIA="
+								},
+								{
+									"key": "X-Amzn-Trace-Id",
+									"value": "Root=1-65ccf40c-299c7e5ae311f3feaf87c7ef"
+								},
+								{
+									"key": "Vary",
+									"value": "Content-Type,Accept-Encoding,User-Agent"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=47474747; includeSubDomains; preload"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"exportId\": \"NDUxYTIyMzgtZTFjMi00MDcxLTlhOTMtZDMxYjRkMzFhNzY2LFI\",\n    \"status\": \"COMPLETED\",\n    \"url\": \"https://snapshots-prod-us-east-1.s3.us-east-1.amazonaws.com/PRODUCT_AD/amzn1.application-oa2-client.xxxxxxxxxxx\",\n    \"fileSize\": 927,\n    \"urlExpiresAt\": \"2024-02-14T18:10:36.212Z\",\n    \"generatedAt\": \"2024-02-14T17:10:09.040Z\",\n    \"createdAt\": \"2024-02-14T17:10:08.288Z\"\n}"
 						}
 					]
 				}
