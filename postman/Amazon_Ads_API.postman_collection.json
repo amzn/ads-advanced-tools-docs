@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "09e4cdee-999c-4295-b3de-94791d6b97cd",
+		"_postman_id": "f1ea2aa4-6f9b-48cf-9659-d788f321f377",
 		"name": "Amazon Ads API",
 		"description": "# Amazon Ads API Postman collection\n\nThis collection includes commonly used endpoints for the Amazon Ads API. The collection also includes pre- and post-request scripts to automate management of auth credentials.\n\nVisit the [Amazon Ads advanced tools center](https://advertising.amazon.com/API/docs/en-us/) for API documentation.\n\n## Setup\n\nTo use this collection, you will need credentials for the Amazon Ads API. For information about acquiring credentials, see the [onboarding overview for the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/onboarding/overview).\n\nFind setup instructions in the Amazon Ads advanced tools center for:\n\n- [New users of the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/getting-started/using-postman-collection)\n- [Users with an existing refresh token](https://advertising.amazon.com/API/docs/en-us/tutorials/postman) \n\n## Issues and support\n\nFor technical support for the Amazon Ads API, see [Technical support](https://advertising.amazon.com/API/docs/en-us/info/support) in the Amazon Ads advanced tools center.\n\nTo report a bug or suggest an improvement relating to this collection or the documentation, [create an issue](https://github.com/amzn/ads-advanced-tools-docs/issues/new/choose).",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -18538,6 +18538,81 @@
 							]
 						},
 						{
+							"name": "Create product collection extended",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = JSON.parse(responseBody);",
+											"",
+											"/*Save adId for first object to environment*/",
+											"if (response.ads.success[0] != null ) {",
+											"var adId = response.ads.success[0].adId",
+											"postman.clearEnvironmentVariable(\"adId\");",
+											"postman.setEnvironmentVariable(\"adId\", adId);",
+											"} else {",
+											"    console.log(responseBody);",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.sbadresource.v4+json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"ads\": [\n        {\n            \"landingPage\": {\n                \"asins\": [\n                    \"B0CGY22J6Y\",\n                    \"B0CGY4QJTC\",\n                    \"B0CGY1MQFD\",\n                    \"B0BVYTJFLY\",\n                    \"B0B6963LJN\"\n                ],\n                \"pageType\": \"PRODUCT_LIST\"\n            },\n            \"name\": \"name of ad\",\n            \"state\": \"ENABLED\",\n            \"adGroupId\": \"{{adGroupId}}\",\n            \"creative\": {\n                \"brandLogoCrop\": {\n                    \"height\": 768,\n                    \"left\": 0,\n                    \"top\": 0,\n                    \"width\": 768\n                },\n                \"asins\": [\n                    \"B0CGY1MQFD\",\n                    \"B0BVYTJFLY\",\n                    \"B0B6963LJN\"\n                ],\n                \"brandName\": \"name of brand\",\n                \"customImages\": [\n                    {\n                        \"assetId\": \"amzn1.assetlibrary.asset1.xxxxxxx:version_v1\",\n                        \"crop\": {\n                            \"height\": 628,\n                            \"left\": 0,\n                            \"top\": 0,\n                            \"width\": 1200\n                        },\n                        \"url\": \"https://m.media-amazon.com/images/S/sample.jpeg\"\n                    }\n                ],\n                \"consentToTranslate\": false,\n                \"brandLogoAssetID\": \"amzn1.assetlibrary.asset1.xxxxxx:version_v1\",\n                \"headline\": \"Find the Perfect LEGO® Gift for Boys of All Ages\"\n            }\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/sb/v4/ads/productCollectionExtended",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sb",
+										"v4",
+										"ads",
+										"productCollectionExtended"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "Create video ad",
 							"event": [
 								{
@@ -23188,6 +23263,61 @@
 							"response": []
 						},
 						{
+							"name": "Product collection Extended",
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "default"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									},
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.sbAdCreativeResource.v4+json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"adId\": \"{{adId}}\",\n    \"creative\": {\n        \"asins\": [\n            \"B0C81DZTX4\",\n            \"B0C81CBH6K\",\n            \"B0BTHXJ718\"\n        ],\n        \"brandLogoAssetId\": \"amzn1.assetlibrary.asset1.xxxxxx:version_v1\",\n        \"brandLogoCrop\": {\n            \"height\": 768,\n            \"left\": 0,\n            \"top\": 0,\n            \"width\": 768\n        },\n        \"brandLogoUrl\": \"https://m.media-amazon.com/images/S/example.png\",\n        \"brandName\": \"name of brand\",\n        \"customImages\": [{\n            \"assetId\": \"amzn1.assetlibrary.asset1.xxxxxx:version_v1\",\n            \"crop\": {\n                \"height\": 628,\n                \"left\": 0,\n                \"top\": 0,\n                \"width\": 1200\n            },\n            \"url\": \"https://m.media-amazon.com/images/S/example.png\"\n        }],\n        \"headline\": \"name of headline\",\n        \"landingPage\": {\n            \"type\": \"PRODUCT_LIST\",\n            \"asins\": [\n                \"B0C81DZTX4\",\n                \"B0C81CBH6K\",\n                \"B0BTHXJ718\"\n            ]\n        }\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/sb/ads/creatives/productCollectionExtended",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"sb",
+										"ads",
+										"creatives",
+										"productCollectionExtended"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "Video",
 							"protocolProfileBehavior": {
 								"disabledSystemHeaders": {
@@ -25526,6 +25656,34 @@
 							"body": "[\n    {\n        \"code\": \"SUCCESS\",\n        \"entityId\": \"ENTITYXXXXXXX\",\n        \"storeName\": \"Test Brand Seller\",\n        \"storePageInfo\": [\n            {\n                \"storePageId\": \"XXXXXX-XXXX-XXXX-XXXX-XXXXXXXX\",\n                \"storePageUrl\": \"https://www.amazon.com/stores/page/XXXXXX-XXXX-XXXX-XXXX-XXXXXXXX\",\n                \"storePageName\": \"Home\"\n            }\n        ],\n        \"brandEntityId\": \"ENTITYXXXXXXX\"\n    }\n]"
 						}
 					]
+				},
+				{
+					"name": "Insight metrics",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"startDate\": \"YYYY-MM-DD\",\n    \"endDate\": \"YYYY-MM-DD\",\n    \"dimension\": \"DATE\",\n    \"maxResult\": 1000,\n    \"metrics\": [\n        \"SCORE_LEVEL\",\n        \"RECOMMENDATIONS\",\n        \"CONTRIBUTORS\",\n        \"DWELL\",\n        \"PEER_DWELL\"\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_url}}/stores/{{brandEntityId}}/insights",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"stores",
+								"{{brandEntityId}}",
+								"insights"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
