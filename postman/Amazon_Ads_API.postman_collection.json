@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "f1ea2aa4-6f9b-48cf-9659-d788f321f377",
+		"_postman_id": "9b76ce81-9aca-4bf8-b695-04ad2c272907",
 		"name": "Amazon Ads API",
 		"description": "# Amazon Ads API Postman collection\n\nThis collection includes commonly used endpoints for the Amazon Ads API. The collection also includes pre- and post-request scripts to automate management of auth credentials.\n\nVisit the [Amazon Ads advanced tools center](https://advertising.amazon.com/API/docs/en-us/) for API documentation.\n\n## Setup\n\nTo use this collection, you will need credentials for the Amazon Ads API. For information about acquiring credentials, see the [onboarding overview for the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/onboarding/overview).\n\nFind setup instructions in the Amazon Ads advanced tools center for:\n\n- [New users of the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/getting-started/using-postman-collection)\n- [Users with an existing refresh token](https://advertising.amazon.com/API/docs/en-us/tutorials/postman) \n\n## Issues and support\n\nFor technical support for the Amazon Ads API, see [Technical support](https://advertising.amazon.com/API/docs/en-us/info/support) in the Amazon Ads advanced tools center.\n\nTo report a bug or suggest an improvement relating to this collection or the documentation, [create an issue](https://github.com/amzn/ads-advanced-tools-docs/issues/new/choose).",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -34656,6 +34656,906 @@
 							],
 							"cookie": [],
 							"body": "{\n    \"exportId\": \"NDUxYTIyMzgtZTFjMi00MDcxLTlhOTMtZDMxYjRkMzFhNzY2LFI\",\n    \"status\": \"COMPLETED\",\n    \"url\": \"https://snapshots-prod-us-east-1.s3.us-east-1.amazonaws.com/PRODUCT_AD/amzn1.application-oa2-client.xxxxxxxxxxx\",\n    \"fileSize\": 927,\n    \"urlExpiresAt\": \"2024-02-14T18:10:36.212Z\",\n    \"generatedAt\": \"2024-02-14T17:10:09.040Z\",\n    \"createdAt\": \"2024-02-14T17:10:08.288Z\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Sponsored TV",
+			"item": [
+				{
+					"name": "Campaign",
+					"item": [
+						{
+							"name": "Create Campaign",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var campaignId;",
+											"pm.test(\"Status test\", function () {",
+											"    pm.response.to.have.status(207);",
+											"    var jsonData = JSON.parse(responseBody);",
+											"        campaignId = jsonData.campaigns.success[0].campaignId;",
+											"        pm.environment.set(\"e.campaign.id\", campaignId);",
+											"        console.log(\"Campaign Id: \" + campaignId);",
+											"    ",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"user-agent": true,
+									"accept": true,
+									"accept-encoding": true,
+									"connection": true,
+									"content-type": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-AdvertiserId",
+										"value": "ENTITY3367XBOE970EG",
+										"type": "text",
+										"disabled": true
+									},
+									{
+										"key": "Authorization",
+										"value": "{{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Prefer",
+										"value": "return=representation",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"campaigns\": [{\n     \"budgetSettings\": {\n         \"budget\": {\n             \"recurrenceType\": \"DAILY\",\n             \"budgetValue\": {\n                 \"amount\": 10.00\n             }\n         }\n     },\n     \"startDate\": \"2024-09-25T00:00:00Z\",\n     \"endDate\": \"2024-09-25T00:00:00Z\",\n     \"name\": \"campaign name\",\n     \"state\": \"ENABLED\",\n     \"tags\": {\n         \"tag1\": \"value1\",\n         \"tag2\": \"value2\",\n         \"tag3\": \"value3\"\n     }\n }]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/st/campaigns",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"st",
+										"campaigns"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "List Campaign",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "{{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Prefer",
+										"value": "include=extendedData",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"campaignIdFilter\": {\n        \"include\": [\n            \"310305299990960\"\n        ]\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/st/campaigns/list",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"st",
+										"campaigns",
+										"list"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Campaign",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "{{access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"campaignIdFilter\": {\n        \"include\": [\n            \"543670711287337\"\n        ]\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/st/campaigns/delete",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"st",
+										"campaigns",
+										"delete"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Campaign",
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"user-agent": true,
+									"accept": true,
+									"accept-encoding": true,
+									"connection": true,
+									"content-type": true
+								}
+							},
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "{{access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"campaigns\": [\n        {\n            \"campaignId\": \"310305299990960\",\n            \"state\": \"PAUSED\"\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/st/campaigns",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"st",
+										"campaigns"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "AdGroup",
+					"item": [
+						{
+							"name": "Create AdGroup",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status test\", function () {",
+											"    pm.response.to.have.status(207);",
+											"    var jsonData = JSON.parse(responseBody);",
+											"    pm.environment.set(\"e.ad.group.id\", jsonData.adGroups.success[0].adGroupId);",
+											"    console.log(\"AdGroupId: \" + jsonData.adGroups.success[0].adGroupId);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "{{access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"adGroups\": [\n        {\n            \"campaignId\": \"{{campaignId}}\",\n            \"name\": \"Ad group name\",\n            \"state\": \"ENABLED\",\n            \"defaultBid\": {\n                \"bid\": 25.0\n            }\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/st/adGroups",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"st",
+										"adGroups"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "List AdGroup",
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "{{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Prefer",
+										"value": "include=extendedData",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"adGroupIdFilter\": {\n        \"include\": [\n            \"362364343252919\"\n        ]\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/st/adGroups/list",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"st",
+										"adGroups",
+										"list"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update AdGroup",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "{{access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"adGroups\": [\n        {\n            \"adGroupId\": \"527484903577467\",\n            \"state\":\"PAUSED\"\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/st/adGroups",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"st",
+										"adGroups"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete AdGroup",
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "{{access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"adGroupIdFilter\": {\n        \"include\": [\n            \"426258550878555\"\n        ]\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/st/adGroups/delete",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"st",
+										"adGroups",
+										"delete"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Ad",
+					"item": [
+						{
+							"name": "Create Ad",
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true,
+									"accept-encoding": true,
+									"connection": true,
+									"content-type": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "{{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Prefer",
+										"value": "return=representation",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"ads\": [\n        {\n            \"adGroupId\": \"{{adGroupId}}\",\n            \"state\": \"ENABLED\",\n            \"landingPageType\": \"ASIN_DP\",\n            \"landingPageValue\": \"B000K2NW08\"\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/st/ads",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"st",
+										"ads"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "List Ad",
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"user-agent": true,
+									"accept": true,
+									"accept-encoding": true,
+									"connection": true,
+									"content-type": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "{{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Prefer",
+										"value": "include=extendedData",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"adIdFilter\": {\n        \"include\": [\n            \"395270913469474\"\n        ]\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/st/ads/list",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"st",
+										"ads",
+										"list"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Ad",
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"user-agent": true,
+									"accept": true,
+									"accept-encoding": true,
+									"connection": true,
+									"content-type": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "{{access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"adIdFilter\": {\n    \"include\": [\n      \"292617398029974\"\n    ]\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/st/ads/delete",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"st",
+										"ads",
+										"delete"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Ad",
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true,
+									"accept-encoding": true,
+									"connection": true
+								}
+							},
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "{{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Prefer",
+										"value": "return=representation",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"ads\": [\n        {\n            \"adId\": \"292617398029974\",\n            \"landingPageType\": \"ASIN_DP\",\n            \"landingPageValue\": \"B09XZR7GC1\",\n            \"state\": \"PAUSED\"\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/st/ads",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"st",
+										"ads"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Creatives",
+					"item": [
+						{
+							"name": "Create Creatives",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "{{access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"creatives\": [\n        {\n            \"assetVersion\": \"version_v1\",\n            \"adGroupId\": \"{{adGroupId}}\",\n            \"assetId\": \"amzn1.assetlibrary.asset1.xxxxxx\"\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/st/creatives",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"st",
+										"creatives"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "List Creatives",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "{{access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"creativeIdFilter\": {\n        \"include\": [\n            \"870187168950667895\"\n        ]\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/st/creatives/list",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"st",
+										"creatives",
+										"list"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "List Creatives Moderation",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "{{access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"creativeIdFilter\": {\n        \"include\": [\n            \"870187168950667895\"\n        ]\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/st/creatives/moderations/list",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"st",
+										"creatives",
+										"moderations",
+										"list"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "List Creatives Moderations Policy Violations",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "{{access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"creativeIdFilter\": {\n        \"include\": [\n            \"870187168950667895\"\n        ]\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/st/creatives/moderations/policyViolations/list",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"st",
+										"creatives",
+										"moderations",
+										"policyViolations",
+										"list"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Preview Creatives",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}",
+										"type": "text"
+									},
+									{
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "{{access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"creativeId\": \"869860752003455077\",\n    \"previewConfiguration\": {\n        \"callToAction\": \"SHOP_NOW\",\n        \"asin\": \"B001PYUTII\"\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/st/creatives/preview",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"st",
+										"creatives",
+										"preview"
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				}
