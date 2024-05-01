@@ -14,13 +14,14 @@ The Amazon Ads API Postman collection currently supports the following features:
 - GET profiles
 - GET manager accounts
 - Sponsored Products campaign management (version 3)
+- Sponsored Brands campaign management (version 4)
 - Sponsored ads reporting
     - Version 3
     - Version 2
 - DSP reporting
 - Sponsored ads snapshots 
 - Test accounts
-- Amazon Marketing Stream beta
+- Amazon Marketing Stream
 - Product metadata 
 - Sponsored ads budget usage
 - Sponsored ads budget rules
@@ -29,6 +30,7 @@ The Amazon Ads API Postman collection currently supports the following features:
 - Stores
 - Locations
 - Sponsored Display
+- Sponsored TV
 - Exports
 
 ## Setup

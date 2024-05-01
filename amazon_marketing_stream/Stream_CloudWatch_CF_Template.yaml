@@ -1,0 +1,182 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  This CloudFormation template creates a CloudWatch dashboard, SNS topic, alarms
+  for monitoring an Amazon SQS queue. It takes the SQS queue name and email address as input parameters.
+
+Parameters:
+  SQSQueueName:
+    Type: String
+    Description: The name of the Amazon SQS queue to monitor.
+  EmailAddress:
+    Type: String
+    Description: The email address to receive notifications.
+
+Resources:
+  SNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Endpoint: !Ref EmailAddress
+          Protocol: email
+
+  SQSQueueDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: !Sub 'SQS-Queue-${SQSQueueName}-Monitoring'
+      DashboardBody: !Sub |
+        {
+          "widgets": [
+            {
+              "type": "metric",
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 6,
+              "properties": {
+                "metrics": [
+                  [ "AWS/SQS", "ApproximateNumberOfMessagesVisible", "QueueName", "${SQSQueueName}" ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${AWS::Region}",
+                "title": "Messages in Queue",
+                "stat": "Sum",
+                "period": 300
+              }
+            },
+            {
+              "type": "metric",
+              "x": 12,
+              "y": 0,
+              "width": 12,
+              "height": 6,
+              "properties": {
+                "metrics": [
+                  [ "AWS/SQS", "ApproximateAgeOfOldestMessage", "QueueName", "${SQSQueueName}" ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${AWS::Region}",
+                "title": "Age of Oldest Message",
+                "stat": "Maximum",
+                "period": 300
+              }
+            },
+            {
+              "type": "metric",
+              "x": 0,
+              "y": 6,
+              "width": 24,
+              "height": 6,
+              "properties": {
+                "metrics": [
+                  [ "AWS/SQS", "NumberOfMessagesDeleted", "QueueName", "${SQSQueueName}" ],
+                  [ ".", "NumberOfMessagesSent", ".", "." ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${AWS::Region}",
+                "title": "Messages Deleted and Sent",
+                "stat": "Sum",
+                "period": 300
+              }
+            }
+          ]
+        }
+
+  MessageVisibleAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub 'SQS-Queue-${SQSQueueName}-MessageVisibleAlarm'
+      AlarmDescription: 'Alarm for a high number of visible messages in the SQS queue'
+      MetricName: ApproximateNumberOfMessagesVisible
+      Namespace: AWS/SQS
+      Statistic: Maximum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 10000
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: QueueName
+          Value: !Ref SQSQueueName
+      AlarmActions:
+        - !Ref SNSTopic
+      # This alarm is triggered when the number of visible messages in the queue exceeds 10,000.
+      # The threshold of 10,000 is based on the assumption that a backlog of more than 10,000 messages
+      # could indicate that your application is unable to keep up, and processing is getting delayed significantly.
+      # This threshold should be adjusted based on your expected maximum queue size and traffic patterns.
+
+  OldestMessageAgeAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub 'SQS-Queue-${SQSQueueName}-OldestMessageAgeAlarm'
+      AlarmDescription: 'Alarm for a high age of the oldest message in the SQS queue'
+      MetricName: ApproximateAgeOfOldestMessage
+      Namespace: AWS/SQS
+      Statistic: Maximum
+      Period: 3600
+      EvaluationPeriods: 1
+      Threshold: 3600 # Threshold set to 1 hour (3600 seconds)
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: QueueName
+          Value: !Ref SQSQueueName
+      AlarmActions:
+        - !Ref SNSTopic
+      # This alarm is triggered when the age of the oldest message in the queue exceeds 1 hour (3600 seconds).
+      # The one-hour processing threshold is set because Amazon marketing data is typically delivered hourly. We expect messages to be processed within this timeframe. 
+      # having a message stuck for over 1 hour indicates an issue worth investigating.
+      # This threshold can be adjusted based on your expected message processing times.
+
+  MessageDeletedDivergenceAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub 'SQS-Queue-${SQSQueueName}-MessageDeletedDivergenceAlarm'
+      AlarmDescription: 'Alert when a significant divergence is observed between the number of messages sent to the queue and the number of messages deleted from the queue within an hour. This could indicate an issue with your application processing messages successfully.'
+      TreatMissingData: notBreaching
+      Metrics:
+        - Id: e1
+          Expression: 'IF((m1-m2) > 100,1,0)'
+          Label: MessageDeletedDivergenceAlarm
+          # This expression evaluates to 1 (alarm state) if the difference between the number of messages sent (m1)
+          # and the number of messages deleted (m2) exceeds 100 within the evaluation period (1 hour).
+          # This is based on the assumption that a significant divergence between sent and deleted messages
+          # could indicate an issue with your application processing messages successfully.
+        - Id: m1
+          MetricStat:
+            Metric:
+              Namespace: AWS/SQS
+              MetricName: NumberOfMessagesSent
+              Dimensions:
+                - Name: QueueName
+                  Value: !Ref SQSQueueName
+            Period: 3600 # Evaluation period is 1 hour (3600 seconds)
+            Stat: Minimum
+            Unit: Count
+          ReturnData: false
+        - Id: m2
+          MetricStat:
+            Metric:
+              Namespace: AWS/SQS
+              MetricName: NumberOfMessagesDeleted
+              Dimensions:
+                - Name: QueueName
+                  Value: !Ref SQSQueueName
+            Period: 3600 # Evaluation period is 1 hour (3600 seconds)
+            Stat: Minimum
+            Unit: Count
+          ReturnData: false
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      # The alarm is triggered if the result of the expression (e1) is greater than or equal to 1.
+      # This is based on the assumption that messages are expected to be processed every hour, as Amazon Marketing Stream is meant for hourly data.
+      # If your processing cycle is different, please adjust the threshold and evaluation period accordingly.
+
+Outputs:
+  DashboardURL:
+    Description: The URL of the CloudWatch dashboard
+    Value: !Sub 'https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#dashboards:name=${SQSQueueDashboard}'
+  SNSTopicArn:
+    Description: The ARN of the SNS topic
+    Value: !Ref SNSTopic

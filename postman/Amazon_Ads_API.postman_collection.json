@@ -1,9 +1,10 @@
 {
 	"info": {
-		"_postman_id": "9b76ce81-9aca-4bf8-b695-04ad2c272907",
+		"_postman_id": "20a77764-f77c-4e43-babf-d46a8e3f7999",
 		"name": "Amazon Ads API",
 		"description": "# Amazon Ads API Postman collection\n\nThis collection includes commonly used endpoints for the Amazon Ads API. The collection also includes pre- and post-request scripts to automate management of auth credentials.\n\nVisit the [Amazon Ads advanced tools center](https://advertising.amazon.com/API/docs/en-us/) for API documentation.\n\n## Setup\n\nTo use this collection, you will need credentials for the Amazon Ads API. For information about acquiring credentials, see the [onboarding overview for the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/onboarding/overview).\n\nFind setup instructions in the Amazon Ads advanced tools center for:\n\n- [New users of the Amazon Ads API](https://advertising.amazon.com/API/docs/en-us/getting-started/using-postman-collection)\n- [Users with an existing refresh token](https://advertising.amazon.com/API/docs/en-us/tutorials/postman) \n\n## Issues and support\n\nFor technical support for the Amazon Ads API, see [Technical support](https://advertising.amazon.com/API/docs/en-us/info/support) in the Amazon Ads advanced tools center.\n\nTo report a bug or suggest an improvement relating to this collection or the documentation, [create an issue](https://github.com/amzn/ads-advanced-tools-docs/issues/new/choose).",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28917689"
 	},
 	"item": [
 		{
@@ -5844,7 +5845,7 @@
 					},
 					"response": [
 						{
-							"name": "sp-traffic",
+							"name": "sp-traffic + SQS",
 							"originalRequest": {
 								"method": "POST",
 								"header": [
@@ -5897,7 +5898,7 @@
 							"body": "{\n  \"clientRequestToken\": \"stream-sp-traffic-test-123456\",\n  \"subscriptionId\": \"xxxxxxxxxxxxxxx\"\n}"
 						},
 						{
-							"name": "sp-conversion",
+							"name": "sp-conversion + SQS",
 							"originalRequest": {
 								"method": "POST",
 								"header": [
@@ -5950,7 +5951,7 @@
 							"body": "{\n  \"clientRequestToken\": \"stream-sp-conversion-test-123456\",\n  \"subscriptionId\": \"xxxxxxxxxxxxxxx\"\n}"
 						},
 						{
-							"name": "budget-usage",
+							"name": "budget-usage +SQS",
 							"originalRequest": {
 								"method": "POST",
 								"header": [
@@ -6001,6 +6002,107 @@
 							],
 							"cookie": [],
 							"body": "{\n  \"clientRequestToken\": \"stream-budget-usage-test-123456\",\n  \"subscriptionId\": \"xxxxxxxxxxxxxxx\"\n}"
+						},
+						{
+							"name": "sp-conversion + Firehose",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"description": "(Required) The identifier of a client associated with a \"Login with Amazon\" account.",
+										"key": "Amazon-Advertising-API-ClientId",
+										"value": "{{client_id}}"
+									},
+									{
+										"description": "(Required) The identifier of a profile associated with the advertiser account. Use GET method on Profiles resource to list profiles associated with the access token passed in the HTTP Authorization header.",
+										"key": "Amazon-Advertising-API-Scope",
+										"value": "{{profileId}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/vnd.MarketingStreamSubscriptions.StreamSubscriptionResource.v1.0+json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.MarketingStreamSubscriptions.StreamSubscriptionResource.v1.0+json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"clientRequestToken\": \"stringstringstringstri\",\n  \"dataSetId\": \"sp-conversion\",\n  \"destination\": {\n    \"firehoseDestination\": {\n      \"deliveryStreamArn\": \"arn:aws:firehose:us-east-1:379073720614:deliverystream/NA-sp-conversion-StreamDestinationFirehoseSpConversionNA\",\n      \"subscriptionRoleArn\": \"arn:aws:iam::379073720614:role/NA-sp-conversion-FirehoseSubscriptionRole\",\n      \"subscriberRoleArn\": \"arn:aws:iam::379073720614:role/NA-sp-conversion-FirehoseSubscriberRole\"\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_url}}/streams/subscriptions",
+									"host": [
+										"{{api_url}}"
+									],
+									"path": [
+										"streams",
+										"subscriptions"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Server",
+									"value": "Server"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 01 May 2024 21:03:47 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "104"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "x-amz-rid",
+									"value": "CV02QTEGW2ADTDPMSES4"
+								},
+								{
+									"key": "x-amzn-RequestId",
+									"value": "819e2bb1-84f1-45ca-bd75-ac2e23a77807"
+								},
+								{
+									"key": "x-amz-apigw-id",
+									"value": "XHAoDHdRIAMFSfQ="
+								},
+								{
+									"key": "X-Amzn-Trace-Id",
+									"value": "Root=1-6632ae33-c822441a9fb54a1bba1a8969"
+								},
+								{
+									"key": "Vary",
+									"value": "Content-Type,Accept-Encoding,User-Agent"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=47474747; includeSubDomains; preload"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"clientRequestToken\": \"stringstringstringstri\",\n    \"subscriptionId\": \"amzn1.fead.cs1.kDOCOan12sYjMoSFVNZLHg\"\n}"
 						}
 					]
 				},
@@ -6059,14 +6161,16 @@
 								"method": "GET",
 								"header": [
 									{
-										"description": "(Required) The identifier of a client associated with a \"Login with Amazon\" account.",
 										"key": "Amazon-Advertising-API-ClientId",
-										"value": "aliquip cillum officia ea"
+										"value": "{{client_id}}"
 									},
 									{
-										"description": "(Required) The identifier of a profile associated with the advertiser account. Use GET method on Profiles resource to list profiles associated with the access token passed in the HTTP Authorization header.",
 										"key": "Amazon-Advertising-API-Scope",
-										"value": "consequat Ut dolore"
+										"value": "{{profileId}}"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.MarketingStreamSubscriptions.StreamSubscriptionResource.v1.0+json"
 									},
 									{
 										"key": "Authorization",
@@ -6075,19 +6179,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{api_url}}/streams/subscriptions?maxResults=2",
+									"raw": "{{api_url}}/streams/subscriptions",
 									"host": [
 										"{{api_url}}"
 									],
 									"path": [
 										"streams",
 										"subscriptions"
-									],
-									"query": [
-										{
-											"key": "maxResults",
-											"value": "2"
-										}
 									]
 								}
 							},
@@ -6096,12 +6194,52 @@
 							"_postman_previewlanguage": "json",
 							"header": [
 								{
+									"key": "Server",
+									"value": "Server"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 01 May 2024 20:27:39 GMT"
+								},
+								{
 									"key": "Content-Type",
-									"value": "application/vnd.MarketingStreamSubscriptions.StreamSubscriptionResource.v1.0+json"
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "940"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "x-amz-rid",
+									"value": "830EGGJG4C1EQA40EY8V"
+								},
+								{
+									"key": "x-amzn-RequestId",
+									"value": "779d9da2-26d1-439c-950b-35666fcd6f21"
+								},
+								{
+									"key": "x-amz-apigw-id",
+									"value": "XG7VSGZEIAMFVIA="
+								},
+								{
+									"key": "X-Amzn-Trace-Id",
+									"value": "Root=1-6632a5bb-689c0bd5aaeb0c7f5181cd8e"
+								},
+								{
+									"key": "Vary",
+									"value": "Content-Type,Accept-Encoding,User-Agent"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=47474747; includeSubDomains; preload"
 								}
 							],
 							"cookie": [],
-							"body": "{\n  \"subscriptions\": [\n    {\n      \"createdDate\": \"1954-09-09T11:09:32.877Z\",\n      \"dataSetId\": \"budget-usage\",\n      \"destinationArn\": \"etanim nisireprehenderit commodo\",\n      \"status\": \"SUSPENDED\",\n      \"subscriptionId\": \"anim reprehenderit\",\n      \"updatedDate\": \"1951-07-18T13:45:38.665Z\",\n      \"notes\": \"magna eiusmod\"\n    },\n    {\n      \"createdDate\": \"1993-05-26T17:50:38.666Z\",\n      \"dataSetId\": \"sp-conversion\",\n      \"destinationArn\": \"dolore anim nullacupidatat velit ad laboris dolor\",\n      \"status\": \"SUSPENDED\",\n      \"subscriptionId\": \"laboris non dolor sint\",\n      \"updatedDate\": \"2007-01-09T16:59:45.442Z\",\n      \"notes\": \"deserunt dolor exercitation magna\"\n    }\n  ],\n  \"nextToken\": \"xxxxxxxxxxx\"\n}"
+							"body": "{\n    \"subscriptions\": [\n        {\n            \"createdDate\": \"2024-05-01T14:43:19.136Z\",\n            \"dataSetId\": \"sp-traffic\",\n            \"destination\": {\n                \"firehoseDestination\": {\n                    \"deliveryStreamArn\": \"arn:aws:firehose:us-east-1:xxxxxxx:deliverystream/NA-sp-traffic-sp-traffic-na\",\n                    \"subscriberRoleArn\": \"arn:aws:iam::xxxxxxx:role/NA-sp-traffic-FirehoseSubscriberRole\",\n                    \"subscriptionRoleArn\": \"arn:aws:iam::xxxxxxx:role/NA-sp-traffic-FirehoseSubscriptionRole\"\n                }\n            },\n            \"notes\": \"\",\n            \"status\": \"ACTIVE\",\n            \"subscriptionId\": \"amzn1.fead.cs1.j5VQ2r3VDddWK2e_ArVApg\",\n            \"updatedDate\": \"2024-05-01T14:43:23.476Z\"\n        },\n        {\n            \"createdDate\": \"2024-05-01T14:46:26.643Z\",\n            \"dataSetId\": \"sp-traffic\",\n            \"destination\": {\n                \"sqsDestination\": {\n                    \"queueArn\": \"arn:aws:sqs:us-east-1:xxxxxx:StreamDestinationQueue\"\n                }\n            },\n            \"destinationArn\": \"arn:aws:sqs:us-east-1:xxxxxx:StreamDestinationQueue\",\n            \"notes\": \"string\",\n            \"status\": \"PENDING_CONFIRMATION\",\n            \"subscriptionId\": \"amzn1.fead.cs1.nQHVYtEaQMEqCWGBX31DHQ\",\n            \"updatedDate\": \"2024-05-01T14:46:30.02Z\"\n        }\n    ]\n}"
 						}
 					]
 				},
@@ -6167,14 +6305,16 @@
 								"method": "GET",
 								"header": [
 									{
-										"description": "(Required) The identifier of a client associated with a \"Login with Amazon\" account.",
 										"key": "Amazon-Advertising-API-ClientId",
 										"value": "{{client_id}}"
 									},
 									{
-										"description": "(Required) The identifier of a profile associated with the advertiser account. Use GET method on Profiles resource to list profiles associated with the access token passed in the HTTP Authorization header.",
 										"key": "Amazon-Advertising-API-Scope",
 										"value": "{{profileId}}"
+									},
+									{
+										"key": "Accept",
+										"value": "application/vnd.MarketingStreamSubscriptions.StreamSubscriptionResource.v1.0+json"
 									},
 									{
 										"key": "Authorization",
@@ -6195,7 +6335,7 @@
 									"variable": [
 										{
 											"key": "subscriptionId",
-											"value": "xxxxxxxxxxxx"
+											"value": "{{subscriptionId}}"
 										}
 									]
 								}
@@ -6205,12 +6345,52 @@
 							"_postman_previewlanguage": "json",
 							"header": [
 								{
+									"key": "Server",
+									"value": "Server"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 01 May 2024 21:04:57 GMT"
+								},
+								{
 									"key": "Content-Type",
-									"value": "application/vnd.MarketingStreamSubscriptions.StreamSubscriptionResource.v1.0+json"
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "578"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "x-amz-rid",
+									"value": "1P20SPM747HAZC236A1D"
+								},
+								{
+									"key": "x-amzn-RequestId",
+									"value": "98b3080d-5b70-48d8-8316-386fed2bf12a"
+								},
+								{
+									"key": "x-amz-apigw-id",
+									"value": "XHAzCG6_oAMF5RQ="
+								},
+								{
+									"key": "X-Amzn-Trace-Id",
+									"value": "Root=1-6632ae79-843db2c1b3bfe550d42d0509"
+								},
+								{
+									"key": "Vary",
+									"value": "Content-Type,Accept-Encoding,User-Agent"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=47474747; includeSubDomains; preload"
 								}
 							],
 							"cookie": [],
-							"body": "{\n  \"subscription\": {\n    \"createdDate\": \"1995-12-19T01:37:51.432Z\",\n    \"dataSetId\": \"sp-conversion\",\n    \"destinationArn\": \"xxxxxxxxxxxxx\",\n    \"status\": \"PENDING_CONFIRMATION\",\n    \"subscriptionId\": \"xxxxxxxxxxxxxx\",\n    \"updatedDate\": \"2015-02-05T11:12:31.839Z\",\n    \"notes\": \"sp-conversion subscription\"\n  }\n}"
+							"body": "{\n    \"subscription\": {\n        \"createdDate\": \"2024-05-01T21:03:47.714Z\",\n        \"dataSetId\": \"sp-conversion\",\n        \"destination\": {\n            \"firehoseDestination\": {\n                \"deliveryStreamArn\": \"arn:aws:firehose:us-east-1:xxxxxxxx:deliverystream/NA-sp-conversion-StreamDestinationFirehoseSpConversionNA\",\n                \"subscriberRoleArn\": \"arn:aws:iam::xxxxxxxx:role/NA-sp-conversion-FirehoseSubscriberRole\",\n                \"subscriptionRoleArn\": \"arn:aws:iam::xxxxxx:role/NA-sp-conversion-FirehoseSubscriptionRole\"\n            }\n        },\n        \"notes\": \"\",\n        \"status\": \"ACTIVE\",\n        \"subscriptionId\": \"amzn1.fead.cs1.kDOCOan12sYjMoSFVNZLHg\",\n        \"updatedDate\": \"2024-05-01T21:03:50.027Z\"\n    }\n}"
 						}
 					]
 				},
