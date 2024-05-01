@@ -1,0 +1,365 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+  StreamDestinationFirehose:
+    Type: String
+    Description: Name of the data stream for receiving data
+    Default: StreamDestinationFirehoseDefaultName
+
+  StreamDatasetId:
+    Type: String
+    Description: Please select the stream dataset for which you wish to receive the data
+    AllowedValues:
+      - sp-traffic
+      - sp-conversion
+      - budget-usage
+      - sd-traffic      
+      - sd-conversion
+      - sponsored-ads-campaign-diagnostics-recommendations
+      - campaigns
+      - adgroups
+      - ads
+      - targets
+      - sb-traffic
+      - sb-conversion
+      - sb-clickstream
+      - sb-rich-media
+      - adsp-campaigns
+      - adsp-campaign-flights
+      - adsp-adgroups
+      - adsp-adgroup-targets
+      - sp-budget-recommendations
+
+  StreamRealm:
+    Type: String
+    Description: Select the aws region for your stream destination
+    AllowedValues:
+      - NA
+      - EU
+      - FE
+      
+  S3Storage:
+    Description: Choose a unique S3 bucket name for your stream destination
+    Type: String
+    MinLength: 1
+    MaxLength: 255
+    AllowedPattern: '^[a-zA-Z][-a-zA-Z0-9]*$'
+Mappings:
+  Region:
+    NA:
+      Region: us-east-1
+    EU:
+      Region: eu-west-1
+    FE:
+      Region: us-west-2
+
+  NA:
+    sp-traffic:
+      Account: 906013806264
+    sp-conversion:
+      Account: 802324068763
+    budget-usage:
+      Account: 055588217351
+    sd-traffic:
+      Account: 370941301809
+    sd-conversion:
+      Account: 877712924581
+    sponsored-ads-campaign-diagnostics-recommendations:
+      Account: 084590724871
+    campaigns:
+      Account: 570159413969
+    adgroups:
+      Account: 118846437111
+    ads:
+      Account: 305370293182
+    targets:
+      Account: 644124924521
+    sb-traffic:
+      Account: 709476672186
+    sb-conversion: 
+      Account: 154357381721
+    sb-clickstream:
+      Account: 091028706140
+    sb-rich-media:
+      Account: 010312603579
+    adsp-campaigns:
+      Account: 153247821255
+    adsp-campaign-flights:
+      Account: 700228448367
+    adsp-adgroups:
+      Account: 222778752755
+    adsp-adgroup-targets:
+      Account: 419834811630
+    sp-budget-recommendations:
+      Account: 678715897637
+  EU:
+    sp-traffic:
+      Account: 668473351658
+    sp-conversion:
+      Account: 562877083794
+    budget-usage:
+      Account: 675750596317
+    sd-traffic:
+      Account: 947153514089
+    sd-conversion:
+      Account: 664093967423 
+    sponsored-ads-campaign-diagnostics-recommendations:
+      Account: 059061853903
+    campaigns:
+      Account: 834862128520
+    adgroups:
+      Account: 130948361130
+    ads:
+      Account: 648558082147
+    targets:
+      Account: 503759481754
+    sb-traffic:
+      Account: 623198756881
+    sb-conversion: 
+      Account: 195770945541
+    sb-clickstream:
+      Account: 219513501272
+    sb-rich-media:
+      Account: 662188760626
+    adsp-campaigns:
+      Account: 599052634802
+    adsp-campaign-flights:
+      Account: 633559263003
+    adsp-adgroups:
+      Account: 682324742468
+    adsp-adgroup-targets:
+      Account: 764057072099
+    sp-budget-recommendations:
+      Account: 158915609581
+  FE:
+    sp-traffic:
+      Account: 074266271188
+    sp-conversion:
+      Account: 622939981599
+    budget-usage:
+      Account: 100899330244
+    sd-traffic:
+      Account: 310605068565
+    sd-conversion:
+      Account: 818973306977
+    sponsored-ads-campaign-diagnostics-recommendations:
+      Account: 489995134625
+    campaigns:
+      Account: 527383333093
+    adgroups:
+      Account: 668585072850
+    ads:
+      Account: 802070757281
+    targets:
+      Account: 248074939493
+    sb-traffic:
+      Account: 485899199471
+    sb-conversion: 
+      Account: 112347756703
+    sb-clickstream:
+      Account: 632322331982
+    sb-rich-media:
+      Account: 618223300352
+    adsp-campaigns:
+      Account: 216875695489
+    adsp-campaign-flights:
+      Account: 451213518288
+    adsp-adgroups:
+      Account: 360850786875
+    adsp-adgroup-targets:
+      Account: 178122609971
+    sp-budget-recommendations:
+      Account: 007292432803
+Rules:
+  NA:
+    RuleCondition:
+      Fn::Equals: [ !Ref StreamRealm, NA ]
+    Assertions:
+      - Assert:
+          Fn::Equals: [ !Ref AWS::Region, us-east-1 ]
+  EU:
+    RuleCondition:
+      Fn::Equals: [ !Ref StreamRealm, EU ]
+    Assertions:
+      - Assert:
+          Fn::Equals: [ !Ref AWS::Region, eu-west-1 ]
+  FE:
+    RuleCondition:
+      Fn::Equals: [ !Ref StreamRealm, FE ]
+    Assertions:
+      - Assert:
+          Fn::Equals: [ !Ref AWS::Region, us-west-2 ]
+Resources:
+  StreamDestinationFirehoseName:
+    Type: 'AWS::KinesisFirehose::DeliveryStream'
+    Properties:
+      DeliveryStreamName: !Sub ${StreamRealm}-${StreamDatasetId}-${StreamDestinationFirehose}
+      DeliveryStreamType: 'DirectPut'
+      ExtendedS3DestinationConfiguration:
+        BucketARN: !GetAtt S3Bucket.Arn
+        BufferingHints:
+          SizeInMBs: 5
+          IntervalInSeconds: 300
+        CloudWatchLoggingOptions:
+          Enabled: true
+          LogGroupName: !Sub ${StreamRealm}-${StreamDatasetId}-${StreamDestinationFirehose}l-extendedS3-log
+          LogStreamName: 'S3Delivery'
+        CompressionFormat: 'UNCOMPRESSED'
+        Prefix: !Join
+          - ''
+          - - !Ref StreamDestinationFirehose
+            - '/year=!{timestamp:YYYY}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/'
+        ErrorOutputPrefix: !Join
+          - ''
+          - - !Ref StreamDestinationFirehose
+            - 'error/!{firehose:error-output-type}/year=!{timestamp:YYYY}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/'
+
+        RoleARN: !GetAtt FirehoseDeliveryRole.Arn
+        ProcessingConfiguration:
+          Enabled: false
+        S3BackupMode: 'Disabled'
+  S3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Ref S3Storage
+
+  FirehoseDeliveryRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join ['-', [!Ref StreamRealm, !Ref StreamDatasetId, FirehoseDeliveryRole]]
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          Effect: Allow
+          Principal:
+            Service: firehose.amazonaws.com
+          Action: 'sts:AssumeRole'
+
+  FirehoseDeliveryPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Join ['-', [!Ref StreamRealm, !Ref StreamDatasetId, FirehoseDeliveryPolicy]] 
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - 's3:AbortMultipartUpload'
+              - 's3:GetBucketLocation'
+              - 's3:GetObject'
+              - 's3:ListBucket'
+              - 's3:ListBucketMultipartUploads'
+              - 's3:PutObject'
+            Resource: !Join
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Sub '${S3Storage}'
+                - '/*'
+          - Effect: Allow
+            Action: 'logs:PutLogEvents'
+            Resource:
+              - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/kinesisfirehose/${StreamDestinationFirehose}:log-stream:*'
+
+      Roles:
+        - !Ref FirehoseDeliveryRole
+
+  FirehoseSubscriptionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join ['-', [!Ref StreamRealm, !Ref StreamDatasetId, FirehoseSubscriptionRole]] 
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: sns.amazonaws.com
+          Action: 'sts:AssumeRole'
+        - Effect: Allow
+          Principal:
+            AWS:
+             - arn:aws:iam::926844853897:role/ReviewerRole
+          Action: 'sts:AssumeRole'
+
+  FirehoseSubscriptionRolePolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Join ['-', [!Ref StreamRealm, !Ref StreamDatasetId, FirehoseSubscriptionRolePolicy]]
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+             - firehose:DescribeDeliveryStream
+             - firehose:ListTagsForDeliveryStream
+             - firehose:ListDeliveryStreams
+             - firehose:PutRecord
+             - firehose:PutRecordBatch
+            Resource: !GetAtt StreamDestinationFirehoseName.Arn
+      Roles:
+        - !Ref FirehoseSubscriptionRole
+
+  
+  FirehoseSubscriberRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join ['-', [!Ref StreamRealm, !Ref StreamDatasetId, FirehoseSubscriberRole]]
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Principal:
+            AWS:
+             - arn:aws:iam::926844853897:role/SubscriberRole
+          Action: 
+            - sts:AssumeRole
+            - sts:TagSession
+
+  FirehoseSubscriberRolePolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Join ['-', [!Ref StreamRealm, !Ref StreamDatasetId, FirehoseSubscriberRolePolicy]]
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+             - iam:PassRole
+            Resource: !GetAtt FirehoseSubscriptionRole.Arn
+          - Effect: Allow
+            Action: 
+              - sns:Subscribe
+              - sns:Unsubscribe
+            Resource: !Join 
+              - ':'
+              - - "arn:aws:sns"
+                - !FindInMap 
+                  - Region
+                  - !Ref 'StreamRealm'
+                  - Region
+                - !FindInMap 
+                  - !Ref 'StreamRealm'
+                  - !Ref 'StreamDatasetId'
+                  - Account
+                - "*"
+      Roles:
+        - !Ref FirehoseSubscriberRole
+
+Outputs:
+  StreamDestinationFirehoseName:
+    Value: !Ref StreamDestinationFirehoseName
+
+  S3Bucket:
+    Value:
+      Fn::GetAtt: [S3Bucket, Arn]
+
+  FirehoseDeliveryRole:
+    Value: !Ref FirehoseDeliveryRole
+
+  FirehoseSubscriptionRole:
+    Value:
+      Fn::GetAtt: [FirehoseSubscriptionRole, Arn]
+
+  FirehoseSubscriberRole:
+    Value:
+      Fn::GetAtt: [FirehoseSubscriberRole, Arn]
+
