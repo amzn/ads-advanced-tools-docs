@@ -189,7 +189,14 @@ Rules:
     Assertions:
       - Assert:
           Fn::Equals: [ !Ref AWS::Region, us-west-2 ]
+
 Resources:
+  FirehoseLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Join ['-', [!Ref StreamRealm, !Ref StreamDatasetId, !Ref StreamDestinationFirehose, 'extendedS3Log']]
+      RetentionInDays: 30
+
   StreamDestinationFirehoseName:
     Type: 'AWS::KinesisFirehose::DeliveryStream'
     Properties:
@@ -202,7 +209,7 @@ Resources:
           IntervalInSeconds: 300
         CloudWatchLoggingOptions:
           Enabled: true
-          LogGroupName: !Sub ${StreamRealm}-${StreamDatasetId}-${StreamDestinationFirehose}l-extendedS3-log
+          LogGroupName: !Join ['-', [!Ref StreamRealm, !Ref StreamDatasetId, !Ref StreamDestinationFirehose, 'extendedS3Log']]
           LogStreamName: 'S3Delivery'
         CompressionFormat: 'UNCOMPRESSED'
         Prefix: !Join
@@ -258,7 +265,8 @@ Resources:
           - Effect: Allow
             Action: 'logs:PutLogEvents'
             Resource:
-              - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/kinesisfirehose/${StreamDestinationFirehose}:log-stream:*'
+              - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${StreamRealm}-${StreamDatasetId}-${StreamDestinationFirehose}-extendedS3Log:log-stream:*'
+
 
       Roles:
         - !Ref FirehoseDeliveryRole
