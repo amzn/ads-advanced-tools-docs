@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-If you need help troubleshooting a problem with the Amazon Ads API, visit the [Amazon Ads API service desk](https://amzn-clicks.atlassian.net/servicedesk/customer/portal/2/group/2). Issues are for reporting documentation bugs and requesting enhancements only.
+If you need help troubleshooting a problem with the Amazon Ads API, contact our support team at [ads-api-support@amazon.com](mailto:ads-api-support@amazon.com). For help with onboarding, visit the [Amazon Ads API service desk](https://amzn-clicks.atlassian.net/servicedesk/customer/portal/2/group/2). Issues are for reporting documentation bugs and requesting enhancements only.
 
 **Describe the bug**
 A clear and concise description of what the bug is.
