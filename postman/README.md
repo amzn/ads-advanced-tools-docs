@@ -32,6 +32,7 @@ The Amazon Ads API Postman collection currently supports the following features:
 - Sponsored Display
 - Sponsored TV
 - Exports
+- Partner opportunities
 
 ## Setup
 

@@ -32907,6 +32907,112 @@
 					]
 				}
 			]
+		},
+		{
+			"name": "Partner opportunities",
+			"item": [
+				{
+					"name": "List opportunities",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Amazon-Advertising-API-ClientId",
+								"value": "{{client_id}}",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Amazon-Advertising-API-Manager-Account",
+								"value": "{{manager_account_id}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/vnd.partneropportunity.v1+json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://advertising-api.amazon.com/partnerOpportunities?maxResults=10&locale=en_US",
+							"protocol": "https",
+							"host": [
+								"advertising-api",
+								"amazon",
+								"com"
+							],
+							"path": [
+								"partnerOpportunities"
+							],
+							"query": [
+								{
+									"key": "maxResults",
+									"value": "10"
+								},
+								{
+									"key": "locale",
+									"value": "en_US"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get opportunity file",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Amazon-Advertising-API-ClientId",
+								"value": "{{client_id}}",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Amazon-Advertising-API-Manager-Account",
+								"value": "{{manager_account_id}}",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/vnd.partneropportunity.v1+json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://advertising-api.amazon.com/partnerOpportunities/:opportunity_id/file",
+							"protocol": "https",
+							"host": [
+								"advertising-api",
+								"amazon",
+								"com"
+							],
+							"path": [
+								"partnerOpportunities",
+								":opportunity_id",
+								"file"
+							],
+							"query": [
+								{
+									"key": "fileFormat",
+									"value": "CSV",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"event": [
