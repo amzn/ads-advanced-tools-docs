@@ -30,6 +30,10 @@ Parameters:
       - adsp-adgroups
       - adsp-adgroup-targets
       - sp-budget-recommendations
+      - adsp-traffic
+      - adsp-conversion 
+      - adsp-clickstream
+      - adsp-rich-media
 
   StreamRealm:
     Type: String
@@ -135,6 +139,14 @@ Mappings:
       Account: 419834811630
     sp-budget-recommendations:
       Account: 678715897637
+    adsp-traffic:
+      Account: 192826442293
+    adsp-conversion:
+      Account: 561176707666
+    adsp-clickstream:
+      Account: 740036912861
+    adsp-rich-media:
+      Account: 718926279583 
   EU:
     sp-traffic:
       Account: 668473351658
@@ -174,6 +186,14 @@ Mappings:
       Account: 764057072099
     sp-budget-recommendations:
       Account: 158915609581
+    adsp-traffic:
+      Account: 738976022360
+    adsp-conversion:
+      Account: 238549931437
+    adsp-clickstream:
+      Account: 475804811800
+    adsp-rich-media:
+      Account: 047120534722 
   FE:
     sp-traffic:
       Account: 074266271188
@@ -213,6 +233,14 @@ Mappings:
       Account: 178122609971
     sp-budget-recommendations:
       Account: 007292432803
+    adsp-traffic:
+      Account: 115810253223
+    adsp-conversion:
+      Account: 063613587323
+    adsp-clickstream:
+      Account: 201394813667
+    adsp-rich-media:
+      Account: 886046350753 
 
 Rules:
   NA:
