@@ -1,0 +1,81 @@
+<mxfile host="app.diagrams.net" modified="2026-02-20T00:00:00.000Z" agent="draw.io" version="24.0.0" type="device">
+  <diagram id="events-api-gtm-architecture" name="Architecture">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="600" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Source: Website -->
+        <mxCell id="src-website" value="Website&#xa;(via Client-Side Tag)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#999999;fontFamily=Amazon Ember;fontSize=13;fontStyle=1;verticalAlign=middle;arcSize=20;" vertex="1" parent="1">
+          <mxGeometry x="40" y="100" width="180" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Source: Mobile App -->
+        <mxCell id="src-mobile" value="Mobile App&#xa;(via Measurement Protocol)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#999999;fontFamily=Amazon Ember;fontSize=13;fontStyle=1;verticalAlign=middle;arcSize=20;" vertex="1" parent="1">
+          <mxGeometry x="40" y="200" width="180" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Source: Server / Backend -->
+        <mxCell id="src-backend" value="Server / Backend&#xa;(via Measurement Protocol)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#999999;fontFamily=Amazon Ember;fontSize=13;fontStyle=1;verticalAlign=middle;arcSize=20;" vertex="1" parent="1">
+          <mxGeometry x="40" y="300" width="180" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- GTM Server Container (outer box) -->
+        <mxCell id="gtm-container" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#666666;strokeWidth=2;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="340" y="60" width="440" height="330" as="geometry" />
+        </mxCell>
+
+        <!-- GTM Server Container label -->
+        <mxCell id="gtm-label" value="GTM Server Container" style="text;html=1;align=left;verticalAlign=top;resizable=0;points=[];autosize=1;fontFamily=Amazon Ember;fontSize=15;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="355" y="70" width="200" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Auth Variable -->
+        <mxCell id="auth-var" value="Auth Variable" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0F0F0;strokeColor=#AAAAAA;fontFamily=Amazon Ember;fontSize=12;verticalAlign=middle;arcSize=20;" vertex="1" parent="1">
+          <mxGeometry x="370" y="115" width="130" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Timestamp Variable -->
+        <mxCell id="ts-var" value="Timestamp Variable" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0F0F0;strokeColor=#AAAAAA;fontFamily=Amazon Ember;fontSize=12;verticalAlign=middle;arcSize=20;" vertex="1" parent="1">
+          <mxGeometry x="520" y="115" width="150" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Events API Tag Template -->
+        <mxCell id="tag-template" value="Events API Tag Template&#xa;&#xa;• Normalize &amp; hash match keys&#xa;• Format event payload&#xa;• Process consent signals&#xa;• Send conversion events" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0F0F0;strokeColor=#AAAAAA;fontFamily=Amazon Ember;fontSize=12;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="370" y="175" width="300" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- Event Data Variables note -->
+        <mxCell id="edv-note" value="Event Data Variables map to template fields:&#xa;match keys, event data, custom attributes, consent" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;fontFamily=Amazon Ember;fontSize=11;fontColor=#666666;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="370" y="310" width="380" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Amazon Ads Events Manager -->
+        <mxCell id="events-manager" value="Amazon Ads&#xa;Events Manager" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#999999;fontFamily=Amazon Ember;fontSize=13;fontStyle=1;verticalAlign=middle;arcSize=20;" vertex="1" parent="1">
+          <mxGeometry x="960" y="190" width="160" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: Website to GTM -->
+        <mxCell id="arrow-web" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1.5;fontFamily=Amazon Ember;fontSize=11;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0;" edge="1" source="src-website" target="gtm-container" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: Mobile to GTM -->
+        <mxCell id="arrow-mobile" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1.5;fontFamily=Amazon Ember;fontSize=11;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="src-mobile" target="gtm-container" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: Backend to GTM -->
+        <mxCell id="arrow-backend" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1.5;fontFamily=Amazon Ember;fontSize=11;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.7;entryDx=0;entryDy=0;" edge="1" source="src-backend" target="gtm-container" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: GTM to Events Manager (labeled Amazon Events API POST) -->
+        <mxCell id="arrow-api" value="Amazon Events API&#xa;(POST)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1.5;fontFamily=Amazon Ember;fontSize=11;fontStyle=0;fontColor=#333333;align=center;verticalAlign=bottom;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="gtm-container" target="events-manager" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
