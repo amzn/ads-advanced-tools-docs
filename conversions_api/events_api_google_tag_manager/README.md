@@ -6,7 +6,7 @@ The Amazon Events API Google Tag Manager server-side template collection allows 
 
 > **Note:** The template code is shared upon engagement in a zip file format that includes the variable and tag templates needed to implement Amazon Events API using Google Tag Manager. If this implementation is of interest, please reach out to the [Amazon Ad Tech Solutions team](mailto:ats-custom-projects@amazon.com) or your dedicated Amazon Ad Tech Account Executive.
 
-This repository contains three GTM templates that work together to authenticate, format, and send conversion events to Amazon Ads:
+This solution contains three GTM templates — one tag and two utility variable templates — that work together to authenticate, format, and send conversion events to Amazon Ads:
 
 | Template | File | Purpose |
 |---|---|---|
@@ -14,7 +14,6 @@ This repository contains three GTM templates that work together to authenticate,
 | Amazon CAPI Auth Variable | `Amazon_CAPI_Auth_Variable.tpl` | Handles OAuth authentication with automatic token refresh |
 | Amazon CAPI Timestamp Variable | `Amazon_CAPI_Timestamp_Variable.tpl` | Converts timestamps to ISO-8601 format |
 
-Template files are located in the [`src/`](src/) directory.
 
 ## Architecture
 
@@ -47,6 +46,6 @@ For details on how to connect different event sources to a GTM server container,
 
 For issues, questions, or contributions, refer to the [Amazon Ads Events API documentation](https://advertising.amazon.com/API/docs/en-us/guides/events/events) or contact your Amazon Ads representative.
 
-**Created by**: Amazon Ad Tech Solutions  
-**Version**: v4  
-**Last Updated**: 3/5/2026
+**Created by**: Justin Cartwright, Ad Tech Consultant, Amazon Ad Tech Solutions  
+**Version**: v1.0  
+**Last Updated**: 3/31/2026
