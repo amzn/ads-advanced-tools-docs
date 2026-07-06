@@ -1,0 +1,31 @@
+{
+  "events": [
+    {
+      "eventDescription": {
+        "name": "PURCHASE",
+        "conversionType": "OFF_AMAZON_PURCHASES",
+        "eventSource": "WEBSITE",
+        "dataSetName": "RetailOrders",
+        "eventIngestionMethod": "SERVER_TO_SERVER"
+      },
+      "countryCode": "US",
+      "eventTime": "2026-06-17T16:35:00Z",
+      "matchKeys": [
+        {
+          "type": "EMAIL",
+          "values": [
+            "c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4"
+          ]
+        }
+      ],
+      "value": 89.99,
+      "customData": [
+        { "name": "coupon_used", "dataType": "STRING", "value": "false" },
+        { "name": "discount_status", "dataType": "STRING", "value": "no_discount" },
+        { "name": "full_price_flag", "dataType": "STRING", "value": "true" },
+        { "name": "promo_type", "dataType": "STRING", "value": "none" },
+        { "name": "deal_event", "dataType": "STRING", "value": "none" }
+      ]
+    }
+  ]
+}

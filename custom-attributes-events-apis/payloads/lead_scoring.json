@@ -1,0 +1,30 @@
+{
+  "events": [
+    {
+      "eventDescription": {
+        "name": "LEAD_SUBMISSION",
+        "conversionType": "LEAD",
+        "eventSource": "WEBSITE",
+        "dataSetName": "LeadGenCampaign",
+        "eventIngestionMethod": "SERVER_TO_SERVER"
+      },
+      "countryCode": "US",
+      "eventTime": "2026-06-17T16:35:00Z",
+      "matchKeys": [
+        {
+          "type": "EMAIL",
+          "values": [
+            "4e308dac739dbf0744ce16c6498fc34f7039bc7032a7af3b09f5a50e3ff63fff"
+          ]
+        }
+      ],
+      "value": 450.00,
+      "customData": [
+        { "name": "lead_score", "dataType": "STRING", "value": "high_intent" },
+        { "name": "predicted_value", "dataType": "INTEGER", "value": "450" },
+        { "name": "lead_source", "dataType": "STRING", "value": "website_form" },
+        { "name": "customer_segment", "dataType": "STRING", "value": "enterprise" }
+      ]
+    }
+  ]
+}
