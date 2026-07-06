@@ -1,0 +1,31 @@
+{
+  "events": [
+    {
+      "eventDescription": {
+        "name": "SUBSCRIPTION_RENEWAL",
+        "conversionType": "OFF_AMAZON_PURCHASES",
+        "eventSource": "WEBSITE",
+        "dataSetName": "SubscriptionEvents",
+        "eventIngestionMethod": "SERVER_TO_SERVER"
+      },
+      "countryCode": "US",
+      "eventTime": "2026-06-17T16:35:00Z",
+      "matchKeys": [
+        {
+          "type": "EMAIL",
+          "values": [
+            "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"
+          ]
+        }
+      ],
+      "value": 59.99,
+      "customData": [
+        { "name": "subscription_type", "dataType": "STRING", "value": "premium" },
+        { "name": "renewal_cycle", "dataType": "INTEGER", "value": "12" },
+        { "name": "is_active_subscriber", "dataType": "STRING", "value": "true" },
+        { "name": "lifetime_revenue", "dataType": "INTEGER", "value": "71988" },
+        { "name": "months_as_customer", "dataType": "INTEGER", "value": "36" }
+      ]
+    }
+  ]
+}
