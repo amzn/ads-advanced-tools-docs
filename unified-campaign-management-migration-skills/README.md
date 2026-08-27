@@ -1,6 +1,6 @@
-# Amazon Ads API Assistance Skills
+# Unified Campaign Management Migration Skills
 
-A collection of [Kiro](https://kiro.dev) skills that help developers with Amazon Ads API integration — including migrating from legacy APIs, adopting new ad formats, and generating test commands.
+A collection of skills that help developers with migrating to unified campaign management APIs.
 
 Official docs are the reference dictionary; this project distills scattered API specs into actionable, agent-consumable knowledge — covering migration, new feature integration, and test validation — so developers get executable answers instead of reading pages of specs. Note: LLMs can hallucinate; when in doubt, verify against [official documentation](https://advertising.amazon.com/API/docs/en-us/guides/overview) or contact the Ads API Support Center.
 
@@ -14,14 +14,14 @@ These skills cover three key aspects of API integration:
 
 ### a. Unified API Migration
 
-Help developers migrate from legacy APIs (SP v3, SB v4, DSP v1) to the Unified API (`/adsApi/v1/`).
+Help developers migrate from earlier API versions (SP v3, SB v4, DSP v1) to the Unified API (`/adsApi/v1/`).
 
 | Skill | Description | Use When |
 |-------|-------------|----------|
 | `unified-api-migration-guide` | High-level migration assessment and planning | Starting a migration, assessing scope |
 | `unified-sp-migration` | SP v3 → Unified API field-level mapping | Migrating Sponsored Products code |
 | `unified-sb-migration` | SB v4 → Unified API field-level mapping | Migrating Sponsored Brands code |
-| `unified-dsp-cm-migration` | DSP legacy → Unified API campaign management | Migrating DSP campaigns, ad groups, creatives, targets |
+| `unified-dsp-cm-migration` | DSP → Unified API campaign management | Migrating DSP campaigns, ad groups, creatives, targets |
 
 ### b. New Ads API Adoption
 
@@ -59,8 +59,8 @@ Help developers generate and validate API requests.
 ### Option 1: Clone and use directly (quickest)
 
 ```bash
-git clone https://github.com/wjwwwww/amazon-ads-api-skills.git
-cd amazon-ads-api-skills
+git clone https://github.com/amzn/ads-advanced-tools-docs.git
+cd ads-advanced-tools-docs/unified-campaign-management-migration-skills
 kiro-cli chat --agent ads-api-migration-assistant
 ```
 
@@ -69,8 +69,8 @@ Everything works out of the box — skills, agent, and API specs are all in plac
 ### Option 2: Install into your existing project
 
 ```bash
-git clone https://github.com/wjwwwww/amazon-ads-api-skills.git
-cd amazon-ads-api-skills
+git clone https://github.com/amzn/ads-advanced-tools-docs.git
+cd ads-advanced-tools-docs/unified-campaign-management-migration-skills
 ./install.sh /path/to/your/project
 
 # Then use in your project
@@ -138,7 +138,7 @@ For CI integration, use `--check` mode (exits with code 1 if specs changed):
 ## Project Structure
 
 ```
-amazon-ads-api-skills/
+unified-campaign-management-migration-skills/
 ├── .kiro/agents/                    ← Agent config (with API Spec Fallback)
 ├── skills/                          ← Skill source files (SKILL.md each)
 ├── api-specs/                       ← OpenAPI specs (auto-synced)
