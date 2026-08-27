@@ -1,4 +1,4 @@
-# Unified Campaign Management Migration Skills
+# Unified Campaign Management API Migration Skills
 
 A collection of skills that help developers with migrating to unified campaign management APIs.
 
