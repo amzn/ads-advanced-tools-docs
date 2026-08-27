@@ -1,0 +1,111 @@
+{
+  "version": "1.0.0",
+  "description": "Amazon Ads API migration skills for Kiro",
+  "skills": [
+    {
+      "name": "unified-api-migration-guide",
+      "path": "skills/unified-api-migration-guide/SKILL.md",
+      "description": "High-level migration assessment from legacy APIs (SP v3, SB v4) to the Unified API",
+      "tags": ["migration", "planning", "assessment"],
+      "apis": ["SP v3", "SB v4", "Unified API v1"],
+      "dependencies": []
+    },
+    {
+      "name": "unified-sp-migration",
+      "path": "skills/unified-sp-migration/SKILL.md",
+      "description": "Field-level migration guide from SP v3 to Unified API",
+      "tags": ["migration", "sponsored-products", "field-mapping"],
+      "apis": ["SP v3", "Unified API v1"],
+      "specFile": "api-specs/unified-api-sp.json",
+      "dependencies": ["unified-api-migration-guide"]
+    },
+    {
+      "name": "unified-sb-migration",
+      "path": "skills/unified-sb-migration/SKILL.md",
+      "description": "Field-level migration guide from SB v4 to Unified API",
+      "tags": ["migration", "sponsored-brands", "field-mapping"],
+      "apis": ["SB v4", "Unified API v1"],
+      "specFile": "api-specs/unified-api-sb.json",
+      "dependencies": ["unified-api-migration-guide"]
+    },
+    {
+      "name": "amazon-ads-sb-collections",
+      "path": "skills/amazon-ads-sb-collections/SKILL.md",
+      "description": "Sponsored Brands Collections (SBC) ad format integration and migration from Product Collections",
+      "tags": ["integration", "sponsored-brands", "collections", "SBC"],
+      "apis": ["Unified API v1", "SB v4"],
+      "specFile": "api-specs/unified-api-sb.json",
+      "dependencies": []
+    },
+    {
+      "name": "unified-api-cli-testing",
+      "path": "skills/unified-api-cli-testing/SKILL.md",
+      "description": "Generate curl commands and test scripts for testing Unified API endpoints from OpenAPI specs",
+      "tags": ["testing", "code-generation", "curl", "CLI"],
+      "apis": ["Unified API v1"],
+      "specFile": "api-specs/unified-api-sp.json",
+      "dependencies": []
+    },
+    {
+      "name": "amazon-ads-spglobal",
+      "path": "skills/amazon-ads-spglobal/SKILL.md",
+      "description": "SP Global Campaigns integration guide for managing Sponsored Products across multiple marketplaces simultaneously",
+      "tags": ["integration", "sponsored-products", "global", "multi-marketplace"],
+      "apis": ["Unified API v1"],
+      "specFile": "api-specs/unified-api-spglobal.json",
+      "dependencies": []
+    },
+    {
+      "name": "unified-dsp-cm-migration",
+      "path": "skills/unified-dsp-cm-migration/SKILL.md",
+      "description": "DSP Campaign Management migration guide from legacy /dsp/v1/ APIs to the Unified API /adsApi/v1/",
+      "tags": ["migration", "dsp", "campaign-management"],
+      "apis": ["DSP Legacy", "Unified API v1"],
+      "specFile": "api-specs/unified-api-dsp.json",
+      "dependencies": []
+    },
+    {
+      "name": "amazon-ads-dsp-creative-management",
+      "path": "skills/amazon-ads-dsp-creative-management/SKILL.md",
+      "description": "DSP creative management guide for creating and managing ads, choosing creative types by inventory, and linking ads to ad groups via associations",
+      "tags": ["integration", "dsp", "creative", "ads"],
+      "apis": ["Unified API v1"],
+      "specFile": "api-specs/unified-api-dsp.json",
+      "dependencies": []
+    },
+    {
+      "name": "update-migration-skills",
+      "path": "skills/update-migration-skills/SKILL.md",
+      "description": "Reads API spec diffs from api-specs/diff/ and updates migration SKILL.md files with new endpoints, fields, and enum changes",
+      "tags": ["maintenance", "automation", "diff", "update"],
+      "apis": ["Unified API v1"],
+      "dependencies": ["unified-sp-migration", "unified-sb-migration"]
+    }
+  ],
+  "apiSpecs": [
+    {
+      "name": "unified-api-sp",
+      "url": "https://d1y2lf8k3vrkfu.cloudfront.net/openapi/en-us/dest/AmazonAdsAPISPMerged_prod_3p.json",
+      "localPath": "api-specs/unified-api-sp.json",
+      "affectsSkills": ["unified-sp-migration"]
+    },
+    {
+      "name": "unified-api-sb",
+      "url": "https://d1y2lf8k3vrkfu.cloudfront.net/openapi/en-us/dest/AmazonAdsAPISBMerged_prod_3p.json",
+      "localPath": "api-specs/unified-api-sb.json",
+      "affectsSkills": ["unified-sb-migration", "amazon-ads-sb-collections"]
+    },
+    {
+      "name": "unified-api-spglobal",
+      "url": "https://d1y2lf8k3vrkfu.cloudfront.net/openapi/en-us/dest/AmazonAdsAPISPGLOBALMerged_prod_3p.json",
+      "localPath": "api-specs/unified-api-spglobal.json",
+      "affectsSkills": ["amazon-ads-spglobal"]
+    },
+    {
+      "name": "unified-api-dsp",
+      "url": "https://d1y2lf8k3vrkfu.cloudfront.net/openapi/en-us/dest/AmazonAdsAPIDSPMerged_prod_3p.json",
+      "localPath": "api-specs/unified-api-dsp.json",
+      "affectsSkills": ["unified-dsp-cm-migration"]
+    }
+  ]
+}

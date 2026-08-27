@@ -1,0 +1,949 @@
+{
+  "source": "https://advertising.amazon.com/API/docs/en-us/reference/common-models/enums",
+  "extractedAt": "2026-07-14T05:13:55Z",
+  "enumCount": 26,
+  "enums": {
+    "adProduct": {
+      "values": [
+        {
+          "value": "SPONSORED_PRODUCTS"
+        },
+        {
+          "value": "SPONSORED_BRANDS"
+        },
+        {
+          "value": "SPONSORED_DISPLAY"
+        }
+      ],
+      "count": 3,
+      "description": "An ad product is a top-level offering from Amazon Ads, with a given feature set, business rules, and consistent logic.",
+      "referencedBy": "Campaigns, ad groups"
+    },
+    "adType": {
+      "values": [
+        {
+          "value": "PRODUCT_AD"
+        },
+        {
+          "value": "IMAGE"
+        },
+        {
+          "value": "VIDEO"
+        },
+        {
+          "value": "PRODUCT_COLLECTION"
+        },
+        {
+          "value": "STORE_SPOTLIGHT"
+        }
+      ],
+      "count": 5,
+      "description": "The type or format of an ad.",
+      "referencedBy": "Ad"
+    },
+    "audienceSegmentType": {
+      "values": [
+        {
+          "value": "SPONSORED_ADS_AMC"
+        },
+        {
+          "value": "BEHAVIOR_DYNAMIC"
+        }
+      ],
+      "count": 2,
+      "description": "Specifies types of audience segment.",
+      "referencedBy": "Campaigns"
+    },
+    "bidStrategy": {
+      "values": [
+        {
+          "value": "SALES_DOWN_ONLY",
+          "Sponsored Products (dynamicBidding)": "LEGACY_FOR_SALES",
+          "Sponsored Brands (bidOptimizationStrategy)": "none"
+        },
+        {
+          "value": "SALES",
+          "Sponsored Products (dynamicBidding)": "AUTO_FOR_SALES",
+          "Sponsored Brands (bidOptimizationStrategy)": "MAXIMIZE_IMMEDIATE_SALES"
+        },
+        {
+          "value": "NEW_TO_BRAND",
+          "Sponsored Products (dynamicBidding)": "none",
+          "Sponsored Brands (bidOptimizationStrategy)": "MAXIMIZE_NEW_TO_BRAND_CUSTOMERS"
+        },
+        {
+          "value": "RULE_BASED",
+          "Sponsored Products (dynamicBidding)": "RULE_BASED",
+          "Sponsored Brands (bidOptimizationStrategy)": "none if a bidRule is present"
+        },
+        {
+          "value": "none / null",
+          "Sponsored Products (dynamicBidding)": "MANUAL"
+        }
+      ],
+      "count": 5,
+      "description": "The auto bidding strategy applied to the campaign.",
+      "referencedBy": "Campaigns"
+    },
+    "budgetType": {
+      "values": [
+        {
+          "value": "MONETARY"
+        }
+      ],
+      "count": 1,
+      "description": "The type of budget associated with the campaign.",
+      "referencedBy": "Campaigns"
+    },
+    "costType": {
+      "values": [
+        {
+          "value": "CPC"
+        },
+        {
+          "value": "VCPM"
+        }
+      ],
+      "count": 2,
+      "description": "The way the campaign is charged."
+    },
+    "currencyCode": {
+      "values": [
+        {
+          "value": "AED"
+        },
+        {
+          "value": "AUD"
+        },
+        {
+          "value": "BRL"
+        },
+        {
+          "value": "CAD"
+        },
+        {
+          "value": "CHF"
+        },
+        {
+          "value": "CNY"
+        },
+        {
+          "value": "DKK"
+        },
+        {
+          "value": "EUR"
+        },
+        {
+          "value": "GBP"
+        },
+        {
+          "value": "INR"
+        },
+        {
+          "value": "JPY"
+        },
+        {
+          "value": "MXN"
+        },
+        {
+          "value": "NOK"
+        },
+        {
+          "value": "SAR"
+        },
+        {
+          "value": "SEK"
+        },
+        {
+          "value": "SGD"
+        },
+        {
+          "value": "TRY"
+        },
+        {
+          "value": "USD"
+        },
+        {
+          "value": "BHD"
+        },
+        {
+          "value": "CNH"
+        },
+        {
+          "value": "CZK"
+        },
+        {
+          "value": "HKD"
+        },
+        {
+          "value": "HUF"
+        },
+        {
+          "value": "ILS"
+        },
+        {
+          "value": "JOD"
+        },
+        {
+          "value": "KWD"
+        },
+        {
+          "value": "PLN"
+        },
+        {
+          "value": "QAR"
+        },
+        {
+          "value": "RON"
+        },
+        {
+          "value": "THB"
+        },
+        {
+          "value": "ZAR"
+        },
+        {
+          "value": "ARS"
+        },
+        {
+          "value": "BGN"
+        },
+        {
+          "value": "BOB"
+        },
+        {
+          "value": "CLP"
+        },
+        {
+          "value": "COP"
+        },
+        {
+          "value": "CRC"
+        },
+        {
+          "value": "DOP"
+        },
+        {
+          "value": "DZD"
+        },
+        {
+          "value": "EGP"
+        },
+        {
+          "value": "GTQ"
+        },
+        {
+          "value": "HNL"
+        },
+        {
+          "value": "HRK"
+        },
+        {
+          "value": "IDR"
+        },
+        {
+          "value": "JMD"
+        },
+        {
+          "value": "KRW"
+        },
+        {
+          "value": "MAD"
+        },
+        {
+          "value": "MYR"
+        },
+        {
+          "value": "NGN"
+        },
+        {
+          "value": "NZD"
+        },
+        {
+          "value": "PAB"
+        },
+        {
+          "value": "PEN"
+        },
+        {
+          "value": "PHP"
+        },
+        {
+          "value": "PKR"
+        },
+        {
+          "value": "PYG"
+        },
+        {
+          "value": "RSD"
+        },
+        {
+          "value": "RUB"
+        },
+        {
+          "value": "TND"
+        },
+        {
+          "value": "TWD"
+        },
+        {
+          "value": "UAH"
+        },
+        {
+          "value": "UYU"
+        },
+        {
+          "value": "VND"
+        }
+      ],
+      "count": 62,
+      "description": "An ISO 4217 standard currency code for all currency-related attributes.",
+      "referencedBy": "Campaigns, ad groups"
+    },
+    "deliveryReasons": {
+      "values": [
+        {
+          "value": "CAMPAIGN_PAUSED",
+          "Sponsored Products": "CAMPAIGN_PAUSED",
+          "Sponsored Brands": "CAMPAIGN_PAUSED",
+          "Sponsored Display": "CAMPAIGN_PAUSED"
+        },
+        {
+          "value": "CAMPAIGN_ARCHIVED",
+          "Sponsored Products": "CAMPAIGN_ARCHIVED",
+          "Sponsored Brands": "CAMPAIGN_ARCHIVED",
+          "Sponsored Display": "CAMPAIGN_ARCHIVED"
+        },
+        {
+          "value": "CAMPAIGN_PENDING_START_DATE",
+          "Sponsored Products": "PENDING_START_DATE",
+          "Sponsored Brands": "PENDING_START_DATE",
+          "Sponsored Display": "PENDING_START_DATE"
+        },
+        {
+          "value": "CAMPAIGN_END_DATE_REACHED",
+          "Sponsored Products": "ENDED",
+          "Sponsored Brands": "ENDED",
+          "Sponsored Display": "ENDED"
+        },
+        {
+          "value": "CAMPAIGN_REJECTED",
+          "Sponsored Products": "REJECTED",
+          "Sponsored Brands": "REJECTED"
+        },
+        {
+          "value": "CAMPAIGN_PENDING_REVIEW",
+          "Sponsored Products": "PENDING_REVIEW",
+          "Sponsored Brands": "PENDING_REVIEW"
+        },
+        {
+          "value": "CAMPAIGN_INCOMPLETE",
+          "Sponsored Products": "CAMPAIGN_INCOMPLETE",
+          "Sponsored Brands": "CAMPAIGN_INCOMPLETE"
+        },
+        {
+          "value": "CAMPAIGN_OUT_OF_BUDGET",
+          "Sponsored Products": "CAMPAIGN_OUT_OF_BUDGET",
+          "Sponsored Brands": "CAMPAIGN_OUT_OF_BUDGET",
+          "Sponsored Display": "CAMPAIGN_OUT_OF_BUDGET"
+        },
+        {
+          "value": "PORTFOLIO_OUT_OF_BUDGET",
+          "Sponsored Products": "PORTFOLIO_OUT_OF_BUDGET"
+        },
+        {
+          "value": "PORTFOLIO_END_DATE_REACHED",
+          "Sponsored Products": "PORTFOLIO_ENDED",
+          "Sponsored Brands": "PORTFOLIO_ENDED"
+        },
+        {
+          "value": "PORTFOLIO_ARCHIVED",
+          "Sponsored Products": "PORTFOLIO_ARCHIVED",
+          "Sponsored Brands": "PORTFOLIO_ARCHIVED"
+        },
+        {
+          "value": "PORTFOLIO_PAUSED",
+          "Sponsored Products": "PORTFOLIO_PAUSED",
+          "Sponsored Brands": "PORTFOLIO_PAUSED"
+        },
+        {
+          "value": "PORTFOLIO_PENDING_START_DATE",
+          "Sponsored Products": "PORTFOLIO_PENDING_START_DATE",
+          "Sponsored Brands": "PORTFOLIO_PENDING_START_DATE"
+        },
+        {
+          "value": "ADVERTISER_POLICING_SUSPENDED",
+          "Sponsored Products": "ADVERTISER_POLICING_SUSPENDED",
+          "Sponsored Brands": "ADVERTISER_POLICING_SUSPENDED"
+        },
+        {
+          "value": "ADVERTISER_POLICING_PENDING_REVIEW",
+          "Sponsored Products": "ADVERTISER_POLICING_PENDING_REVIEW",
+          "Sponsored Brands": "ADVERTISER_POLICING_PENDING_REVIEW"
+        },
+        {
+          "value": "ADVERTISER_ARCHIVED",
+          "Sponsored Products": "ADVERTISER_ARCHIVED",
+          "Sponsored Brands": "ADVERTISER_ARCHIVED"
+        },
+        {
+          "value": "ADVERTISER_OUT_OF_BUDGET",
+          "Sponsored Products": "ADVERTISER_OUT_OF_BUDGET AND ACCOUNT_OUT_OF_BUDGET",
+          "Sponsored Brands": "ADVERTISER_ACCOUNT_OUT_OF_BUDGET",
+          "Sponsored Display": "ACCOUNT_OUT_OF_BUDGET"
+        },
+        {
+          "value": "ADVERTISER_PAUSED",
+          "Sponsored Products": "ADVERTISER_PAUSED",
+          "Sponsored Brands": "ADVERTISER_PAUSED",
+          "Sponsored Display": "ADVERTISER_PAUSED"
+        },
+        {
+          "value": "ADVERTISER_PAYMENT_FAILURE",
+          "Sponsored Products": "ADVERTISER_PAYMENT_FAILURE",
+          "Sponsored Brands": "ADVERTISER_PAYMENT_FAILURE",
+          "Sponsored Display": "ADVERTISER_PAYMENT_FAILURE"
+        },
+        {
+          "value": "ADVERTISER_OUT_OF_PREPAY_BALANCE",
+          "Sponsored Brands": "ADVERTISER_OUT_OF_PREPAY_BALANCE"
+        },
+        {
+          "value": "ADVERTISER_INELIGIBLE",
+          "Sponsored Brands": "INELIGIBLE"
+        },
+        {
+          "value": "ADVERTISER_OUT_OF_PREPAY_BALANCE",
+          "Sponsored Brands": "ADVERTISER_OUT_OF_PREPAY_BALANCE"
+        },
+        {
+          "value": "AD_GROUP_PAUSED",
+          "Sponsored Products": "AD_GROUP_PAUSED",
+          "Sponsored Brands": "AD_GROUP_PAUSED",
+          "Sponsored Display": "AD_GROUP_PAUSED"
+        },
+        {
+          "value": "AD_GROUP_ARCHIVED",
+          "Sponsored Products": "AD_GROUP_ARCHIVED",
+          "Sponsored Brands": "AD_GROUP_ARCHIVED",
+          "Sponsored Display": "AD_GROUP_ARCHIVED"
+        },
+        {
+          "value": "AD_GROUP_INCOMPLETE",
+          "Sponsored Products": "AD_GROUP_INCOMPLETE",
+          "Sponsored Brands": "AD_GROUP_INCOMPLETE",
+          "Sponsored Display": "AD_GROUP_INCOMPLETE"
+        },
+        {
+          "value": "AD_GROUP_POLICING_PENDING_REVIEW",
+          "Sponsored Products": "AD_GROUP_POLICING_PENDING_REVIEW",
+          "Sponsored Brands": "AD_GROUP_POLICING_PENDING_REVIEW"
+        },
+        {
+          "value": "AD_GROUP_LOW_BID",
+          "Sponsored Products": "AD_GROUP_LOW_BID",
+          "Sponsored Brands": "AD_GROUP_LOW_BID",
+          "Sponsored Display": "AD_GROUP_LOW_BID"
+        },
+        {
+          "value": "AD_GROUP_PENDING_REVIEW",
+          "Sponsored Products": "PENDING_REVIEW"
+        },
+        {
+          "value": "AD_GROUP_REJECTED",
+          "Sponsored Products": "REJECTED"
+        },
+        {
+          "value": "TARGET_POLICING_SUSPENDED",
+          "Sponsored Products": "TARGETING_CLAUSE_POLICING_SUSPENDED"
+        },
+        {
+          "value": "TARGET_PAUSED",
+          "Sponsored Products": "TARGETING_CLAUSE_PAUSED",
+          "Sponsored Display": "TARGET_STATUS_PAUSED"
+        },
+        {
+          "value": "TARGET_ARCHIVED",
+          "Sponsored Products": "TARGETING_CLAUSE_ARCHIVED",
+          "Sponsored Display": "TARGET_STATUS_ARCHIVED"
+        },
+        {
+          "value": "TARGET_BLOCKED",
+          "Sponsored Products": "TARGETING_CLAUSE_BLOCKED"
+        },
+        {
+          "value": "AD_PAUSED",
+          "Sponsored Products": "AD_PAUSED",
+          "Sponsored Brands": "AD_PAUSED",
+          "Sponsored Display": "AD_STATUS_PAUSED"
+        },
+        {
+          "value": "AD_ARCHIVED",
+          "Sponsored Products": "AD_ARCHIVED",
+          "Sponsored Brands": "AD_ARCHIVED",
+          "Sponsored Display": "AD_STATUS_ARCHIVED"
+        },
+        {
+          "value": "AD_POLICING_PENDING_REVIEW",
+          "Sponsored Products": "AD_POLICING_PENDING_REVIEW",
+          "Sponsored Brands": "AD_POLICING_PENDING_REVIEW"
+        },
+        {
+          "value": "AD_POLICING_SUSPENDED",
+          "Sponsored Products": "AD_POLICING_SUSPENDED",
+          "Sponsored Brands": "AD_POLICING_SUSPENDED"
+        },
+        {
+          "value": "AD_CREATION_FAILED",
+          "Sponsored Products": "AD_CREATION_OFFLINE_FAILED or AD_CREATION_FAILED"
+        },
+        {
+          "value": "AD_CREATION_IN_PROGRESS",
+          "Sponsored Products": "AD_CREATION_OFFLINE_PENDING or AD_CREATION_OFFLINE_IN_PROGRESS"
+        },
+        {
+          "value": "LANDING_PAGE_NOT_AVAILABLE",
+          "Sponsored Products": "LANDING_PAGE_NOT_AVAILABLE or AD_LANDING_PAGE_NOT_AVAILABLE"
+        },
+        {
+          "value": "NOT_BUYABLE",
+          "Sponsored Products": "NOT_BUYABLE or AD_NOT_BUYABLE",
+          "Sponsored Display": "NOT_BUYABLE"
+        },
+        {
+          "value": "NOT_IN_BUYBOX",
+          "Sponsored Products": "NOT_IN_BUYBOX or AD_NOT_IN_BUYBOX",
+          "Sponsored Display": "NOT_IN_BUYBOX"
+        },
+        {
+          "value": "NOT_IN_POLICY",
+          "Sponsored Display": "NOT_IN_POLICY"
+        },
+        {
+          "value": "OUT_OF_STOCK",
+          "Sponsored Products": "OUT_OF_STOCK or AD_OUT_OF_STOCK",
+          "Sponsored Display": "OUT_OF_STOCK"
+        },
+        {
+          "value": "AD_MISSING_IMAGE",
+          "Sponsored Products": "MISSING_IMAGE or AD_MISSING_IMAGE",
+          "Sponsored Display": "MISSING_IMAGE"
+        },
+        {
+          "value": "SECURITY_SCAN_PENDING_REVIEW",
+          "Sponsored Products": "SECURITY_SCAN_PENDING_REVIEW"
+        },
+        {
+          "value": "SECURITY_SCAN_REJECTED",
+          "Sponsored Products": "SECURITY_SCAN_REJECTED"
+        },
+        {
+          "value": "STATUS_UNAVAILABLE",
+          "Sponsored Products": "STATUS_UNAVAILABLE"
+        },
+        {
+          "value": "NO_INVENTORY",
+          "Sponsored Products": "NO_INVENTORY"
+        },
+        {
+          "value": "NO_PURCHASABLE_OFFER",
+          "Sponsored Products": "NO_PURCHASABLE_OFFER or AD_NO_PURCHASABLE_OFFER"
+        },
+        {
+          "value": "AD_INELIGIBLE",
+          "Sponsored Products": "INELIGIBLE or AD_INELIGIBLE",
+          "Sponsored Brands": "INELIGIBLE"
+        },
+        {
+          "value": "CREATIVE_MISSING_ASSET"
+        },
+        {
+          "value": "CREATIVE_PENDING_REVIEW",
+          "Sponsored Brands": "SUBMITTED_FOR_MODERATION or PENDING_MODERATION_REVIEW",
+          "Sponsored Display": "PENDING_REVIEW"
+        },
+        {
+          "value": "CREATIVE_REJECTED",
+          "Sponsored Products": "AD_GROUP_POLICING_CREATIVE_REJECTED",
+          "Sponsored Brands": "REJECTED_BY_MODERATION or AD_GROUP_POLICING_CREATIVE_REJECTED",
+          "Sponsored Display": "REJECTED"
+        },
+        {
+          "value": "AD_MISSING_DECORATION",
+          "Sponsored Products": "AD_MISSING_DECORATION",
+          "Sponsored Display": "MISSING_DECORATION"
+        },
+        {
+          "value": "PIR_RULE_EXCLUDED",
+          "Sponsored Products": "PIR_RULE_EXCLUDED"
+        },
+        {
+          "value": "AD_NOT_DELIVERING",
+          "Sponsored Products": "CAMPAIGN_ADS_NOT_DELIVERING",
+          "Sponsored Display": "CAMPAIGN_ADS_NOT_DELIVERING"
+        },
+        {
+          "value": "OTHER"
+        }
+      ],
+      "count": 58,
+      "description": "A list of reasons that explains the delivery status of the entity. It explains why the entity is delivering or not delivering. This value is not defined by the user and is read only.",
+      "referencedBy": "Campaigns, ad groups"
+    },
+    "deliveryStatus": {
+      "values": [
+        {
+          "value": "DELIVERING"
+        },
+        {
+          "value": "NOT_DELIVERING"
+        },
+        {
+          "value": "UNAVAILABLE"
+        }
+      ],
+      "count": 3,
+      "description": "An overall status indicating whether the entity is delivering. This value is not defined by the user and is read only.",
+      "referencedBy": "Campaigns, ad groups"
+    },
+    "event": {
+      "values": [
+        {
+          "value": "PURCHASE"
+        },
+        {
+          "value": "VIEW"
+        }
+      ],
+      "count": 2,
+      "description": "A target event is an event used in audience targets to define what product event to target based on.",
+      "referencedBy": "Targets"
+    },
+    "goal": {
+      "values": [
+        {
+          "value": "AWARENESS",
+          "Sponsored Display": "reach"
+        },
+        {
+          "value": "CONSIDERATION",
+          "Sponsored Display": "clicks"
+        },
+        {
+          "value": "CONVERSIONS",
+          "Sponsored Display": "conversions"
+        }
+      ],
+      "count": 3,
+      "description": "The objective of the campaign or ad group.",
+      "referencedBy": "ad groups"
+    },
+    "kpi": {
+      "values": [
+        {
+          "value": "CLICKS"
+        }
+      ],
+      "count": 1,
+      "description": "The way a goal is measured.",
+      "referencedBy": "ad groups"
+    },
+    "landingPageType": {
+      "values": [
+        {
+          "value": "PRODUCT_LIST",
+          "PRODUCT_COLLECTION": "x"
+        },
+        {
+          "value": "STORE",
+          "IMAGE": "x",
+          "VIDEO": "x",
+          "PRODUCT_COLLECTION": "x",
+          "STORE_SPOTLIGHT": "x"
+        },
+        {
+          "value": "CUSTOM_URL",
+          "PRODUCT_COLLECTION": "x"
+        },
+        {
+          "value": "DETAIL_PAGE",
+          "VIDEO": "x"
+        },
+        {
+          "value": "OFF_AMAZON_LINK",
+          "IMAGE": "x"
+        }
+      ],
+      "count": 5,
+      "description": "The type of landing page used in an ad. Only certain landing page types are supported for each ad type."
+    },
+    "Auto target match types": {
+      "values": [
+        {
+          "value": "SEARCH_LOOSE_MATCH",
+          "Description": "Targets customers using search terms loosely related to your products.",
+          "Sponsored Products": "QUERY_BROAD_REL_MATCHES",
+          "Sponsored Brands": "N/a",
+          "Sponsored Display": "N/a"
+        },
+        {
+          "value": "SEARCH_CLOSE_MATCH",
+          "Description": "Targets customers using search terms closely related to your products.",
+          "Sponsored Products": "QUERY_HIGH_REL_MATCHES",
+          "Sponsored Brands": "N/a",
+          "Sponsored Display": "N/a"
+        },
+        {
+          "value": "PRODUCT_SUBSTITUTES",
+          "Description": "Targets customers who view detail pages of products similar to yours.",
+          "Sponsored Products": "ASIN_SUBSTITUTE_RELATED",
+          "Sponsored Brands": "N/a",
+          "Sponsored Display": "N/a"
+        },
+        {
+          "value": "PRODUCT_COMPLEMENTS",
+          "Description": "Targets customers who view detail pages of products that complement your product.",
+          "Sponsored Products": "ASIN_ACCESSORY_RELATED",
+          "Sponsored Brands": "N/a",
+          "Sponsored Display": "N/a"
+        },
+        {
+          "value": "PRODUCT_SIMILAR",
+          "Description": "Targets customers who view detail pages of products similar to yours.",
+          "Sponsored Products": "N/a",
+          "Sponsored Brands": "N/a",
+          "Sponsored Display": "similarProduct"
+        },
+        {
+          "value": "SEARCH_RELATED_TO_YOUR_BRAND",
+          "Description": "A set of keywords that are often used to search for brands and promote brand impressions.",
+          "Sponsored Products": "N/a",
+          "Sponsored Brands": "KEYWORDS_RELATED_TO_YOUR_BRAND",
+          "Sponsored Display": "N/a"
+        },
+        {
+          "value": "SEARCH_RELATED_TO_YOUR_LANDING_PAGES",
+          "Description": "A set of keywords that promote brand discovery and can help drive traffic to brand store page or product detail pages.",
+          "Sponsored Products": "N/a",
+          "Sponsored Brands": "KEYWORDS_RELATED_TO_YOUR_LANDING_PAGES",
+          "Sponsored Display": "N/a"
+        }
+      ],
+      "count": 7
+    },
+    "Keyword target match types": {
+      "values": [
+        {
+          "value": "BROAD",
+          "Description": "Offers broad exposure to customer shopping queries. Search terms may include keyword terms in any order, and may also include singulars, plurals, variations, synonyms, and related terms.",
+          "Sponsored Products": "BROAD",
+          "Sponsored Brands": "broad"
+        },
+        {
+          "value": "PHRASE",
+          "Description": "For Sponsored Products, the search term must contain the exact phrase or sequence of words. This match type is more restrictive than broad match. Phrase match also includes the plural form of the keyword. In Sponsored Brands campaigns, this match type includes search terms matching the meaning of the keyword.",
+          "Sponsored Products": "PHRASE",
+          "Sponsored Brands": "phrase"
+        },
+        {
+          "value": "EXACT",
+          "Description": "The search term must exactly match the keyword or close variations of the keyword. The sequence of words must also match. This is the most restrictive keyword match type.",
+          "Sponsored Products": "EXACT",
+          "Sponsored Brands": "exact"
+        }
+      ],
+      "count": 3
+    },
+    "Product target match types": {
+      "values": [
+        {
+          "value": "PRODUCT_EXACT",
+          "Sponsored Products": "ASIN_SAME_AS",
+          "Sponsored Brands": "asinSameAs",
+          "Sponsored Display": "asinSameAs"
+        },
+        {
+          "value": "PRODUCT_SIMILAR",
+          "Sponsored Products": "ASIN_EXPANDED_FROM",
+          "Sponsored Brands": "N/a",
+          "Sponsored Display": "N/a"
+        }
+      ],
+      "count": 2
+    },
+    "Product audience match types": {
+      "values": [
+        {
+          "value": "PRODUCT_EXACT",
+          "Sponsored Display mapping": "exactProduct"
+        },
+        {
+          "value": "PRODUCT_SIMILAR",
+          "Sponsored Display mapping": "relatedProduct, similarProduct"
+        }
+      ],
+      "count": 2
+    },
+    "Theme target match type": {
+      "values": [
+        {
+          "value": "KEYWORDS_RELATED_TO_YOUR_BRAND",
+          "Sponsored Products": "brand"
+        },
+        {
+          "value": "KEYWORDS_RELATED_TO_GIFTS",
+          "Sponsored Products": "gift"
+        },
+        {
+          "value": "KEYWORDS_RELATED_TO_YOUR_PRODUCT_CATEGORY",
+          "Sponsored Products": "category"
+        }
+      ],
+      "count": 3,
+      "referencedBy": "Targets"
+    },
+    "placement": {
+      "values": [
+        {
+          "value": "HOME_PAGE",
+          "Sponsored Brands": "HOME"
+        },
+        {
+          "value": "TOP_OF_SEARCH",
+          "Sponsored Products": "PLACEMENT_TOP"
+        },
+        {
+          "value": "PRODUCT_PAGE",
+          "Sponsored Products": "PLACEMENT_PRODUCT_PAGE",
+          "Sponsored Brands": "DETAIL_PAGE"
+        },
+        {
+          "value": "REST_OF_SEARCH",
+          "Sponsored Products": "REST_OF_SEARCH"
+        }
+      ],
+      "count": 4,
+      "description": "Refers to the placement where an ad appears.",
+      "referencedBy": "Campaigns"
+    },
+    "recurrenceTimePeriod": {
+      "values": [
+        {
+          "value": "DAILY"
+        },
+        {
+          "value": "LIFETIME"
+        },
+        {
+          "value": "OTHER"
+        }
+      ],
+      "count": 3,
+      "description": "The possible recurrence options for a budget.",
+      "referencedBy": "Campaigns"
+    },
+    "productIdType": {
+      "values": [
+        {
+          "value": "ASIN"
+        },
+        {
+          "value": "SKU"
+        }
+      ],
+      "count": 2,
+      "description": "The type of ID used to identify a product.",
+      "referencedBy": "Ads"
+    },
+    "shopperCohortType": {
+      "values": [
+        {
+          "value": "AUDIENCE_SEGMENT"
+        }
+      ],
+      "count": 1,
+      "description": "Specifies types of shopper cohort.",
+      "referencedBy": "Campaigns"
+    },
+    "shopperSegment": {
+      "values": [
+        {
+          "value": "NEW_TO_BRAND_PURCHASE"
+        }
+      ],
+      "count": 1,
+      "description": "Specifies types of shoppers.",
+      "referencedBy": "Campaigns"
+    },
+    "state": {
+      "values": [
+        {
+          "value": "ENABLED"
+        },
+        {
+          "value": "PAUSED"
+        },
+        {
+          "value": "ARCHIVED"
+        },
+        {
+          "value": "OTHER"
+        }
+      ],
+      "count": 4,
+      "description": "The user-chosen state of a campaign.",
+      "referencedBy": "Campaigns, ad groups"
+    },
+    "targetingSettings": {
+      "values": [
+        {
+          "value": "MANUAL",
+          "Description": "Sponsored Products manual targeting."
+        },
+        {
+          "value": "AUTO",
+          "Description": "Sponsored Products auto targeting."
+        },
+        {
+          "value": "T00020",
+          "Description": "Sponsored Display contextual targeting."
+        },
+        {
+          "value": "T00030",
+          "Description": "Sponsored Display audience targeting."
+        }
+      ],
+      "count": 4,
+      "description": "Used to indicate the type of targeting supported by the campaign.",
+      "referencedBy": "Campaigns"
+    },
+    "targetType": {
+      "values": [
+        {
+          "value": "AUTO"
+        },
+        {
+          "value": "KEYWORD"
+        },
+        {
+          "value": "PRODUCT_CATEGORY"
+        },
+        {
+          "value": "PRODUCT"
+        },
+        {
+          "value": "PRODUCT_CATEGORY_AUDIENCE"
+        },
+        {
+          "value": "PRODUCT_AUDIENCE"
+        },
+        {
+          "value": "AUDIENCE"
+        }
+      ],
+      "count": 7,
+      "description": "A target type defines the type of target criteria for inclusion or exclusion on the given ad group or campaign.",
+      "referencedBy": "Targets"
+    }
+  }
+}
