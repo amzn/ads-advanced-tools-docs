@@ -1,0 +1,571 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  Creates a secure Amazon Marketing Stream S3 destination and its companion SQS
+  notification queue. The stack includes customer-managed KMS keys, an SQS dead-letter
+  queue, S3 access logging, transport-security policies, and the permissions required by
+  the Amazon Marketing Stream publisher and destination reviewer roles. The two S3
+  buckets and the Stream data KMS key are retained on stack deletion and must be
+  removed manually.
+
+# Retention policy and manual cleanup after deleting this stack
+# ------------------------------------------------------------
+# DeletionPolicy: Retain is applied only where data cannot be recovered once deleted.
+# Resources holding transient data are set explicitly to Delete so that stack teardown
+# does not strand billable resources or block re-deployment. Every resource states its
+# policy explicitly -- an omitted policy would behave as Delete but read as an oversight.
+#
+# Retained -- survive stack deletion, must be removed by hand:
+#   StreamDataBucket  Stream Parquet data. Backfill is capped (70 days automatic,
+#                     extended lookback on request), so deleted data may be
+#                     unrecoverable.
+#   StreamDataKey     Encrypts StreamDataBucket. Deleting it would leave the retained
+#                     bucket as unreadable ciphertext, so its policy must match the
+#                     bucket's.
+#   AccessLogBucket   S3 server access logs, kept as a security audit trail.
+#
+# Deleted with the stack -- nothing durable to preserve:
+#   StreamDestinationQueue, StreamDeadLetterQueue
+#                     MessageRetentionPeriod caps messages at 14 days, and those
+#                     messages are only pointers to S3 objects that survive
+#                     independently.
+#   StreamQueueKey    Encrypts queue messages only, so it guards nothing once the
+#                     queues are gone. Its policy follows the queues.
+#
+# To fully decommission a destination after deleting the stack:
+#   1. Empty and delete the data bucket (<name>-<account>-<region>-data) and the
+#      access-log bucket (<name>-<account>-<region>-logs). Versioning is enabled, so
+#      remove every object version and delete marker first.
+#   2. Schedule deletion of StreamDataKey (alias/<name>-ams-data). It stays billable
+#      until its KmsKeyDeletionWindowDays waiting period elapses.
+# Note: re-deploying with the same DestinationName in the same account and Region fails
+# while the retained buckets still exist, because their S3 names are already taken.
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Destination configuration
+        Parameters:
+          - DestinationName
+          - StreamRealm
+      - Label:
+          default: Retention and recovery
+        Parameters:
+          - AccessLogRetentionDays
+          - QueueVisibilityTimeoutSeconds
+          - MaxReceiveCount
+          - KmsKeyDeletionWindowDays
+    ParameterLabels:
+      DestinationName:
+        default: Destination name
+      StreamRealm:
+        default: Advertiser geographic realm
+      AccessLogRetentionDays:
+        default: S3 access-log retention (days)
+      QueueVisibilityTimeoutSeconds:
+        default: SQS visibility timeout (seconds)
+      MaxReceiveCount:
+        default: Maximum receives before dead-lettering
+      KmsKeyDeletionWindowDays:
+        default: KMS key deletion waiting period (days)
+
+Parameters:
+  DestinationName:
+    Type: String
+    Default: amazon-marketing-stream
+    Description: >-
+      A lowercase name used in the S3 bucket, SQS queue, and KMS alias names. Use a
+      different value for each Amazon Ads API client application destination.
+    MinLength: 3
+    MaxLength: 24
+    AllowedPattern: '^[a-z0-9][a-z0-9-]{1,22}[a-z0-9]$'
+    ConstraintDescription: >-
+      Must be 3-24 characters, contain only lowercase letters, numbers, and hyphens,
+      and begin and end with a letter or number.
+
+  StreamRealm:
+    Type: String
+    Description: >-
+      Geographic realm for the advertiser account. The stack Region must be supported
+      by this realm. For eu-south-2, enable the Region in the AWS account before deployment.
+    AllowedValues:
+      - NA
+      - EU
+      - FE
+
+  AccessLogRetentionDays:
+    Type: Number
+    Default: 365
+    Description: Number of days to retain S3 server access logs.
+    MinValue: 30
+    MaxValue: 3653
+    ConstraintDescription: Must be between 30 and 3653 days.
+
+  QueueVisibilityTimeoutSeconds:
+    Type: Number
+    Default: 300
+    Description: >-
+      Time a received notification remains hidden from other consumers. Set this above
+      the maximum expected processing time for one message.
+    MinValue: 30
+    MaxValue: 43200
+    ConstraintDescription: Must be between 30 seconds and 12 hours.
+
+  MaxReceiveCount:
+    Type: Number
+    Default: 5
+    Description: Number of failed receives before a message moves to the dead-letter queue.
+    MinValue: 1
+    MaxValue: 20
+    ConstraintDescription: Must be between 1 and 20.
+
+  KmsKeyDeletionWindowDays:
+    Type: Number
+    Default: 30
+    Description: Waiting period before a retained KMS key can be deleted after scheduling.
+    MinValue: 7
+    MaxValue: 30
+    ConstraintDescription: Must be between 7 and 30 days.
+
+Rules:
+  NorthAmericaRegion:
+    RuleCondition: !Equals [!Ref StreamRealm, NA]
+    Assertions:
+      - Assert:
+          Fn::Contains:
+            - - us-east-1
+            - !Ref AWS::Region
+        AssertDescription: North America destinations must be deployed in us-east-1.
+
+  EuropeRegion:
+    RuleCondition: !Equals [!Ref StreamRealm, EU]
+    Assertions:
+      - Assert:
+          Fn::Contains:
+            - - eu-west-1
+              - eu-west-2
+              - eu-south-2
+            - !Ref AWS::Region
+        AssertDescription: >-
+          Europe destinations must be deployed in eu-west-1, eu-west-2, or eu-south-2.
+
+  FarEastRegion:
+    RuleCondition: !Equals [!Ref StreamRealm, FE]
+    Assertions:
+      - Assert:
+          Fn::Contains:
+            - - us-west-2
+              - ap-southeast-1
+            - !Ref AWS::Region
+        AssertDescription: >-
+          Far East destinations must be deployed in us-west-2 or ap-southeast-1.
+
+Resources:
+  # @secure_recommendation: Encrypt Stream objects with a dedicated customer-managed KMS key.
+  StreamDataKey:
+    Type: AWS::KMS::Key
+    # Retained: this key decrypts StreamDataBucket, which is also retained. Deleting it
+    # would leave that bucket as unreadable ciphertext, so the two policies must match.
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      Description: !Sub 'Encryption key for ${DestinationName} Amazon Marketing Stream objects'
+      EnableKeyRotation: true
+      PendingWindowInDays: !Ref KmsKeyDeletionWindowDays
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: EnableCustomerAccountAdministration
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:root'
+            Action: 'kms:*'
+            Resource: '*'
+          - Sid: AllowStreamPublisherEncryption
+            Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::926844853897:role/PublisherRole
+            Action:
+              - kms:Decrypt
+              - kms:GenerateDataKey
+            Resource: '*'
+            Condition:
+              StringEquals:
+                kms:ViaService: !Sub 's3.${AWS::Region}.amazonaws.com'
+      Tags:
+        - Key: Application
+          Value: AmazonMarketingStream
+        - Key: Destination
+          Value: !Ref DestinationName
+
+  StreamDataKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub 'alias/${DestinationName}-ams-data'
+      TargetKeyId: !Ref StreamDataKey
+
+  # @secure_recommendation: Use a separate customer-managed key for SQS messages.
+  StreamQueueKey:
+    Type: AWS::KMS::Key
+    # Deleted with the stack, deliberately. This key encrypts SQS messages only, so it
+    # guards nothing once the queues below are deleted. Retaining it would strand a
+    # billable key in its pending-deletion window protecting no recoverable data.
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      Description: !Sub 'Encryption key for ${DestinationName} Amazon Marketing Stream queues'
+      EnableKeyRotation: true
+      PendingWindowInDays: !Ref KmsKeyDeletionWindowDays
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: EnableCustomerAccountAdministration
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:root'
+            Action: 'kms:*'
+            Resource: '*'
+          - Sid: AllowStreamPublisherEncryption
+            Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::926844853897:role/PublisherRole
+            Action:
+              - kms:Decrypt
+              - kms:GenerateDataKey
+            Resource: '*'
+            Condition:
+              StringEquals:
+                kms:ViaService: !Sub 'sqs.${AWS::Region}.amazonaws.com'
+          # Grants the SQS service principal use of this key, scoped to this account.
+          #
+          # This is NOT required for the RedrivePolicy below. AWS documents that moving a
+          # message to a dead-letter queue does not affect its encryption -- the existing
+          # ciphertext is relocated as-is, so no KMS call occurs at move time and no
+          # service-principal grant is needed for dead-lettering:
+          #   https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-server-side-encryption.html
+          # (The comparable requirement that does exist applies to SNS dead-letter queues,
+          # where sns.amazonaws.com is the sender and therefore needs the grant.)
+          #
+          # Retained as defense-in-depth for any future path where an AWS service, rather
+          # than the publisher IAM role above, writes to these queues. Senders today are
+          # IAM roles, and consumers are covered by the account-root statement.
+          #
+          # The S3 Data Delivery Integration Guide omits this statement, which is correct.
+          # Do not add it there on the assumption that redrive depends on it.
+          - Sid: AllowSqsServiceEncryption
+            Effect: Allow
+            Principal:
+              Service: sqs.amazonaws.com
+            Action:
+              - kms:Decrypt
+              - kms:GenerateDataKey
+            Resource: '*'
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+      Tags:
+        - Key: Application
+          Value: AmazonMarketingStream
+        - Key: Destination
+          Value: !Ref DestinationName
+
+  StreamQueueKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub 'alias/${DestinationName}-ams-queue'
+      TargetKeyId: !Ref StreamQueueKey
+
+  # @secure_recommendation: S3 server access-log targets require SSE-S3; S3 log delivery does not support SSE-KMS.
+  AccessLogBucket:
+    Type: AWS::S3::Bucket
+    # Retained: access logs are a security audit trail and cannot be reconstructed after
+    # deletion. Remove manually once the retention requirement no longer applies.
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub '${DestinationName}-${AWS::AccountId}-${AWS::Region}-logs'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteExpiredAccessLogs
+            Status: Enabled
+            ExpirationInDays: !Ref AccessLogRetentionDays
+            NoncurrentVersionExpiration:
+              NoncurrentDays: !Ref AccessLogRetentionDays
+          - Id: AbortIncompleteMultipartUploads
+            Status: Enabled
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 7
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        - Key: Application
+          Value: AmazonMarketingStream
+        - Key: Destination
+          Value: !Ref DestinationName
+        - Key: Purpose
+          Value: S3ServerAccessLogs
+
+  AccessLogBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref AccessLogBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowS3ServerAccessLogDelivery
+            Effect: Allow
+            Principal:
+              Service: logging.s3.amazonaws.com
+            Action: s3:PutObject
+            Resource: !Sub '${AccessLogBucket.Arn}/access-logs/*'
+            Condition:
+              ArnLike:
+                aws:SourceArn: !Sub >-
+                  arn:${AWS::Partition}:s3:::${DestinationName}-${AWS::AccountId}-${AWS::Region}-data
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+          # @secure_recommendation: Deny all unencrypted transport to the access-log bucket.
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: '*'
+            Action: s3:*
+            Resource:
+              - !GetAtt AccessLogBucket.Arn
+              - !Sub '${AccessLogBucket.Arn}/*'
+            Condition:
+              Bool:
+                aws:SecureTransport: 'false'
+
+  # @secure_recommendation: Block public access, enforce bucket ownership, KMS encryption, versioning, and audit logging.
+  StreamDataBucket:
+    Type: AWS::S3::Bucket
+    DependsOn: AccessLogBucketPolicy
+    # Retained: holds the delivered Stream data. Backfill is capped (70 days automatic,
+    # extended lookback on request), so deleted objects may be unrecoverable. This is the
+    # one resource where the CloudFormation default of Delete could cause real data loss.
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub '${DestinationName}-${AWS::AccountId}-${AWS::Region}-data'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - BucketKeyEnabled: true
+            ServerSideEncryptionByDefault:
+              KMSMasterKeyID: !GetAtt StreamDataKey.Arn
+              SSEAlgorithm: aws:kms
+      LifecycleConfiguration:
+        Rules:
+          - Id: AbortIncompleteMultipartUploads
+            Status: Enabled
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 7
+      LoggingConfiguration:
+        DestinationBucketName: !Ref AccessLogBucket
+        LogFilePrefix: access-logs/
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        - Key: Application
+          Value: AmazonMarketingStream
+        - Key: Destination
+          Value: !Ref DestinationName
+        - Key: Purpose
+          Value: StreamData
+
+  StreamDataBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref StreamDataBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowStreamDataDelivery
+            Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::926844853897:role/PublisherRole
+            Action: s3:PutObject
+            Resource: !Sub '${StreamDataBucket.Arn}/*'
+          - Sid: AllowStreamDestinationValidation
+            Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::926844853897:role/ReviewerRole
+            Action: s3:ListBucket
+            Resource: !GetAtt StreamDataBucket.Arn
+            Condition:
+              StringNotLike:
+                s3:prefix:
+                  - '*'
+          # @secure_recommendation: Deny all unencrypted transport to the Stream data bucket.
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: '*'
+            Action: s3:*
+            Resource:
+              - !GetAtt StreamDataBucket.Arn
+              - !Sub '${StreamDataBucket.Arn}/*'
+            Condition:
+              Bool:
+                aws:SecureTransport: 'false'
+
+  StreamDeadLetterQueue:
+    Type: AWS::SQS::Queue
+    # Deleted with the stack, deliberately. MessageRetentionPeriod caps messages at 14
+    # days, and each message is only a pointer to an S3 object that survives
+    # independently. Retaining the queue would also block re-deploying with the same
+    # DestinationName, since SQS queue names must be unique per account and Region.
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      QueueName: !Sub '${DestinationName}-${AWS::AccountId}-${AWS::Region}-dlq'
+      KmsDataKeyReusePeriodSeconds: 300
+      KmsMasterKeyId: !GetAtt StreamQueueKey.Arn
+      MessageRetentionPeriod: 1209600
+      SqsManagedSseEnabled: false
+      Tags:
+        - Key: Application
+          Value: AmazonMarketingStream
+        - Key: Destination
+          Value: !Ref DestinationName
+        - Key: Purpose
+          Value: DeadLetterQueue
+
+  StreamDeadLetterQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref StreamDeadLetterQueue
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          # @secure_recommendation: Deny all unencrypted transport to the dead-letter queue.
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: '*'
+            Action: sqs:*
+            Resource: !GetAtt StreamDeadLetterQueue.Arn
+            Condition:
+              Bool:
+                aws:SecureTransport: 'false'
+
+  # @secure_recommendation: Use KMS encryption, maximum retention, long polling, and a dead-letter queue.
+  StreamDestinationQueue:
+    Type: AWS::SQS::Queue
+    # Deleted with the stack, deliberately. Same reasoning as the dead-letter queue:
+    # 14-day message retention, messages are pointers to retained S3 objects, and a
+    # retained queue name would block re-deploying with the same DestinationName.
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      QueueName: !Sub '${DestinationName}-${AWS::AccountId}-${AWS::Region}-queue'
+      KmsDataKeyReusePeriodSeconds: 300
+      KmsMasterKeyId: !GetAtt StreamQueueKey.Arn
+      MessageRetentionPeriod: 1209600
+      ReceiveMessageWaitTimeSeconds: 20
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt StreamDeadLetterQueue.Arn
+        maxReceiveCount: !Ref MaxReceiveCount
+      SqsManagedSseEnabled: false
+      VisibilityTimeout: !Ref QueueVisibilityTimeoutSeconds
+      Tags:
+        - Key: Application
+          Value: AmazonMarketingStream
+        - Key: Destination
+          Value: !Ref DestinationName
+        - Key: Purpose
+          Value: StreamNotifications
+
+  StreamDestinationQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref StreamDestinationQueue
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowStreamNotifications
+            Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::926844853897:role/PublisherRole
+            Action: sqs:SendMessage
+            Resource: !GetAtt StreamDestinationQueue.Arn
+          - Sid: AllowStreamDestinationValidation
+            Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::926844853897:role/ReviewerRole
+            Action: sqs:GetQueueAttributes
+            Resource: !GetAtt StreamDestinationQueue.Arn
+          # @secure_recommendation: Deny all unencrypted transport to the destination queue.
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: '*'
+            Action: sqs:*
+            Resource: !GetAtt StreamDestinationQueue.Arn
+            Condition:
+              Bool:
+                aws:SecureTransport: 'false'
+
+Outputs:
+  StreamRealm:
+    Description: Advertiser geographic realm selected for this destination.
+    Value: !Ref StreamRealm
+
+  DestinationRegion:
+    Description: AWS Region containing both destination resources.
+    Value: !Ref AWS::Region
+
+  StreamDataBucketName:
+    Description: Name of the S3 bucket that receives Amazon Marketing Stream data.
+    Value: !Ref StreamDataBucket
+
+  StreamDataBucketArn:
+    Description: S3 bucket ARN to provide when creating a stream subscription.
+    Value: !GetAtt StreamDataBucket.Arn
+
+  StreamDestinationQueueUrl:
+    Description: URL of the SQS queue containing delivery notifications.
+    Value: !Ref StreamDestinationQueue
+
+  StreamDestinationQueueArn:
+    Description: SQS queue ARN to provide when creating a stream subscription.
+    Value: !GetAtt StreamDestinationQueue.Arn
+
+  StreamDeadLetterQueueUrl:
+    Description: URL of the dead-letter queue for notifications that repeatedly fail processing.
+    Value: !Ref StreamDeadLetterQueue
+
+  StreamDeadLetterQueueArn:
+    Description: ARN of the dead-letter queue for notifications that repeatedly fail processing.
+    Value: !GetAtt StreamDeadLetterQueue.Arn
+
+  StreamDataKmsKeyArn:
+    Description: ARN of the KMS key protecting Stream objects.
+    Value: !GetAtt StreamDataKey.Arn
+
+  StreamQueueKmsKeyArn:
+    Description: ARN of the KMS key protecting SQS messages.
+    Value: !GetAtt StreamQueueKey.Arn
+
+  StreamDestinationConfiguration:
+    Description: Bucket and queue ARNs for the Amazon Ads create-stream-subscription request.
+    Value: !Sub >-
+      {"bucketArn":"${StreamDataBucket.Arn}","notification":{"queueArn":"${StreamDestinationQueue.Arn}"}}
