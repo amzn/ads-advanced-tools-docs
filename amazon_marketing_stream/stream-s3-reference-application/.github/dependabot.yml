@@ -1,0 +1,23 @@
+# The workflow pins every action to a full commit SHA, because a tag such as @v4 can be moved to
+# different code after it was reviewed. A pin that is never updated goes stale instead, so this
+# proposes an update, as a reviewable pull request, whenever a pinned action publishes a release.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  # The Python dependencies are pinned to exact versions with hashes, which is what makes a
+  # build reproducible — and also means nothing moves until somebody moves it. Without this,
+  # no one is told when a pinned package ships a security fix.
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+  # A second entry, because `directory` names where one manifest lives rather than a tree to
+  # walk: without this, infrastructure/cdk/requirements.txt — which pins aws-cdk-lib — is not
+  # covered by the entry above.
+  - package-ecosystem: pip
+    directory: /infrastructure/cdk
+    schedule:
+      interval: weekly

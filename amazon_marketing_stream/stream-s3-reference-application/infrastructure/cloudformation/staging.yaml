@@ -1,0 +1,1633 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+# Fn::ForEach comes from this transform, and is how one schedule and one alarm set are
+# declared per dataset. CloudFormation cannot otherwise loop over a list parameter, and the
+# alternative is to index element zero and silently ignore the rest of the list.
+#
+# Two consequences of using a transform, both operational rather than structural:
+#   * deployment needs CAPABILITY_AUTO_EXPAND, since a transform is a macro
+#   * `--use-previous-template` replays parameters as the literals they resolved to last
+#     time, so new parameter values are not picked up. Deploy with the template file.
+Transform: AWS::LanguageExtensions
+
+Description: >-
+  Change-data staging layer: consumer side only. Creates the S3 Tables bucket, the AWS Glue
+  jobs that run the staging pipeline, IAM roles, schedules, and alarms.
+
+  This template does NOT create the delivery destination. The delivery bucket and notification
+  queue are prerequisites, supplied as parameters, and are typically created by a separate
+  template because their bucket policy grants write access to the delivery service and their
+  region must be one of the allowed regions for the declared geography. That geography is your
+  own infrastructure's, not the advertiser's: a subscription for an advertiser in any region can
+  target a destination in any allowed region.
+
+# ---------------------------------------------------------------------------------------
+# Compute is AWS Glue, and only AWS Glue
+#
+# There is no parameter selecting between Glue and another engine. A second compute profile would
+# be an untested Condition on most resources in this file, and a parameter with one usable value
+# only obscures what the template does.
+#
+# Glue carries deployments up to roughly five billion rows in state. Above that ceiling, add a
+# second compute stack consuming the same tables rather than a parameter that makes one template
+# describe two deployments.
+# ---------------------------------------------------------------------------------------
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Deployment shape
+        Parameters:
+          - DeploymentName
+      - Label:
+          default: Delivery destination (existing; not created here)
+        Parameters:
+          - Geo
+          - DeliveryBucketName
+          - NotificationQueueArn
+          - DeliveryKmsKeyArn
+      - Label:
+          default: Datasets and cadence
+        Parameters:
+          - DatasetIds
+          - IngestScheduleExpression
+          - MergeScheduleExpression
+          - AggregateScheduleExpression
+          - ArrivalEventBatchSize
+          - ArrivalEventBatchWindowSeconds
+      - Label:
+          default: Job artefacts
+        Parameters:
+          - ArtifactBucketName
+          - ArtifactPrefix
+          - WheelFileName
+      - Label:
+          default: Alarms
+        Parameters:
+          - AlarmEmail
+          - QueueDepthAlarmThreshold
+          - NoDeliveriesAlarmHours
+          - PendingMarkAgeAlarmHours
+          - JobSilentAlarmHours
+      - Label:
+          default: Logging
+        Parameters:
+          - LogRetentionDays
+
+# ---------------------------------------------------------------------------------------
+# This stack must be deployed in the same region as the destination it reads
+#
+# Nothing about that is enforced by the parameters alone. The three destination parameters are
+# validated for *shape* — an ARN pattern, a bucket-name pattern — and their region component is
+# accepted as whatever it happens to say. So a staging stack deployed into a different region
+# than its destination passes every parameter constraint, comes up green, and then reads a queue
+# and a bucket across a region boundary: slower, billed as inter-region transfer, and with the
+# tables built in a region the delivery never reaches.
+#
+# What this section does about it, and what it does not:
+#
+#   catches   a region the delivery service never delivers to for the declared geography,
+#             which is the common form of the mistake
+#   misses    a region that is legal for the geography but still not the destination's own.
+#             EU has three legal regions and FE has two, so within those an exact mismatch
+#             passes here
+#
+# The gap is not an oversight, it is the limit of the mechanism. A Rules assertion may use only
+# the rule-specific functions — Fn::And, Fn::Contains, Fn::EachMemberEquals, Fn::EachMemberIn,
+# Fn::Equals, Fn::If, Fn::Not, Fn::Or, Fn::RefAll, Fn::ValueOf, Fn::ValueOfAll. None of them
+# manipulate strings: no Fn::Split, no Fn::Select, no Fn::Sub. The region is sitting in plain
+# sight inside NotificationQueueArn and cannot be extracted here to compare against
+# AWS::Region.
+#
+# Worth knowing if you are tempted to try anyway: cfn-lint accepts Fn::Select and Fn::Sub in a
+# Rules block without complaint. It parses the section — a bad Ref here is reported as E1020 —
+# but does not enforce the function allow-list, so a template that lints clean can still be
+# rejected on deploy.
+#
+# The CDK path in infrastructure/cdk/stacks/staging_stack.py has no such restriction and does
+# compare the ARN's region to the stack's directly, so it closes the gap this section leaves.
+# ---------------------------------------------------------------------------------------
+Rules:
+  NorthAmericaRegion:
+    RuleCondition: !Equals [!Ref Geo, 'NA']
+    Assertions:
+      - Assert:
+          Fn::Contains:
+            - ['us-east-1']
+            - !Ref 'AWS::Region'
+        AssertDescription: >-
+          A North America destination lives in us-east-1, so the staging layer that reads it
+          must be deployed there too. Re-run with --region us-east-1.
+
+  EuropeRegion:
+    RuleCondition: !Equals [!Ref Geo, 'EU']
+    Assertions:
+      - Assert:
+          Fn::Contains:
+            - ['eu-west-1', 'eu-west-2', 'eu-south-2']
+            - !Ref 'AWS::Region'
+        AssertDescription: >-
+          A Europe destination lives in eu-west-1, eu-west-2 or eu-south-2, so the staging
+          layer must be deployed in one of those. It must be the same one as the destination;
+          this assertion cannot verify which, so check the region in NotificationQueueArn.
+
+  FarEastRegion:
+    RuleCondition: !Equals [!Ref Geo, 'FE']
+    Assertions:
+      - Assert:
+          Fn::Contains:
+            - ['us-west-2', 'ap-southeast-1']
+            - !Ref 'AWS::Region'
+        AssertDescription: >-
+          A Far East destination lives in us-west-2 or ap-southeast-1, so the staging layer
+          must be deployed in one of those. It must be the same one as the destination; this
+          assertion cannot verify which, so check the region in NotificationQueueArn.
+
+Parameters:
+
+  Geo:
+    Type: String
+    AllowedValues: ['NA', 'EU', 'FE']
+    Description: >-
+      Advertising geography the destination serves. Must match the Geo passed to the
+      destination stack. Constrains which regions this stack may be deployed into; see the
+      Rules section above for what that check does and does not cover.
+
+  DeploymentName:
+    Type: String
+    Default: stream-staging
+    AllowedPattern: '^[a-z][a-z0-9-]{2,30}$'
+    Description: >-
+      Lowercase name prefixed to created resources. Lowercase is enforced rather than
+      preferred: S3 Tables reached through the Glue Data Catalog rejects capitalised
+      identifiers, and such a table is created but stays invisible to Athena.
+
+  DeliveryBucketName:
+    Type: String
+    AllowedPattern: '^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$'
+    Description: Existing delivery bucket. Read only; this stack never writes to it.
+
+  NotificationQueueArn:
+    Type: String
+    AllowedPattern: '^arn:aws[a-z-]*:sqs:[a-z0-9-]+:\d{12}:.+$'
+    Description: >-
+      ARN of the existing notification queue. Attach a dead-letter queue to it if you have
+      not already: a notification that cannot be parsed is deliberately left unacknowledged
+      so it retries and then dead-letters, which is where you inspect it.
+
+  DeliveryKmsKeyArn:
+    Type: String
+    Default: ''
+    Description: >-
+      Optional. Customer-managed key encrypting the delivery bucket or queue. Leave empty for
+      SSE-S3 or SSE-SQS, which need no additional grant.
+
+  DatasetIds:
+    Type: CommaDelimitedList
+    Default: ads-performance-v1
+    Description: >-
+      Dataset identifiers to run jobs for. Each must have a matching file in schemas/. Every
+      dataset listed gets its own three schedules and its own alarm set. Only the ingest job
+      definition is shared, since it reads the queue for every dataset in one run; merge and
+      aggregate get one job definition per dataset, which is what gives each dataset its own
+      concurrency boundary.
+
+  IngestScheduleExpression:
+    Type: String
+    Default: rate(5 minutes)
+    Description: >-
+      How often to land delivered objects. Since the arrival trigger below exists, this is no
+      longer the primary way ingest starts — but it is not a formality and should not be
+      relaxed without reading the next paragraph. Independent of the merge cadence on purpose:
+      ingest is an append, so it can run frequently without waiting on the more expensive step.
+
+      This schedule is what drains a backlog. A run lands at most --max-objects objects, 200 by
+      default, and a busy delivery day can carry 3,000 for the hourly dataset. Arrival events
+      cannot finish that: once the delivery burst stops, no further events are emitted, and any
+      event whose start was refused while a run was in progress is gone rather than queued. So
+      the remainder is drained one scheduled run at a time. It is also the only retry path,
+      because MaxRetries is 0 on every job and a failed run leaves its notifications
+      unacknowledged for the next run to collect. Fifteen minutes would make catching up on
+      that day take three and a half hours instead of seventy minutes.
+
+  MergeScheduleExpression:
+    Type: String
+    Default: rate(15 minutes)
+    Description: >-
+      How often to resolve delivered objects into current state. The feed's freshness is roughly
+      20 to 50 minutes, so a cadence in this range adds nothing a consumer can perceive.
+
+  AggregateScheduleExpression:
+    Type: String
+    Default: cron(20 * * * ? *)
+    Description: >-
+      Hourly rebuild of the coarse-grain partitions for the event dates merge has marked as
+      pending. Not today and yesterday: a late correction can invalidate a partition months
+      back, and a run with nothing marked exits without touching a partition.
+
+  ArrivalEventBatchSize:
+    Type: Number
+    Default: 100
+    MinValue: 1
+    # Glue caps EventBatchingCondition.BatchSize at 100. Without this bound a larger value passes
+    # every parameter constraint and is refused when the trigger is created.
+    MaxValue: 100
+    Description: >-
+      Arrival events to accumulate before the trigger starts a run. One delivered object
+      produces one event, and a busy day can carry 3,000 for the hourly dataset, so starting a
+      Spark job per event would pay thousands of startups to read one file each. AWS recommends
+      batching for exactly this reason. The default is also the maximum Glue accepts, so the
+      only useful direction is downward: lowering it trades fewer runs for latency, and the run
+      still lands up to --max-objects objects regardless.
+
+  ArrivalEventBatchWindowSeconds:
+    Type: Number
+    Default: 60
+    MinValue: 1
+    MaxValue: 900
+    Description: >-
+      Seconds to wait for ArrivalEventBatchSize events before starting a run anyway. This is
+      what bounds latency on a quiet arrival: without it, a lone delivered object would wait
+      for 99 more. Glue defaults this to 900, which is also its maximum, so leaving it unset
+      would make a single arrival wait fifteen minutes.
+
+  JobSilentAlarmHours:
+    Type: Number
+    Default: 3
+    MinValue: 2
+    MaxValue: 24
+    Description: >-
+      Hours a merge or aggregate job may publish nothing before alarming. This is the only check
+      that catches a job which has stopped *starting*, as opposed to one that starts and fails.
+
+      Those are different faults and only one of them is otherwise detectable. The job-failed rule
+      reports a run that ended FAILED, so it needs a run to exist; a job whose schedule is
+      disabled, deleted, or losing a concurrency race emits no Glue event at all. Every other
+      alarm here watches a per-dataset metric with TreatMissingData notBreaching, and a job that
+      is not running publishes nothing — which notBreaching reads as healthy. Without this check a
+      dataset can go unmerged and unaggregated indefinitely with every alarm green.
+
+      Two is the floor rather than one, because the aggregate job runs hourly and a single empty
+      hour is a period-boundary artifact rather than a fault.
+
+  NoDeliveriesAlarmHours:
+    Type: Number
+    Default: 12
+    MinValue: 2
+    MaxValue: 48
+    Description: >-
+      Hours without a delivered object before alarming. Must exceed the slowest expected
+      delivery interval across every dataset in DatasetIds, or an ordinary quiet period pages
+      someone. The daily dataset is delivered every four to six hours, so six is inside its
+      normal range and twelve is the safe default. Lower it to six only for a deployment
+      carrying hourly datasets alone.
+
+  PendingMarkAgeAlarmHours:
+    Type: Number
+    Default: 3
+    # Listed, not a range: each value is a key in the HoursInSeconds mapping.
+    AllowedValues: [2, 3, 4, 6, 8, 12, 24, 48]
+    Description: >-
+      Hours a rebuild request may wait before alarming. Merge marks every event date it
+      changes, and the aggregate job clears the marks once it has rebuilt those dates. With the
+      default hourly aggregate schedule a mark normally lives under ninety minutes, so three
+      hours means at least two rebuilds in a row have failed or not run. Raise it if you slow
+      AggregateScheduleExpression down.
+
+  ArtifactBucketName:
+    Type: String
+    Default: ''
+    Description: >-
+      Existing bucket holding the job scripts and the packaged wheel. Left empty, a bucket is
+      created.
+
+  ArtifactPrefix:
+    Type: String
+    Default: stream-staging/
+    MinLength: 1
+    AllowedPattern: '^[A-Za-z0-9!_.*''()\-/]+/$'
+    Description: >-
+      Key prefix under which job artefacts are stored. Must end in '/'. The constraint is a
+      safety property, not tidiness: the ArtifactLocation output is
+      s3://<bucket>/<ArtifactPrefix>, and the teardown tool runs `aws s3 rm --recursive` against
+      it. An empty prefix made that the bucket root, and `aws s3 rm` takes a string prefix rather
+      than a path, so 'x' would also match 'xyz/...'. The character class is S3's safe set.
+      Note this feeds both branches of ArtifactLocation, so it covers a caller-supplied bucket as
+      well as a stack-created one.
+  WheelFileName:
+    Type: String
+    Default: stream_s3_reference_application-0.1.0-py3-none-any.whl
+    MinLength: 1
+    Description: >-
+      Filename of the packaged wheel under ArtifactPrefix. It is a parameter rather than a
+      literal because the name embeds the distribution name and version, so a version bump
+      would otherwise leave the jobs pointing at a wheel that is no longer produced — and
+      Glue reports that as a module import failure inside the job, not as a deployment error.
+      Confirm it with `ls dist/` after building rather than assuming the version here.
+
+  AlarmEmail:
+    Type: String
+    Default: ''
+    Description: Optional email address subscribed to the alarm topic.
+
+  LogRetentionDays:
+    Type: Number
+    Default: 90
+    # The values CloudWatch Logs accepts. Anything else fails the deployment, so it is refused
+    # here with a clear message instead.
+    AllowedValues: [1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1096, 1827,
+                    2192, 2557, 2922, 3288, 3653]
+    Description: >-
+      Days to keep the Glue job logs. Defaults to 90, just over the 70-day window in which a
+      correction can still arrive, so the logs of the run that first wrote a number are still
+      there when that number is corrected.
+  QueueDepthAlarmThreshold:
+    Type: Number
+    Default: 10000
+    Description: >-
+      Alarm when the notification queue exceeds this depth. Worth setting: a destination can
+      accumulate tens of thousands of unconsumed notifications with nothing reporting it, and
+      SQS discards a message after fourteen days, at which point the queue is no longer a
+      complete record of the bucket.
+
+Conditions:
+  CreateArtifactBucket: !Equals [!Ref ArtifactBucketName, '']
+  HasDeliveryKmsKey: !Not [!Equals [!Ref DeliveryKmsKeyArn, '']]
+  HasAlarmEmail: !Not [!Equals [!Ref AlarmEmail, '']]
+
+Mappings:
+  # PendingMarkAgeAlarmHours in seconds, the unit pending_oldest_mark_age is published in.
+  HoursInSeconds:
+    '2': {Seconds: 7200}
+    '3': {Seconds: 10800}
+    '4': {Seconds: 14400}
+    '6': {Seconds: 21600}
+    '8': {Seconds: 28800}
+    '12': {Seconds: 43200}
+    '24': {Seconds: 86400}
+    '48': {Seconds: 172800}
+
+Resources:
+
+  # -------------------------------------------------------------------------------------
+  # Storage
+  # -------------------------------------------------------------------------------------
+
+  # S3 Tables rather than Iceberg on a general-purpose bucket. Delivered files average a few
+  # hundred kilobytes and arrive continuously, so a table inherits that file size and degrades
+  # unless something compacts it. S3 Tables runs compaction, snapshot expiry and orphan-file
+  # cleanup itself, which is the difference between a reference application and one that hands
+  # the reader an operational job on day one.
+  TableBucket:
+    Type: AWS::S3Tables::TableBucket
+    # Retained, because the name is interpolated from DeploymentName and a name change requires
+    # replacement. Without these, editing that one parameter points the stack at a new empty
+    # table bucket and schedules the old one for deletion — losing current state, every
+    # coarse-grain table, the pending rebuild marks and the ingest manifest, and reporting a
+    # successful stack update while doing it. Teardown is `make undeploy`, which drops tables
+    # and namespaces in order.
+    #
+    # The cost: a stack that FAILS and rolls back reports
+    # `DELETE_SKIPPED` for this bucket and leaves it behind, so the next attempt under the same
+    # DeploymentName fails because the table bucket name is already taken. Delete the empty
+    # bucket, or redeploy under a different name. That is the same trade the delivery bucket
+    # already makes, and the right way round: a retry that needs one manual delete is better
+    # than an update that silently destroys every table.
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableBucketName: !Sub '${DeploymentName}-${AWS::AccountId}-${AWS::Region}'
+      UnreferencedFileRemoval:
+        Status: Enabled
+        NoncurrentDays: 7
+        UnreferencedDays: 3
+
+  # Glue 5.0 writes a job's logs to '<prefix>/error' and '<prefix>/output', where the prefix is
+  # the '--custom-logGroup-prefix' argument every job below passes. Both groups are created here so
+  # they carry a retention period; left to Glue they are created on first write and kept forever.
+  # Logs are operational, not data, so they go with the stack.
+  JobErrorLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      LogGroupName: !Sub '/aws-glue/stream-staging/${DeploymentName}/error'
+      RetentionInDays: !Ref LogRetentionDays
+
+  JobOutputLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      LogGroupName: !Sub '/aws-glue/stream-staging/${DeploymentName}/output'
+      RetentionInDays: !Ref LogRetentionDays
+
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
+    Condition: CreateArtifactBucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub '${DeploymentName}-artifacts-${AWS::AccountId}-${AWS::Region}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+
+  ArtifactBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Condition: CreateArtifactBucket
+    Properties:
+      Bucket: !Ref ArtifactBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource:
+              - !GetAtt ArtifactBucket.Arn
+              - !Sub '${ArtifactBucket.Arn}/*'
+            Condition:
+              Bool:
+                'aws:SecureTransport': false
+
+  # -------------------------------------------------------------------------------------
+  # IAM
+  #
+  # One role for all three jobs. Permissions are scoped to the specific queue, buckets and
+  # table bucket rather than granted on '*'. The delivery bucket grant is read-only: this
+  # stack never writes to the customer's delivery bucket, and the policy says so.
+  # -------------------------------------------------------------------------------------
+
+  JobRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${DeploymentName}-${AWS::Region}-job-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - glue.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: read-delivered-data
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              # Read and list only. Bootstrap lists the bucket; steady-state ingest reads the
+              # objects the notifications name. Neither writes, and neither deletes.
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                  - 's3:GetObjectVersion'
+                Resource: !Sub 'arn:${AWS::Partition}:s3:::${DeliveryBucketName}/*'
+              - Effect: Allow
+                Action:
+                  - 's3:ListBucket'
+                  - 's3:GetBucketLocation'
+                Resource: !Sub 'arn:${AWS::Partition}:s3:::${DeliveryBucketName}'
+
+        - PolicyName: consume-notifications
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              # DeleteMessage is required: a consumer must acknowledge what it processed, and
+              # the job only calls it after the corresponding rows are committed.
+              - Effect: Allow
+                Action:
+                  - 'sqs:ReceiveMessage'
+                  - 'sqs:DeleteMessage'
+                  - 'sqs:GetQueueAttributes'
+                  - 'sqs:GetQueueUrl'
+                Resource: !Ref NotificationQueueArn
+
+        - PolicyName: write-tables
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3tables:GetTableBucket'
+                  - 's3tables:ListNamespaces'
+                  - 's3tables:CreateNamespace'
+                  - 's3tables:GetNamespace'
+                  - 's3tables:ListTables'
+                  - 's3tables:CreateTable'
+                  - 's3tables:GetTable'
+                  - 's3tables:GetTableData'
+                  - 's3tables:PutTableData'
+                  - 's3tables:UpdateTableMetadataLocation'
+                  - 's3tables:GetTableMetadataLocation'
+                Resource:
+                  - !GetAtt TableBucket.TableBucketARN
+                  - !Sub '${TableBucket.TableBucketARN}/table/*'
+
+        - PolicyName: catalog-and-observability
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              # The jobs reach the table bucket through the Data Catalog, so these are the
+              # permissions that decide whether a table can be created at all.
+              #
+              # The jobs create the databases and tables they write and keep that metadata
+              # current as the delivered schema grows, so they read, create and update catalog
+              # entries. They never remove one: no job drops a table or a view, and teardown
+              # deletes through the S3 Tables API under operator credentials instead.
+              - Effect: Allow
+                Action:
+                  - 'glue:GetCatalog'
+                  - 'glue:GetCatalogs'
+                  - 'glue:GetDatabase'
+                  - 'glue:GetDatabases'
+                  - 'glue:CreateDatabase'
+                  - 'glue:GetTable'
+                  - 'glue:GetTables'
+                  - 'glue:CreateTable'
+                  - 'glue:UpdateTable'
+                Resource:
+                  # A table bucket is not a database in the account's own catalog. The S3 Tables
+                  # integration nests it as 's3tablescatalog/<bucket>', so its databases and
+                  # tables are two levels deeper than in a flat catalog, and 'catalog' alone
+                  # matches only the account root.
+                  #
+                  # Scoped to this deployment's own table bucket. The wider 'database/*' and
+                  # 'table/*' forms would grant CreateDatabase, CreateTable and UpdateTable on
+                  # every Glue database and table in the account — including other teams' — for a
+                  # role anyone able to start a Glue job run can reach. Creating and altering
+                  # catalog metadata is only safe at this width.
+                  - !Sub 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:catalog'
+                  - !Sub 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:catalog/s3tablescatalog'
+                  - !Sub 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:catalog/s3tablescatalog/${DeploymentName}-${AWS::AccountId}-${AWS::Region}'
+                  - !Sub 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:database/s3tablescatalog/${DeploymentName}-${AWS::AccountId}-${AWS::Region}/*'
+                  - !Sub 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:table/s3tablescatalog/${DeploymentName}-${AWS::AccountId}-${AWS::Region}/*'
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                # The two groups this stack creates, and nothing else. '/aws-glue/*' reached
+                # every Glue log group in the account, including other deployments' and other
+                # teams'.
+                #
+                # Both groups, not one. Continuous logging under a custom prefix writes
+                # '<prefix>/output' and '<prefix>/error', so naming only one of them loses the
+                # other — and the one lost would be the error stream, which is the half anyone
+                # reads after a failure. Each is listed twice because the group-level and
+                # stream-level ARNs differ: CreateLogGroup authorises against the group,
+                # CreateLogStream and PutLogEvents against streams inside it.
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${JobOutputLogGroup}'
+                  - !Sub 'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${JobOutputLogGroup}:*'
+                  - !Sub 'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${JobErrorLogGroup}'
+                  - !Sub 'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${JobErrorLogGroup}:*'
+              - Effect: Allow
+                # PutMetricData cannot be resource-scoped; it is constrained by namespace
+                # instead, which is the narrowest condition the action supports.
+                #
+                # Two namespaces, not one. StreamStaging carries the application's own metrics,
+                # which the alarms in this stack watch. Glue is where the runtime publishes the
+                # job metrics that '--enable-metrics' asks for — DPU utilisation and the like,
+                # which is what you tune worker counts against.
+                #
+                # Granting only the first was an inconsistency between this policy and the job
+                # definitions: every run emitted a burst of AccessDenied while Glue retried its
+                # own metric put three times, and the run log carried the failure of a feature
+                # the job definition had explicitly enabled.
+                Action: 'cloudwatch:PutMetricData'
+                Resource: '*'
+                Condition:
+                  StringEquals:
+                    'cloudwatch:namespace':
+                      - StreamStaging
+                      - Glue
+
+        - PolicyName: read-artifacts
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                  - 's3:ListBucket'
+                Resource: !If
+                  - CreateArtifactBucket
+                  - [!GetAtt ArtifactBucket.Arn, !Sub '${ArtifactBucket.Arn}/*']
+                  - [!Sub 'arn:${AWS::Partition}:s3:::${ArtifactBucketName}',
+                     !Sub 'arn:${AWS::Partition}:s3:::${ArtifactBucketName}/*']
+
+  DeliveryKmsAccessPolicy:
+    Type: AWS::IAM::RolePolicy
+    Condition: HasDeliveryKmsKey
+    Properties:
+      RoleName: !Ref JobRole
+      PolicyName: decrypt-delivered-data
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          # Decrypt only. The jobs read delivered data; they never encrypt anything with the
+          # customer's delivery key.
+          - Effect: Allow
+            Action:
+              - 'kms:Decrypt'
+              - 'kms:DescribeKey'
+            Resource: !Ref DeliveryKmsKeyArn
+
+  # -------------------------------------------------------------------------------------
+  # Compute: AWS Glue
+  #
+  # Every job states MaxConcurrentRuns: 1. That is also the Glue default, so this changes no
+  # behaviour — it is written down because it is the only concurrency control in the
+  # deployment, and each job depends on it for a different reason:
+  #
+  #   ingest     deduplication is a read-then-write. The anti-join against the manifest and
+  #              the insert into it are separate statements with no lock between them, so two
+  #              runs holding different notifications for the same object would both judge it
+  #              new and both land it. Redelivery mints a new delivery id for an unchanged
+  #              object, so that is a real case rather than a theoretical one.
+  #   merge      MERGE INTO is an Iceberg OverwriteFiles operation. Two overlapping merges can
+  #              raise a data conflict, which Iceberg cannot retry; it surfaces as a failed
+  #              job. See the commit.retry properties in tables/ddl.py.
+  #   aggregate  two runs over the same event dates race to replace the same partitions.
+  #
+  # Job run queuing is deliberately left off. Refusing a start is the behaviour the
+  # event-driven trigger below relies on: while a run is draining the queue, further starts
+  # are redundant, because that run reads the queue rather than a fixed list of objects and
+  # will pick up whatever arrived meanwhile. Queuing them instead would leave a stack of runs
+  # that each wake, find the queue empty, and bill for the startup.
+  #
+  # Which is why merge and aggregate are declared PER DATASET and ingest is not.
+  #
+  # MaxConcurrentRuns is scoped to the job *definition*, but two of the three invariants above
+  # are per *dataset*: two merges for one dataset conflict on the same Iceberg table, two
+  # merges for different datasets touch different tables and cannot conflict. Sharing one
+  # definition across datasets would therefore serialise datasets against each other, and because
+  # a refused start is discarded rather than queued, the loser's work is not deferred — it is
+  # dropped. With both schedules on the same expression the race resolves the same way every time,
+  # so one dataset starves indefinitely while every run still reports SUCCEEDED and every
+  # per-dataset alarm reads the starved dataset's silence as healthy.
+  #
+  # Ingest is the exception and stays shared, because its invariant genuinely is deployment-wide:
+  # it is queue-shaped. One run accepts every dataset the queue names, so a second concurrent run
+  # would race the same manifest. See IngestSchedule for why it also has only one schedule.
+  # -------------------------------------------------------------------------------------
+
+  IngestGlueJob:
+    Type: AWS::Glue::Job
+    Properties:
+      Name: !Sub '${DeploymentName}-ingest'
+      Description: Records delivered objects in the ingest manifest.
+      GlueVersion: '5.0'
+      Role: !GetAtt JobRole.Arn
+      WorkerType: G.1X
+      NumberOfWorkers: 5
+      # Retries are left to the schedule rather than configured here. A failed ingest leaves
+      # its notifications unacknowledged, so the next scheduled run picks them up; an
+      # immediate in-place retry would more often re-hit the same transient cause.
+      MaxRetries: 0
+      # See the section comment: load-bearing, not decorative.
+      ExecutionProperty:
+        MaxConcurrentRuns: 1
+      Timeout: 60
+      Command:
+        Name: glueetl
+        PythonVersion: '3'
+        ScriptLocation: !If
+          - CreateArtifactBucket
+          - !Sub 's3://${ArtifactBucket}/${ArtifactPrefix}jobs/ingest.py'
+          - !Sub 's3://${ArtifactBucketName}/${ArtifactPrefix}jobs/ingest.py'
+      DefaultArguments:
+        '--enable-metrics': 'true'
+        '--enable-continuous-cloudwatch-log': 'true'
+        '--custom-logGroup-prefix': !Sub '/aws-glue/stream-staging/${DeploymentName}'
+        '--enable-observability-metrics': 'true'
+        '--datalake-formats': iceberg
+        '--STREAM_CATALOG': datalake
+        '--STREAM_WAREHOUSE_ARN': !GetAtt TableBucket.TableBucketARN
+        '--STREAM_QUEUE_URL': !Sub
+          - 'https://sqs.${Region}.amazonaws.com/${Account}/${Name}'
+          - Region: !Select [3, !Split [':', !Ref NotificationQueueArn]]
+            Account: !Select [4, !Split [':', !Ref NotificationQueueArn]]
+            Name: !Select [5, !Split [':', !Ref NotificationQueueArn]]
+        '--STREAM_DELIVERY_BUCKET': !Ref DeliveryBucketName
+        '--additional-python-modules': !If
+          - CreateArtifactBucket
+          - !Sub 's3://${ArtifactBucket}/${ArtifactPrefix}${WheelFileName}'
+          - !Sub 's3://${ArtifactBucketName}/${ArtifactPrefix}${WheelFileName}'
+
+  # One merge and one aggregate job per dataset. The scripts and every argument are identical —
+  # only the name differs — so this buys nothing but the concurrency boundary, which is exactly
+  # what it is for. See the section comment above.
+  #
+  # Job definitions are not billed; runs are. So N datasets cost no more than one did.
+  'Fn::ForEach::DatasetJobs':
+    - DatasetId
+    - !Ref DatasetIds
+    - 'MergeGlueJob&{DatasetId}':
+        Type: AWS::Glue::Job
+        Properties:
+          Name: !Sub '${DeploymentName}-merge-${DatasetId}'
+          Description: !Sub >-
+            Resolves delivered objects for ${DatasetId} into current state.
+          GlueVersion: '5.0'
+          Role: !GetAtt JobRole.Arn
+          WorkerType: G.2X
+          NumberOfWorkers: 10
+          MaxRetries: 0
+          # Per dataset, which is the granularity the invariant is about: two merges for THIS
+          # dataset would conflict on its Iceberg table. A merge for another dataset cannot, and
+          # does not have to wait.
+          ExecutionProperty:
+            MaxConcurrentRuns: 1
+          Timeout: 120
+          Command:
+            Name: glueetl
+            PythonVersion: '3'
+            ScriptLocation: !If
+              - CreateArtifactBucket
+              - !Sub 's3://${ArtifactBucket}/${ArtifactPrefix}jobs/merge.py'
+              - !Sub 's3://${ArtifactBucketName}/${ArtifactPrefix}jobs/merge.py'
+          DefaultArguments:
+            '--enable-metrics': 'true'
+            '--enable-continuous-cloudwatch-log': 'true'
+            '--custom-logGroup-prefix': !Sub '/aws-glue/stream-staging/${DeploymentName}'
+            '--datalake-formats': iceberg
+            '--STREAM_CATALOG': datalake
+            '--STREAM_WAREHOUSE_ARN': !GetAtt TableBucket.TableBucketARN
+            # Required, not optional: the wheel supplies the stream_staging package that merge.py
+            # imports absolutely, so without it the job fails at import rather than doing less
+            # work.
+            '--additional-python-modules': !If
+              - CreateArtifactBucket
+              - !Sub 's3://${ArtifactBucket}/${ArtifactPrefix}${WheelFileName}'
+              - !Sub 's3://${ArtifactBucketName}/${ArtifactPrefix}${WheelFileName}'
+
+      'AggregateGlueJob&{DatasetId}':
+        Type: AWS::Glue::Job
+        Properties:
+          Name: !Sub '${DeploymentName}-aggregate-${DatasetId}'
+          Description: !Sub 'Rebuilds coarse-grain partitions for ${DatasetId}.'
+          GlueVersion: '5.0'
+          Role: !GetAtt JobRole.Arn
+          WorkerType: G.2X
+          NumberOfWorkers: 5
+          MaxRetries: 0
+          # Per dataset: two runs over the same event dates race to replace the same partitions.
+          # Two runs over *different* datasets replace different tables.
+          ExecutionProperty:
+            MaxConcurrentRuns: 1
+          Timeout: 120
+          Command:
+            Name: glueetl
+            PythonVersion: '3'
+            ScriptLocation: !If
+              - CreateArtifactBucket
+              - !Sub 's3://${ArtifactBucket}/${ArtifactPrefix}jobs/aggregate.py'
+              - !Sub 's3://${ArtifactBucketName}/${ArtifactPrefix}jobs/aggregate.py'
+          DefaultArguments:
+            '--enable-metrics': 'true'
+            '--enable-continuous-cloudwatch-log': 'true'
+            '--custom-logGroup-prefix': !Sub '/aws-glue/stream-staging/${DeploymentName}'
+            '--datalake-formats': iceberg
+            '--STREAM_CATALOG': datalake
+            '--STREAM_WAREHOUSE_ARN': !GetAtt TableBucket.TableBucketARN
+            '--additional-python-modules': !If
+              - CreateArtifactBucket
+              - !Sub 's3://${ArtifactBucket}/${ArtifactPrefix}${WheelFileName}'
+              - !Sub 's3://${ArtifactBucketName}/${ArtifactPrefix}${WheelFileName}'
+
+  # -------------------------------------------------------------------------------------
+  # Scheduling
+  #
+  # EventBridge Scheduler rather than a Step Functions state machine. The three jobs are
+  # independent — that independence is the point of the two-tier design — so nothing here needs
+  # to express a dependency between them. Step Functions becomes the right answer when a run
+  # grows dependent stages, and not before.
+  #
+  # There is also a Glue trigger further down, which is not in tension with that choice: the
+  # reasoning above is about expressing a dependency between jobs, and the trigger below
+  # expresses none. It exists to batch arrival events, which is the one thing EventBridge
+  # Scheduler cannot do, because a schedule has no event to count.
+  #
+  # These schedules are the floor under that trigger rather than a redundant second path. See
+  # IngestScheduleExpression for why removing them loses data recovery, not just latency.
+  # -------------------------------------------------------------------------------------
+
+  SchedulerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${DeploymentName}-${AWS::Region}-scheduler-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: scheduler.amazonaws.com
+            Action: 'sts:AssumeRole'
+            Condition:
+              StringEquals:
+                'aws:SourceAccount': !Ref AWS::AccountId
+      Policies:
+        - PolicyName: start-jobs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: 'glue:StartJobRun'
+                # One pattern per job-name shape, each with a literal segment immediately
+                # after the deployment name. A bare '${DeploymentName}-*' would also match a
+                # deployment whose name extends this one: with DeploymentName=stream-staging
+                # it reaches stream-staging-two-ingest. The patterns below cannot.
+                #
+                # Three static patterns rather than one statement per dataset, because
+                # Fn::ForEach cannot build one list across its iterations (see the job-failure
+                # rule below). A per-dataset Policies entry meets the same limitation, since
+                # Policies is a list under the role as well.
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:job/${DeploymentName}-ingest'
+                  - !Sub 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:job/${DeploymentName}-merge-*'
+                  - !Sub 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:job/${DeploymentName}-aggregate-*'
+
+  # -------------------------------------------------------------------------------------
+  # Ingest schedule: one for the deployment, not one per dataset
+  #
+  # Ingest is queue-shaped. run() accepts every dataset the drain returns and --dataset does not
+  # restrict what is processed — set, it only changes the dimension on the queue-level counters.
+  # So N per-dataset ingest schedules did N times the same work, N-1 of those starts were refused
+  # by MaxConcurrentRuns, and the one that won attributed queue-wide counters to whichever
+  # dataset's schedule happened to win the race.
+  #
+  # One schedule, and no --dataset: config.py already resolves an absent dataset to
+  # QUEUE_DIMENSION_VALUE for exactly this case, which is what the arrival trigger below has
+  # always done. No alarm watches a queue-level counter, so this changes nothing an alarm reads.
+  # -------------------------------------------------------------------------------------
+
+  IngestSchedule:
+    Type: AWS::Scheduler::Schedule
+    Properties:
+      Name: !Sub '${DeploymentName}-ingest'
+      Description: Records delivered objects for every dataset the queue names.
+      ScheduleExpression: !Ref IngestScheduleExpression
+      FlexibleTimeWindow:
+        Mode: 'OFF'
+      Target:
+        Arn: !Sub 'arn:${AWS::Partition}:scheduler:::aws-sdk:glue:startJobRun'
+        RoleArn: !GetAtt SchedulerRole.Arn
+        Input: !Sub '{"JobName":"${IngestGlueJob}"}'
+        RetryPolicy:
+          # One retry. A persistent failure should surface as an alarm rather than be
+          # absorbed by retries, and unacknowledged notifications are picked up by the
+          # next run anyway.
+          MaximumRetryAttempts: 1
+
+  # -------------------------------------------------------------------------------------
+  # Merge and aggregate schedules, one set per dataset
+  #
+  # Each dataset gets an independent cadence, which matters: the hourly and daily datasets are
+  # delivered on very different intervals. Each also targets its OWN job, so two datasets firing
+  # on the same expression do not contend for one definition's single concurrency slot.
+  #
+  # &{DatasetId} rather than ${DatasetId} in the logical ID, because a logical ID must be
+  # alphanumeric and dataset identifiers contain hyphens. The &{} form strips them. It works in
+  # the logical ID only: CloudFormation does not substitute it inside Ref or DependsOn, and
+  # rejects the template with "Unresolved resource dependencies" if you try. So the job is named
+  # with !Sub rather than referenced, and there is consequently no declared dependency between a
+  # schedule and its job. The cost is bounded and self-healing: on a first deploy a schedule can
+  # fire before its job exists, which is one refused start, and the next tick succeeds.
+  # -------------------------------------------------------------------------------------
+
+  'Fn::ForEach::DatasetSchedules':
+    - DatasetId
+    - !Ref DatasetIds
+    - 'MergeSchedule&{DatasetId}':
+        Type: AWS::Scheduler::Schedule
+        Properties:
+          Name: !Sub '${DeploymentName}-merge-${DatasetId}'
+          Description: !Sub 'Resolves delivered objects into current state for ${DatasetId}.'
+          ScheduleExpression: !Ref MergeScheduleExpression
+          FlexibleTimeWindow:
+            Mode: 'OFF'
+          Target:
+            Arn: !Sub 'arn:${AWS::Partition}:scheduler:::aws-sdk:glue:startJobRun'
+            RoleArn: !GetAtt SchedulerRole.Arn
+            Input: !Sub
+              '{"JobName":"${DeploymentName}-merge-${DatasetId}",
+              "Arguments":{"--dataset":"${DatasetId}"}}'
+            RetryPolicy:
+              MaximumRetryAttempts: 1
+
+      'AggregateSchedule&{DatasetId}':
+        Type: AWS::Scheduler::Schedule
+        Properties:
+          Name: !Sub '${DeploymentName}-aggregate-${DatasetId}'
+          Description: !Sub 'Rebuilds every declared coarse-grain partition for ${DatasetId}.'
+          ScheduleExpression: !Ref AggregateScheduleExpression
+          FlexibleTimeWindow:
+            Mode: 'OFF'
+          Target:
+            Arn: !Sub 'arn:${AWS::Partition}:scheduler:::aws-sdk:glue:startJobRun'
+            RoleArn: !GetAtt SchedulerRole.Arn
+            # 'all' rather than a grain name. Grains are declared per dataset, so no single
+            # name is valid across datasets — a schedule naming product_day would fail on the
+            # performance dataset, which has no product column. Enumerating them here instead
+            # would need a dataset-to-grain mapping in the template, and would drift from the
+            # schema files that actually own the list.
+            #
+            # The cost is that grain count multiplies the work in one run, and all of it
+            # lands in a single job whose concurrency is capped at 1. If a dataset grows more
+            # grains than fit the cadence, split it into a second schedule with explicit names
+            # rather than raising the cap — and that schedule must name event dates rather
+            # than pass pending. A mark covers an event date for every grain and is cleared
+            # once the run finishes, so a schedule building a grain subset against pending
+            # would clear the record of the grains it did not build. The job refuses it.
+            # pending, not latest. latest resolves to today and yesterday, which is wrong in
+            # both directions: it rebuilds both every hour however little has changed, and it
+            # can never rebuild the partition a late correction has just invalidated, because
+            # a restatement for an event 70 days ago arrives today and lands nowhere near the
+            # clock. A schedule guessing which event dates are stale from the clock is
+            # permanently wrong for exactly the case the staging layer exists to handle.
+            #
+            # pending asks instead. Merge records every event date it writes, and this rebuilds
+            # that set and clears it. A run with nothing marked exits without touching a
+            # partition, so an idle hour costs nothing. The manual tokens remain for the case
+            # the marks cannot cover: after a correctness fix, aggregates are stale for dates no
+            # merge has touched, which is what --event-dates restatement is for.
+            Input: !Sub
+              '{"JobName":"${DeploymentName}-aggregate-${DatasetId}",
+              "Arguments":{"--dataset":"${DatasetId}",
+              "--grain":"all","--event-dates":"pending"}}'
+            RetryPolicy:
+              MaximumRetryAttempts: 1
+
+  # -------------------------------------------------------------------------------------
+  # Arrival trigger
+  #
+  # S3 object arrival wakes ingest, instead of ingest waking on a clock and looking. The
+  # delivery bucket publishes to EventBridge (see destination.yaml), a rule routes those events
+  # to a Glue workflow, and an EVENT trigger in that workflow starts the job once a batch has
+  # accumulated.
+  #
+  # The event is a doorbell, not a work list. Ingest still drains the notification queue to
+  # learn which objects to read, so the event carries no state the pipeline depends on and a
+  # lost one costs latency rather than data. AWS is explicit that this matters: Glue does not
+  # guarantee delivery of EventBridge messages and performs no deduplication of them, leaving
+  # idempotency to the consumer. Here that is already covered — deduplication is on object URI
+  # and the merge takes strictly higher versions — and the recovery path for a lost event is
+  # the ingest schedule above.
+  #
+  # Why a workflow exists at all: Glue only permits an EVENT trigger inside one. It holds a
+  # single job and expresses no dependency. Its MaxConcurrentRuns matches the job's, because a
+  # mismatch between the two surfaces as workflow run failures rather than as refused starts.
+  # -------------------------------------------------------------------------------------
+
+  IngestArrivalWorkflow:
+    Type: AWS::Glue::Workflow
+    Properties:
+      Name: !Sub '${DeploymentName}-ingest-on-arrival'
+      Description: >-
+        Container for the arrival-triggered ingest run. Holds one job and no dependency; it
+        exists because an EVENT trigger cannot be created outside a workflow.
+      MaxConcurrentRuns: 1
+
+  IngestArrivalTrigger:
+    Type: AWS::Glue::Trigger
+    Properties:
+      Name: !Sub '${DeploymentName}-ingest-on-arrival'
+      Description: >-
+        Starts ingest once a batch of arrival events has accumulated.
+      Type: EVENT
+      WorkflowName: !Ref IngestArrivalWorkflow
+      # The debounce, and the reason this is a Glue trigger rather than a rule pointed straight
+      # at the job. Without batching every matched event starts a run, and a delivery burst of
+      # thousands of objects would mean thousands of Spark startups.
+      EventBatchingCondition:
+        BatchSize: !Ref ArrivalEventBatchSize
+        BatchWindow: !Ref ArrivalEventBatchWindowSeconds
+      # No --dataset, and that is the point. Ingest's work list is the queue, so a run lands
+      # every dataset the drain names; the job's parser makes --dataset optional for exactly
+      # this caller. Naming one here would mean indexing DatasetIds, which is the shape of the
+      # original defect — a green stack that processed the first dataset and ignored the rest —
+      # and no reader could tell the two apart. The schedules still pass --dataset, because
+      # each of those is genuinely about one dataset's cadence.
+      Actions:
+        - JobName: !Ref IngestGlueJob
+
+  ArrivalRuleRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${DeploymentName}-${AWS::Region}-arrival-rule-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: 'sts:AssumeRole'
+            Condition:
+              StringEquals:
+                'aws:SourceAccount': !Ref AWS::AccountId
+      Policies:
+        - PolicyName: notify-workflow
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              # one action, scoped to the one workflow. glue:NotifyEvent is the only permission an
+              # EventBridge rule needs to start an event-driven workflow; without it the rule
+              # publishes FailedInvocations and nothing runs.
+              - Effect: Allow
+                Action: 'glue:NotifyEvent'
+                Resource: !Sub
+                  - 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:workflow/${Name}'
+                  - Name: !Ref IngestArrivalWorkflow
+
+  IngestArrivalRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub '${DeploymentName}-object-created'
+      Description: >-
+        Routes delivery-bucket object-created events to the ingest workflow.
+      State: ENABLED
+      EventPattern:
+        source:
+          - aws.s3
+        # 'Object Created' comes from the bucket's own EventBridge configuration. The older
+        # documented pattern matches 'AWS API Call via CloudTrail' on PutObject, which needs a
+        # CloudTrail data-event trail on the bucket — an extra dependency and a per-event
+        # charge, for a signal this already provides directly.
+        detail-type:
+          - Object Created
+        detail:
+          bucket:
+            # Scoped to the delivery bucket by name. Without this the rule matches every
+            # bucket in the account and wakes ingest on unrelated traffic.
+            name:
+              - !Ref DeliveryBucketName
+      Targets:
+        - Id: ingest-workflow
+          Arn: !Sub
+            - 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:workflow/${Name}'
+            - Name: !Ref IngestArrivalWorkflow
+          RoleArn: !GetAtt ArrivalRuleRole.Arn
+
+  # -------------------------------------------------------------------------------------
+  # Alarms
+  #
+  # Each alarm corresponds to a failure that is otherwise silent. None of these fire on a
+  # crash; a crash is visible. These fire on wrongness that looks like normal operation.
+  # -------------------------------------------------------------------------------------
+
+  # The key the alarm topic is encrypted with. A customer-managed key rather than the
+  # AWS-managed 'alias/aws/sns': that key's policy cannot be edited and does not let CloudWatch
+  # Alarms or EventBridge call kms:GenerateDataKey, so a topic encrypted with it accepts no
+  # notification at all. The refusal is recorded only in the alarm's own history, as "CloudWatch
+  # Alarms does not have authorization to access the SNS topic encryption key", which is a worse
+  # outcome than leaving the topic unencrypted.
+  AlarmKey:
+    Type: AWS::KMS::Key
+    # Deleted with the stack. It protects notifications in transit and nothing durable, so a
+    # retained key would accumulate one orphan per teardown.
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      Description: !Sub 'Encrypts alarm notifications for ${AWS::StackName}.'
+      # Rotation is available but not enabled. KMS key material cannot be exported, so rotation
+      # addresses compliance obligations rather than a material exposure risk.
+      EnableKeyRotation: false
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          # Without this the key is unmanageable: IAM policies in this account cannot grant
+          # access to a key whose policy does not delegate to the account.
+          - Sid: AllowAccountAdministration
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:root'
+            Action: 'kms:*'
+            Resource: '*'
+          # Both publishers the topic policy below admits, each with the two actions a publish
+          # to an encrypted topic needs. Unconditioned, which is the statement AWS documents for
+          # this case: a condition either service does not satisfy would stop every notification
+          # while the alarms themselves still reported healthy.
+          - Sid: AllowCloudWatchAlarmsToPublish
+            Effect: Allow
+            Principal:
+              Service: cloudwatch.amazonaws.com
+            Action:
+              - 'kms:Decrypt'
+              - 'kms:GenerateDataKey*'
+            # In a key policy '*' scopes to the key the policy is attached to, not to every key
+            # in the account. It cannot be narrowed to a key ARN.
+            Resource: '*'
+          - Sid: AllowTheJobFailureRuleToPublish
+            Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action:
+              - 'kms:Decrypt'
+              - 'kms:GenerateDataKey*'
+            Resource: '*'
+  AlarmKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub 'alias/${AWS::StackName}-alarms'
+      TargetKeyId: !Ref AlarmKey
+  AlarmTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub '${DeploymentName}-alarms'
+      DisplayName: Change-data staging alarms
+      # Encrypted at rest, matching the destination stack's topic. Every publisher is granted
+      # the key above; an email subscriber needs nothing, because SNS decrypts before delivery.
+      KmsMasterKeyId: !Ref AlarmKey
+
+  AlarmSubscription:
+    Type: AWS::SNS::Subscription
+    Condition: HasAlarmEmail
+    Properties:
+      TopicArn: !Ref AlarmTopic
+      Protocol: email
+      Endpoint: !Ref AlarmEmail
+
+  # Who may publish to the alarm topic. Needed because EventBridge, unlike CloudWatch, cannot
+  # publish to a topic without a resource policy that names it. A topic policy replaces the
+  # default one rather than adding to it, so CloudWatch is named here too, scoped to this
+  # deployment's alarms, rather than left to the default policy this one replaces.
+  AlarmTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      Topics:
+        - !Ref AlarmTopic
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          # service principals scoped by source ARN and account, so only this deployment's alarms
+          # and its one failure rule can publish.
+          - Sid: AllowThisDeploymentsAlarms
+            Effect: Allow
+            Principal:
+              Service: cloudwatch.amazonaws.com
+            Action: 'sns:Publish'
+            Resource: !Ref AlarmTopic
+            Condition:
+              ArnLike:
+                'aws:SourceArn': !Sub 'arn:${AWS::Partition}:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:${DeploymentName}-*'
+              StringEquals:
+                'aws:SourceAccount': !Ref AWS::AccountId
+          - Sid: AllowTheJobFailureRule
+            Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: 'sns:Publish'
+            Resource: !Ref AlarmTopic
+            Condition:
+              ArnEquals:
+                'aws:SourceArn': !GetAtt JobFailureRule.Arn
+          # publishing is refused over plain HTTP.
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: '*'
+            Action: 'sns:Publish'
+            Resource: !Ref AlarmTopic
+            Condition:
+              Bool:
+                'aws:SecureTransport': 'false'
+
+  # A failed job run. Not a CloudWatch alarm: Glue reports the end of a run as an event, and
+  # a metric-based alarm would need job metrics that are published only while a run is alive,
+  # so a run that fails at startup would publish nothing to alarm on.
+  #
+  # Every job runs with MaxRetries 0, and a failed run is picked up by the next scheduled one,
+  # so a single failure may heal itself. It is reported anyway, because the same failure
+  # repeating every fifteen minutes looks exactly like that until someone reads the logs.
+  JobFailureRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub '${DeploymentName}-job-failed'
+      Description: A staging Glue job run ended in FAILED, TIMEOUT or ERROR.
+      State: ENABLED
+      EventPattern:
+        source:
+          - aws.glue
+        detail-type:
+          - Glue Job State Change
+        detail:
+          # A prefix rather than a list of job names. The merge and aggregate jobs are per
+          # dataset, and Fn::ForEach cannot build one list across its iterations, so they cannot
+          # be enumerated in a single rule. A prefix also stops the list drifting from the jobs
+          # it is meant to cover.
+          #
+          # The exposure is a deployment whose name is a prefix of another in the same account
+          # and region: its rule would also report the other's failures. Deployment names are
+          # already required to be unique per region because every resource name derives from
+          # them, so this narrows uniqueness to "not a prefix of another" — stated here because
+          # nothing enforces it.
+          jobName:
+            - prefix: !Sub '${DeploymentName}-'
+          # STOPPED is left out: it is what a person stopping a run produces.
+          state:
+            - FAILED
+            - TIMEOUT
+            - ERROR
+      Targets:
+        - Id: alarm-topic
+          Arn: !Ref AlarmTopic
+          InputTransformer:
+            InputPathsMap:
+              job: '$.detail.jobName'
+              run: '$.detail.jobRunId'
+              state: '$.detail.state'
+              message: '$.detail.message'
+            InputTemplate: >-
+              "Glue job <job> run <run> ended <state>: <message>"
+
+  QueueDepthAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${DeploymentName}-queue-backlog'
+      AlarmDescription: >-
+        Notification backlog is growing. SQS discards a message after fourteen days, so a
+        sustained backlog means the queue is on its way to no longer being a complete record
+        of what was delivered. Recovering from that requires a bootstrap run that lists the
+        bucket instead.
+      Namespace: AWS/SQS
+      MetricName: ApproximateNumberOfMessagesVisible
+      Dimensions:
+        - Name: QueueName
+          Value: !Select [5, !Split [':', !Ref NotificationQueueArn]]
+      Statistic: Maximum
+      Period: 300
+      EvaluationPeriods: 3
+      Threshold: !Ref QueueDepthAlarmThreshold
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      AlarmActions:
+        - !Ref AlarmTopic
+
+  # -------------------------------------------------------------------------------------
+  # Per-dataset alarms
+  #
+  # The Dimensions block is load-bearing, not decoration. The jobs publish every metric with a
+  # Dataset dimension, and in CloudWatch a metric name carrying dimensions is a different metric
+  # from the same name without them. An alarm declaring no dimensions watches a zero-dimension
+  # metric that is never published: a notBreaching alarm then cannot fire, and a breaching one
+  # sits in ALARM from the moment the stack is created. An alarm has to name the exact dimension
+  # set the metric is emitted with, which is why removing a dimension from the code means editing
+  # these in the same commit.
+  # -------------------------------------------------------------------------------------
+
+  'Fn::ForEach::DatasetAlarms':
+    - DatasetId
+    - !Ref DatasetIds
+    - 'SchemaDriftAlarm&{DatasetId}':
+        Type: AWS::CloudWatch::Alarm
+        Properties:
+          AlarmName: !Sub '${DeploymentName}-schema-drift-${DatasetId}'
+          AlarmDescription: !Sub >-
+            A delivered field's type in ${DatasetId} no longer fits the declared type without
+            losing information. The job stops rather than truncating, which is correct: over a
+            quarter of the hourly dataset's metrics are decimals carrying money and fractional
+            attribution, and reading them as integers silently zeroes them.
+          Namespace: StreamStaging
+          MetricName: schema_drift_lossy
+          Dimensions:
+            - Name: Dataset
+              Value: !Sub '${DatasetId}'
+          Statistic: Sum
+          Period: 300
+          EvaluationPeriods: 1
+          Threshold: 0
+          ComparisonOperator: GreaterThanThreshold
+          TreatMissingData: notBreaching
+          AlarmActions:
+            - !Ref AlarmTopic
+
+      'NewFieldsAlarm&{DatasetId}':
+        Type: AWS::CloudWatch::Alarm
+        Properties:
+          AlarmName: !Sub '${DeploymentName}-new-fields-${DatasetId}'
+          AlarmDescription: !Sub >-
+            ${DatasetId} deliveries carry fields the declared schema does not know. A new
+            metric.* field is dropped by the projection and ingest carries on, so on its own this
+            alarm is informational. A field that is not a metric refuses the object instead,
+            because it may belong to the record key: rows differing only in that field would share
+            a key and only one would survive, with no error. Which case this is shows in
+            schema_undeclared_non_metrics, and a refusal also fires the job-failed alarm. A
+            refusal loses nothing, because no manifest row is written for a refused object and
+            --bootstrap rediscovers whatever the manifest does not hold. Read the field names from
+            the ingest log, declare each one in the schema and lockfile, then redrive the queue or
+            re-run with --bootstrap. Stays in alarm while they keep arriving.
+          Namespace: StreamStaging
+          MetricName: schema_new_fields
+          Dimensions:
+            - Name: Dataset
+              Value: !Sub '${DatasetId}'
+          Statistic: Sum
+          Period: 300
+          EvaluationPeriods: 1
+          Threshold: 0
+          ComparisonOperator: GreaterThanThreshold
+          TreatMissingData: notBreaching
+          AlarmActions:
+            - !Ref AlarmTopic
+
+      'DeleteRatioAlarm&{DatasetId}':
+        Type: AWS::CloudWatch::Alarm
+        Properties:
+          AlarmName: !Sub '${DeploymentName}-delete-ratio-${DatasetId}'
+          AlarmDescription: !Sub >-
+            Almost every row in a ${DatasetId} batch is a delete marker. Bulk deliveries carry
+            none and restatement deliveries roughly half, so a ratio this high across a whole
+            batch is what a mass negating delivery looks like. Tombstones make it reversible;
+            this makes it noticed.
+          Namespace: StreamStaging
+          MetricName: delete_ratio
+          Dimensions:
+            - Name: Dataset
+              Value: !Sub '${DatasetId}'
+          Statistic: Maximum
+          Period: 900
+          EvaluationPeriods: 2
+          Threshold: 0.95
+          ComparisonOperator: GreaterThanThreshold
+          TreatMissingData: notBreaching
+          AlarmActions:
+            - !Ref AlarmTopic
+
+      'NoDeliveriesAlarm&{DatasetId}':
+        Type: AWS::CloudWatch::Alarm
+        Properties:
+          AlarmName: !Sub '${DeploymentName}-no-deliveries-${DatasetId}'
+          AlarmDescription: !Sub >-
+            Nothing arrived for ${DatasetId} within the configured window. The most likely
+            cause is not a pipeline fault: the feed verifies only that a destination exists at
+            subscription time, not that it is writable, so a missing write grant leaves the
+            subscription ACTIVE while nothing is ever delivered. Check the delivery bucket and
+            queue policies before looking here.
+          Namespace: StreamStaging
+          MetricName: objects_recorded
+          Dimensions:
+            - Name: Dataset
+              Value: !Sub '${DatasetId}'
+          Statistic: Sum
+          Period: 3600
+          EvaluationPeriods: !Ref NoDeliveriesAlarmHours
+          DatapointsToAlarm: !Ref NoDeliveriesAlarmHours
+          Threshold: 1
+          ComparisonOperator: LessThanThreshold
+          # breaching, because the failure being watched for is the absence of data. An
+          # unwritable destination produces no metric at all, so missing data is the signal.
+          TreatMissingData: breaching
+          AlarmActions:
+            - !Ref AlarmTopic
+
+      'PendingMarkAgeAlarm&{DatasetId}':
+        Type: AWS::CloudWatch::Alarm
+        Properties:
+          AlarmName: !Sub '${DeploymentName}-pending-mark-age-${DatasetId}'
+          AlarmDescription: !Sub >-
+            A ${DatasetId} event date has waited more than ${PendingMarkAgeAlarmHours} hours to
+            be re-aggregated. Merge marks every date it changes and the aggregate job clears the
+            mark once that date is rebuilt, so an old mark means the rebuild keeps failing: the
+            coarse tables and dashboards disagree with current state until it succeeds. The
+            count of marks cannot show this, because a healthy busy pipeline carries marks too.
+          Namespace: StreamStaging
+          MetricName: pending_oldest_mark_age
+          Dimensions:
+            - Name: Dataset
+              Value: !Sub '${DatasetId}'
+          Statistic: Maximum
+          Period: 3600
+          EvaluationPeriods: 1
+          # The metric is in seconds and the parameter in hours. CloudFormation cannot multiply,
+          # so the conversion is a lookup, which is why the parameter takes listed values only.
+          Threshold: !FindInMap [HoursInSeconds, !Ref PendingMarkAgeAlarmHours, Seconds]
+          ComparisonOperator: GreaterThanThreshold
+          # notBreaching: this metric is published only when marks exist, so no data is the
+          # normal idle state and this alarm genuinely cannot distinguish idle from stopped.
+          # A job that stops running entirely is AggregateNotRunningAlarm's case — which watches
+          # pending_marks_outstanding instead, precisely because that one *is* published on every
+          # run.
+          TreatMissingData: notBreaching
+          AlarmActions:
+            - !Ref AlarmTopic
+
+      'ObjectsOutstandingAlarm&{DatasetId}':
+        Type: AWS::CloudWatch::Alarm
+        Properties:
+          AlarmName: !Sub '${DeploymentName}-objects-outstanding-${DatasetId}'
+          AlarmDescription: !Sub >-
+            A ${DatasetId} delivered object has been waiting more than a day to be merged. Merge
+            takes its work from the merged-objects ledger rather than from a window of arrival
+            dates, which makes a backlog visible and self-healing: each run drains what the ledger
+            shows as outstanding, oldest first, up to its object cap. So this firing means
+            either the backlog is larger than one run's cap, in which case it clears over the next
+            few runs, or merge is not completing. Check the job-failed alarm to tell them apart.
+            The count of outstanding objects cannot show this on its own, because a healthy run
+            has objects outstanding between ingest and the next merge.
+          Namespace: StreamStaging
+          MetricName: oldest_outstanding_object_age
+          Dimensions:
+            - Name: Dataset
+              Value: !Sub '${DatasetId}'
+          Statistic: Maximum
+          Period: 3600
+          EvaluationPeriods: 1
+          # Days, not seconds: the metric is the age of the oldest outstanding object in whole
+          # days, since arrival date is the only timestamp the manifest partitions on. One day
+          # allows a routine run to lag overnight without paging.
+          Threshold: 1
+          ComparisonOperator: GreaterThanThreshold
+          # notBreaching, because this alarm is about backlog *age*. Missing data means merge is
+          # not running, which is a different fault with a different fix, and it is watched by
+          # MergeNotRunningAlarm below.
+          #
+          # Not the job-failed rule's case: that rule reports a run that ended FAILED, so it needs
+          # a run to exist. A job that never starts emits no Glue event, so assigning this case to
+          # that mechanism would leave nothing watching it at all.
+          TreatMissingData: notBreaching
+          AlarmActions:
+            - !Ref AlarmTopic
+
+      # -----------------------------------------------------------------------------------
+      # "The job stopped running" — the fault nothing else here can see.
+      #
+      # SampleCount, not the gauge's value. Both metrics below are published once per run
+      # regardless of what the run found, so the number of datapoints in an hour *is* the number
+      # of times the job ran. That makes these alarms independent of what the pipeline is doing:
+      # an idle pipeline still publishes, so silence means the job is not executing.
+      #
+      # TreatMissingData breaching, which is the whole point. Every other per-dataset alarm here
+      # is notBreaching, because for those metrics no news is good news. For a heartbeat it is
+      # the opposite: no news is the only evidence of the fault.
+      # -----------------------------------------------------------------------------------
+      'MergeNotRunningAlarm&{DatasetId}':
+        Type: AWS::CloudWatch::Alarm
+        Properties:
+          AlarmName: !Sub '${DeploymentName}-merge-not-running-${DatasetId}'
+          AlarmDescription: !Sub >-
+            The merge job has not run for ${DatasetId} in ${JobSilentAlarmHours} hours. Not a
+            failing run — a run that never started, which the job-failed rule cannot see because
+            no run means no Glue event. Current state is stale and falling further behind for as
+            long as this lasts, while every other alarm for this dataset stays green.
+
+            Check, in this order: that the schedule exists and is ENABLED
+            (aws scheduler get-schedule --name ${DeploymentName}-merge-${DatasetId}); that it is
+            not being refused a concurrency slot, which it cannot be if it has its own job
+            definition; and that the job itself exists.
+          Namespace: StreamStaging
+          MetricName: oldest_outstanding_object_age
+          Dimensions:
+            - Name: Dataset
+              Value: !Sub '${DatasetId}'
+          Statistic: SampleCount
+          Period: 3600
+          EvaluationPeriods: !Ref JobSilentAlarmHours
+          DatapointsToAlarm: !Ref JobSilentAlarmHours
+          Threshold: 1
+          ComparisonOperator: LessThanThreshold
+          TreatMissingData: breaching
+          AlarmActions:
+            - !Ref AlarmTopic
+
+      'AggregateNotRunningAlarm&{DatasetId}':
+        Type: AWS::CloudWatch::Alarm
+        Properties:
+          AlarmName: !Sub '${DeploymentName}-aggregate-not-running-${DatasetId}'
+          AlarmDescription: !Sub >-
+            The aggregate job has not run for ${DatasetId} in ${JobSilentAlarmHours} hours. The
+            coarse tables the dashboards read are stale, and the pending-mark age alarm cannot
+            report it: that metric is published only when marks exist, so a job that is not
+            running looks the same as one with nothing to do.
+
+            The heartbeat this watches is published on every run, as zero when nothing is
+            outstanding, so missing data means the job is not running. It is the only check that
+            catches a job which has stopped starting. Check the schedule is ENABLED
+            (aws scheduler get-schedule --name ${DeploymentName}-aggregate-${DatasetId}).
+          Namespace: StreamStaging
+          MetricName: pending_marks_outstanding
+          Dimensions:
+            - Name: Dataset
+              Value: !Sub '${DatasetId}'
+          Statistic: SampleCount
+          Period: 3600
+          EvaluationPeriods: !Ref JobSilentAlarmHours
+          DatapointsToAlarm: !Ref JobSilentAlarmHours
+          Threshold: 1
+          ComparisonOperator: LessThanThreshold
+          TreatMissingData: breaching
+          AlarmActions:
+            - !Ref AlarmTopic
+
+      'DatasetFailedAlarm&{DatasetId}':
+        Type: AWS::CloudWatch::Alarm
+        Properties:
+          AlarmName: !Sub '${DeploymentName}-dataset-failed-${DatasetId}'
+          AlarmDescription: !Sub >-
+            Ingest could not record ${DatasetId}, and carried on with the other datasets in the
+            same run. Its notifications were deliberately left on the queue, so they return after
+            the visibility timeout and then dead-letter; nothing is lost, and the dead-letter
+            alarm on the destination stack will follow if this keeps happening. The job-failed
+            rule also fires, but it cannot say which dataset is at fault — this can. Read the
+            ingest log for the cause: a lossy schema change, a column the schema does not
+            declare, or a refused ALTER are the ones seen in practice.
+          Namespace: StreamStaging
+          MetricName: dataset_failed
+          Dimensions:
+            - Name: Dataset
+              Value: !Sub '${DatasetId}'
+          Statistic: Sum
+          Period: 300
+          EvaluationPeriods: 1
+          Threshold: 0
+          ComparisonOperator: GreaterThanThreshold
+          # notBreaching: the counter is published only when a dataset fails, so no data is the
+          # healthy state. An ingest job that stops running entirely is NoDeliveriesAlarm's case
+          # — it watches objects_recorded with TreatMissingData breaching, precisely because a
+          # job that never starts emits no Glue event for the job-failed rule to see.
+          TreatMissingData: notBreaching
+          AlarmActions:
+            - !Ref AlarmTopic
+
+      'RowsMissingAlarm&{DatasetId}':
+        Type: AWS::CloudWatch::Alarm
+        Properties:
+          AlarmName: !Sub '${DeploymentName}-rows-missing-${DatasetId}'
+          AlarmDescription: !Sub >-
+            A ${DatasetId} merge read fewer rows than ingest recorded for the same delivered
+            files, so some rows never reached current state. Without --allow-missing-objects a
+            missing file fails the job instead, so this normally means that flag was used, or a
+            delivered file changed after it was accepted. The merge log names the shortfall.
+          Namespace: StreamStaging
+          MetricName: rows_missing_in_window
+          Dimensions:
+            - Name: Dataset
+              Value: !Sub '${DatasetId}'
+          Statistic: Sum
+          Period: 900
+          EvaluationPeriods: 1
+          Threshold: 0
+          ComparisonOperator: GreaterThanThreshold
+          TreatMissingData: notBreaching
+          AlarmActions:
+            - !Ref AlarmTopic
+
+Outputs:
+  TableBucketArn:
+    Description: >-
+      S3 Tables bucket ARN. Pass as --warehouse-arn, or STREAM_WAREHOUSE_ARN.
+    Value: !GetAtt TableBucket.TableBucketARN
+    Export:
+      Name: !Sub '${AWS::StackName}-TableBucketArn'
+
+  JobRoleArn:
+    Description: Role the staging jobs assume.
+    Value: !GetAtt JobRole.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-JobRoleArn'
+
+  ArtifactLocation:
+    Description: Where to upload the job scripts and the packaged wheel.
+    Value: !If
+      - CreateArtifactBucket
+      - !Sub 's3://${ArtifactBucket}/${ArtifactPrefix}'
+      - !Sub 's3://${ArtifactBucketName}/${ArtifactPrefix}'
+
+  WheelFileName:
+    Description: >-
+      Filename of the wheel the jobs were deployed against, under ArtifactLocation. Emitted so
+      that tools/verify.py can check the wheel is present: it is the one artefact whose absence
+      the stack cannot detect, because Glue resolves it at run time. Without this output the
+      check had no name to look for and silently skipped it.
+    Value: !Ref WheelFileName
+  AlarmTopicArn:
+    Description: SNS topic carrying the alarms.
+    Value: !Ref AlarmTopic
+
+  # One output per dataset rather than one for the first dataset. The identifier is normalised
+  # to snake_case because S3 Tables through Glue rejects hyphens in table names.
+  'Fn::ForEach::CurrentStateTables':
+    - DatasetId
+    - !Ref DatasetIds
+    - 'CurrentStateTable&{DatasetId}':
+        Description: !Sub >-
+          Current state for ${DatasetId}. Deleted records are retained here as tombstones so that
+          an out-of-order delivery cannot resurrect them, which means a reader has to exclude
+          them by filtering on is_deleted = false. There is no _live view to read instead: on
+          S3 Tables a view cannot be created from Spark or from Athena.
+        Value: !Sub
+          - 'datalake.current.${Table}'
+          - Table: !Join ['_', !Split ['-', !Sub '${DatasetId}']]

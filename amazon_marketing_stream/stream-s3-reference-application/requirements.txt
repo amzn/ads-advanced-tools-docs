@@ -1,0 +1,14 @@
+# Runtime dependencies.
+#
+#   python3 -m venv .venv && source .venv/bin/activate
+#   pip install -r requirements.txt
+#
+# pyproject.toml is the single source of truth; this file mirrors it so that the familiar
+# pip workflow works without reading TOML. A test asserts the two agree, so they cannot
+# drift -- see tests/unit/test_packaging.py.
+#
+# To install the package itself along with these, use `make install` or `pip install -e .`.
+
+boto3>=1.34,<2
+pyarrow>=14,<24
+PyYAML>=6,<7

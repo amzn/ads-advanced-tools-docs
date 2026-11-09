@@ -1,0 +1,19 @@
+# Development dependencies: linting, tests, and the wheel build the deploy step needs.
+#
+#   pip install -r requirements-dev.txt
+#
+# Includes PySpark so that `make test` runs the Spark integration tests against a local
+# Iceberg catalog rather than skipping them. Those tests need a JDK 17 on PATH as well.
+#
+# pyproject.toml is the single source of truth; a test asserts these agree.
+
+-r requirements.txt
+
+pytest>=8
+pytest-cov>=5
+ruff>=0.6
+mypy>=1.11
+types-PyYAML
+cfn-lint>=1
+build>=1
+pyspark>=3.5,<4

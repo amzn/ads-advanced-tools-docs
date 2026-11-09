@@ -1,0 +1,5 @@
+# Pinned so a synth is reproducible. CDK's generated CloudFormation changes between minor
+# versions, and an unpinned deployment would drift without any change in this repository.
+aws-cdk-lib==2.244.0
+constructs==10.6.0; python_version < "3.10"
+constructs==10.8.1; python_version >= "3.10"

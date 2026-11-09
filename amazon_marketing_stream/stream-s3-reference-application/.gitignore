@@ -1,0 +1,67 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+/build
+.build-logs/
+dist/
+.venv/
+venv/
+
+# Test and coverage artifacts
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.ruff_cache/
+
+# CDK
+infrastructure/cdk/cdk.out/
+infrastructure/cdk/.venv/
+node_modules/
+
+# Not just build output: cdk.context.json caches the results of environment lookups, which
+# include the account id and availability-zone names of whoever last synthesised. It is commonly
+# committed, and must not be here — this repository is intended to be public, and `make scan`
+# would flag the account id it contains as a finding.
+cdk.context.json
+cdk.out/
+
+# Editor and OS noise
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# ---------------------------------------------------------------------------
+# Never commit delivered data or credentials.
+#
+# Delivered Parquet files contain real advertiser data. There is deliberately no
+# exception to the rule below: test fixtures are synthetic and constructed in
+# code by tests/conftest.py, so no .parquet file ever needs to be committed.
+# An allowlist here would be a hole in the one guard that matters most, and
+# `make scan` blocks the same extension independently.
+# ---------------------------------------------------------------------------
+*.parquet
+
+# `stream-subscription` reads AMAZON_ADS_CLIENT_ID and AMAZON_ADS_ACCESS_TOKEN from the
+# environment, and the natural way to persist those is a shell file. `.env` alone does not cover
+# the two forms people actually use: direnv's `.envrc`, and a named file like `local.env`.
+.env
+.env.*
+*.env
+.envrc
+
+*.pem
+credentials
+aws-credentials*
+
+# Local build-system file.
+/Config
+
+# Local working notes.
+.agents/
+
+# Local git worktrees for in-progress branches.
+.worktrees/

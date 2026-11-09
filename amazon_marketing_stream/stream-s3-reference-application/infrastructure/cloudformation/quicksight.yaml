@@ -1,0 +1,2188 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: >-
+  Optional QuickSight layer: a stack-owned Athena execution path, ten datasets and an
+  eleven-visual dashboard over staging tables. Deploy after staging has created its runtime
+  databases and tables. The only external prerequisites are QuickSight account signup and an
+  existing QuickSight user ARN.
+
+# There is no CloudFormation resource for a QuickSight account subscription. Everything below
+# assumes QuickSight is already signed up in this account and region, and QuickSight resource
+# ownership still requires an existing regional user ARN. The dedicated service role, Athena
+# workgroup, encrypted result storage and Lake Formation grants are owned here. In particular,
+# this stack never reads or modifies aws-quicksight-service-role-v0.
+#
+# ---------------------------------------------------------------------------------------
+# Why SPICE for the coarse tables and direct query for the fine one
+#
+# The coarse tables are small, pre-aggregated and rebuilt on a schedule, which is exactly what
+# SPICE suits: import once per refresh, then serve reads from memory at no further query cost.
+#
+# The current-state table is the opposite. It is large, and the questions asked of it are
+# ad hoc, so importing it would mean holding hundreds of millions of rows in SPICE to answer
+# queries that change every time. It is registered as a direct-query dataset instead.
+#
+# Every dataset below is defined with CustomSql rather than by naming a table. A relational
+# table definition has to declare each input column explicitly, and the current-state table has
+# 437 of them; an explicit projection is both shorter and a statement of intent about which
+# columns a dashboard is allowed to see.
+# ---------------------------------------------------------------------------------------
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: QuickSight identity (see prerequisites above)
+        Parameters:
+          - QuickSightUserArn
+          - QuickSightLakeFormationPrincipalArn
+      - Label:
+          default: Where the data is
+        Parameters:
+          - TableBucketArn
+          - AthenaCatalogName
+          - PerformanceDatasetId
+          - ConvertedProductDatasetId
+      - Label:
+          default: Naming and refresh
+        Parameters:
+          - DeploymentName
+          - SpiceRefreshTimeOfDay
+          - SpiceRefreshTimeZone
+
+Parameters:
+  QuickSightUserArn:
+    Type: String
+    AllowedPattern: '^arn:aws.*:quicksight:.+:\d{12}:user/.+$'
+    ConstraintDescription: >-
+      must be a QuickSight user ARN, for example
+      arn:aws:quicksight:us-east-1:111122223333:user/default/alice
+    Description: >-
+      Principal granted ownership of everything this template creates. Find it with
+      `aws quicksight list-users --aws-account-id <id> --namespace default`. Deliberately has no
+      default: a QuickSight principal is account-specific and cannot be guessed.
+
+  # A second identity parameter, and not a duplicate of the one above. QuickSightUserArn is
+  # consumed by AWS::QuickSight::DataSet, ::DataSource and ::Dashboard, whose Permissions.Principal
+  # requires a QuickSight user or group ARN. Lake Formation's DataLakePrincipalIdentifier requires
+  # an IAM principal ARN and rejects a quicksight: one. A live deploy proved it: the five User
+  # grants below all failed with AccessDenied -- "Resource does not exist or requester is not
+  # authorized to access requested permissions" -- while the five sibling Role grants, identical
+  # but for an IAM role ARN, succeeded. One parameter cannot satisfy both consumers, so there are
+  # two.
+  #
+  # A federated QuickSight user is addressed by the IAM role behind it, which is what goes here.
+  #
+  # Left empty, the five User grants are skipped rather than created with a value known to fail.
+  # That is a safe default: the Athena data source passes AthenaParameters.RoleArn naming the role
+  # this stack creates, so every dataset and the dashboard read through the Role grants. What the
+  # User grants add is the ability for a human to query the same tables directly in the Athena
+  # console. Supply this parameter if you want that; leave it empty and the dashboard still works.
+  QuickSightLakeFormationPrincipalArn:
+    Type: String
+    Default: ''
+    AllowedPattern: '^$|^arn:aws[^:]*:iam::\d{12}:(role|user)/.+$'
+    ConstraintDescription: >-
+      must be empty, or an IAM role or user ARN, for example
+      arn:aws:iam::111122223333:role/Analyst
+    Description: >-
+      IAM principal granted Lake Formation SELECT/DESCRIBE on the staging databases, so a human
+      can query them in the Athena console. Must be an IAM ARN, not a QuickSight one: Lake
+      Formation rejects a quicksight: user ARN with AccessDenied. A federated QuickSight user is
+      addressed by its underlying IAM role. Leave empty to skip those grants entirely; the
+      dashboard does not depend on them.
+
+  AthenaCatalogName:
+    Type: String
+    Default: datalake
+    MinLength: 1
+    Description: >-
+      Athena catalog holding the staging tables, as Athena addresses it. For S3 Tables reached
+      through Glue this is usually 's3tablescatalog/<table-bucket-name>' rather than a short
+      name, so check in the Athena console before deploying. Getting this wrong produces a
+      dataset that validates and returns nothing.
+
+  TableBucketArn:
+    Type: String
+    AllowedPattern: '^arn:aws[^:]*:s3tables:[^:]+:\d{12}:bucket/.+$'
+    ConstraintDescription: must be an S3 Tables table-bucket ARN
+    Description: >-
+      ARN exported by the staging stack. This is always required because it scopes IAM table
+      reads even when AthenaCatalogName overrides the catalog's logical name.
+
+  PerformanceDatasetId:
+    Type: String
+    Default: ads_performance_v1
+    Description: >-
+      Snake-case table stem of the hourly dataset. Note the underscores: the delivered
+      identifier is hyphenated, but table names are normalised because S3 Tables through Glue
+      rejects hyphens.
+
+  ConvertedProductDatasetId:
+    Type: String
+    Default: ads_converted_product_v1
+    Description: Snake-case table stem of the daily dataset.
+
+  DeploymentName:
+    Type: String
+    Default: stream-staging
+    AllowedPattern: '^[a-z0-9-]+$'
+    Description: Prefix for the QuickSight resource ids this template creates.
+
+  SpiceRefreshTimeOfDay:
+    Type: String
+    Default: '05:00'
+    AllowedPattern: '^([01][0-9]|2[0-3]):[0-5][0-9]$'
+    Description: >-
+      Daily SPICE refresh time, HH:MM. Schedule it after the aggregate job has rebuilt the
+      partitions for the period you care about, or the refresh imports yesterday's numbers.
+
+  SpiceRefreshTimeZone:
+    Type: String
+    Default: UTC
+    Description: Time zone for the refresh schedule, as an IANA name.
+
+Conditions:
+  # Gates the five User*Permissions grants. Nothing in the template may DependsOn a resource
+  # carrying this condition: CloudFormation does not drop such a dependency, it skips the
+  # depending resource too -- "if a resource with a condition isn't created, any resources that
+  # depend on that resource aren't created either, regardless of their own conditions". An entry
+  # for one of these in AthenaDataSource's DependsOn would therefore delete the data source, and
+  # with it every dataset and the dashboard, the moment this parameter was left empty.
+  HasLakeFormationPrincipal: !Not [!Equals [!Ref QuickSightLakeFormationPrincipalArn, '']]
+
+Resources:
+  # -------------------------------------------------------------------------------------
+  # Stack-owned QuickSight execution path
+  # -------------------------------------------------------------------------------------
+
+  AthenaResultsKey:
+    Type: AWS::KMS::Key
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      Description: !Sub 'Encrypts QuickSight Athena results for ${AWS::StackName}. Access logs use SSE-S3.'
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowAccountAdministration
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:root'
+            Action: 'kms:*'
+            Resource: '*'
+          # No statement for logging.s3.amazonaws.com. There was one, to let server access log
+          # delivery encrypt with this key — but SSE-KMS is not supported for a server access log
+          # destination bucket in the first place, so the access-log bucket uses SSE-S3 and this
+          # key is never asked to encrypt a log object. A grant for a principal that cannot use
+          # it only widens the key policy.
+
+  AthenaResultsKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub 'alias/${AWS::StackName}-athena-results'
+      TargetKeyId: !Ref AthenaResultsKey
+
+  AthenaAccessLogBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      BucketName: !Sub '${DeploymentName}-quicksight-logs-${AWS::AccountId}-${AWS::Region}'
+      # ACLs are disabled; access is controlled by policy only.
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      # all four bucket-level public access controls are enabled. This stack never changes the
+      # account-level public access block.
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      # SSE-S3, not AthenaResultsKey. S3 server access log delivery does not support SSE-KMS on
+      # the destination bucket, so a customer-managed key here means no logs are ever written
+      # and nothing reports it. The query-results bucket below is not a log destination and does
+      # use the key.
+      # https://docs.aws.amazon.com/AmazonS3/latest/userguide/enable-server-access-logging.html
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireAccessLogs
+            Status: Enabled
+            ExpirationInDays: 90
+            NoncurrentVersionExpirationInDays: 7
+          - Id: AbortIncompleteUploads
+            Status: Enabled
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 7
+
+  AthenaAccessLogBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref AthenaAccessLogBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          # only S3 log delivery may write, only under logs/, and only for a source bucket in this
+          # account.
+          - Sid: AllowLogDelivery
+            Effect: Allow
+            Principal:
+              Service: logging.s3.amazonaws.com
+            Action: 's3:PutObject'
+            Resource: !Sub '${AthenaAccessLogBucket.Arn}/logs/*'
+            Condition:
+              StringEquals:
+                'aws:SourceAccount': !Ref AWS::AccountId
+          - Sid: DenyUnencryptedTransport
+            Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource:
+              - !GetAtt AthenaAccessLogBucket.Arn
+              - !Sub '${AthenaAccessLogBucket.Arn}/*'
+            Condition:
+              Bool:
+                'aws:SecureTransport': false
+
+  AthenaResultsBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      BucketName: !Sub '${DeploymentName}-quicksight-results-${AWS::AccountId}-${AWS::Region}'
+      # ACLs are disabled; access is controlled by policy only.
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      # all four bucket-level public access controls are enabled. This stack never changes the
+      # account-level public access block.
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: 'aws:kms'
+              KMSMasterKeyID: !GetAtt AthenaResultsKey.Arn
+            BucketKeyEnabled: true
+      VersioningConfiguration:
+        Status: Enabled
+      # access logging is policy-based so BucketOwnerEnforced can remain enabled without an ACL
+      # grant.
+      LoggingConfiguration:
+        DestinationBucketName: !Ref AthenaAccessLogBucket
+        LogFilePrefix: logs/
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireQueryResults
+            Status: Enabled
+            ExpirationInDays: 7
+            NoncurrentVersionExpirationInDays: 7
+          - Id: AbortIncompleteUploads
+            Status: Enabled
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 7
+
+  AthenaResultsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref AthenaResultsBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: DenyUnencryptedTransport
+            Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource:
+              - !GetAtt AthenaResultsBucket.Arn
+              - !Sub '${AthenaResultsBucket.Arn}/*'
+            Condition:
+              Bool:
+                'aws:SecureTransport': false
+
+  AthenaWorkGroup:
+    Type: AWS::Athena::WorkGroup
+    Properties:
+      Name: !Sub '${DeploymentName}-quicksight'
+      RecursiveDeleteOption: true
+      WorkGroupConfiguration:
+        EnforceWorkGroupConfiguration: true
+        PublishCloudWatchMetricsEnabled: true
+        RequesterPaysEnabled: false
+        ResultConfiguration:
+          ExpectedBucketOwner: !Ref AWS::AccountId
+          OutputLocation: !Sub 's3://${AthenaResultsBucket}/results/'
+          EncryptionConfiguration:
+            EncryptionOption: SSE_KMS
+            KmsKey: !GetAtt AthenaResultsKey.Arn
+
+  QuickSightRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${DeploymentName}-quicksight'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          # scoped to this account, so the QuickSight service principal cannot be induced to assume
+          # this role on behalf of another customer. The role reads delivered advertiser data and
+          # the query-result bucket, so an unconditioned service-principal trust is a
+          # confused-deputy exposure. The SchedulerRole in the staging stack carries the same
+          # condition.
+          #
+          # Not verifiable here, and worth stating plainly: AWS's general guidance is to use
+          # aws:SourceAccount for "all services with service principals that have been given
+          # access to resources in your account", but AWS's own QuickSight documentation shows
+          # this trust policy *without* a condition, and QuickSight publishes no confused-deputy
+          # page of its own, so whether QuickSight sends the key is unconfirmed. The condition is
+          # set anyway: an unsupported condition makes the role unassumable, so the first deploy
+          # fails loudly and the problem is discoverable, whereas omitting the condition fails
+          # silently and forever. See docs/verification.md.
+          - Effect: Allow
+            Principal:
+              Service: quicksight.amazonaws.com
+            Action: 'sts:AssumeRole'
+            Condition:
+              StringEquals:
+                'aws:SourceAccount': !Ref AWS::AccountId
+      Policies:
+        - PolicyName: QuickSightAthenaAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'athena:GetWorkGroup'
+                  - 'athena:StartQueryExecution'
+                  - 'athena:StopQueryExecution'
+                  - 'athena:GetQueryExecution'
+                  - 'athena:GetQueryResults'
+                  - 'athena:GetQueryResultsStream'
+                  - 'athena:ListQueryExecutions'
+                Resource: !Sub 'arn:${AWS::Partition}:athena:${AWS::Region}:${AWS::AccountId}:workgroup/${DeploymentName}-quicksight'
+              - Effect: Allow
+                Action:
+                  - 's3:GetBucketLocation'
+                  - 's3:ListBucket'
+                  - 's3:ListBucketMultipartUploads'
+                Resource: !GetAtt AthenaResultsBucket.Arn
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                  - 's3:PutObject'
+                  - 's3:DeleteObject'
+                  - 's3:AbortMultipartUpload'
+                Resource: !Sub '${AthenaResultsBucket.Arn}/results/*'
+              - Effect: Allow
+                Action:
+                  - 'kms:Decrypt'
+                  - 'kms:Encrypt'
+                  - 'kms:GenerateDataKey'
+                  - 'kms:DescribeKey'
+                Resource: !GetAtt AthenaResultsKey.Arn
+              - Effect: Allow
+                Action:
+                  - 's3tables:GetTableBucket'
+                  - 's3tables:ListNamespaces'
+                  - 's3tables:GetNamespace'
+                  - 's3tables:ListTables'
+                  - 's3tables:GetTable'
+                  - 's3tables:GetTableData'
+                  - 's3tables:GetTableMetadataLocation'
+                Resource:
+                  - !Ref TableBucketArn
+                  - !Sub '${TableBucketArn}/table/*'
+              - Effect: Allow
+                Action:
+                  - 'glue:GetCatalog'
+                  - 'glue:GetDatabase'
+                  - 'glue:GetDatabases'
+                  - 'glue:GetTable'
+                  - 'glue:GetTables'
+                  - 'glue:GetPartition'
+                  - 'glue:GetPartitions'
+                  - 'glue:BatchGetPartition'
+                Resource:
+                  # The account's own default catalog, addressed by the bare ':catalog' resource,
+                  # which is not any of the three below. Athena resolves a catalog named in the
+                  # SQL by first reading the default catalog of the account it is querying, so
+                  # without this entry resolution stops before the nested catalog is ever
+                  # consulted and the query fails with CATALOG_NOT_FOUND.
+                  #
+                  # Measured on a live deployment rather than reasoned about, because three
+                  # earlier readings of the same error were wrong. A role holding this policy
+                  # verbatim, assumed by an ordinary caller, reproduced CATALOG_NOT_FOUND on
+                  # SELECT count(*) FROM "<nested-catalog>"."current"."ads_performance_v1";
+                  # adding this one ARN and nothing else, the same query succeeded and returned
+                  # the table's rows. Adding glue:GetCatalogs instead, with this ARN still
+                  # absent, failed identically — so the missing grant is this resource and not
+                  # that action, and the role's trust condition, which the error was previously
+                  # attributed to, is not involved.
+                  - !Sub 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:catalog'
+                  # Both the parent catalog and the per-table-bucket catalog nested under it.
+                  # S3 Tables surfaces each table bucket as its own nested Glue catalog, and the
+                  # generated SQL names that nested one. Granting only the parent makes
+                  # glue:GetCatalog fail on the nested id, which Athena reports as
+                  # CATALOG_NOT_FOUND rather than as an access denial — so the failure names the
+                  # catalog rather than the missing permission.
+                  - !Sub
+                    - 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:catalog/${CatalogRoot}'
+                    - CatalogRoot: !Select [0, !Split ['/', !Ref AthenaCatalogName]]
+                  - !Sub 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:catalog/${AthenaCatalogName}'
+                  - !Sub 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:database/${AthenaCatalogName}/current'
+                  - !Sub 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:database/${AthenaCatalogName}/aggregate'
+                  - !Sub 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:table/${AthenaCatalogName}/current/*'
+                  - !Sub 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:table/${AthenaCatalogName}/aggregate/*'
+              # Lake Formation GetDataAccess does not support resource-level permissions, so the API
+              # requires '*'; this role has no grant-management actions.
+              - Effect: Allow
+                Action: 'lakeformation:GetDataAccess'
+                Resource: '*'
+
+  # Resource.Catalog is a CatalogResource object, so the identifier goes under 'Id'. Verified
+  # against the published registry schema, which is what CloudFormation validates with:
+  #   CatalogResource: {type: object, properties: {Id: CatalogIdString}, additionalProperties: false}
+  # from https://schema.cloudformation.us-east-1.amazonaws.com/CloudformationSchema.zip
+  # (aws-lakeformation-principalpermissions.json).
+  #
+  # A bare identifier instead is accepted by cfn-lint and by CDK's typing, and rejected by
+  # CloudFormation at create — and because AthenaDataSource DependsOn the Role grants below, that
+  # failure takes the whole stack with it. The Database and Table grants further down nest the
+  # same value under CatalogId.
+  #
+  # E3012 is suppressed per-resource, not globally: cfn-lint ships no schema for
+  # AWS::LakeFormation::PrincipalPermissions and falls back to the legacy resource spec, which
+  # predates CatalogResource and still types this as a string. Scoped here so E3012 keeps its
+  # teeth everywhere else.
+  RoleCatalogPermissions:
+    Type: AWS::LakeFormation::PrincipalPermissions
+    Metadata:
+      cfn-lint:
+        config:
+          ignore_checks:
+            - E3012
+    Properties:
+      Principal:
+        DataLakePrincipalIdentifier: !GetAtt QuickSightRole.Arn
+      Resource:
+        Catalog:
+          Id: !Sub '${AWS::AccountId}:${AthenaCatalogName}'
+      Permissions: [DESCRIBE]
+      PermissionsWithGrantOption: []
+
+  # The five User* grants below are for a human querying these tables in the Athena console, and
+  # are skipped unless QuickSightLakeFormationPrincipalArn is supplied. They take an IAM ARN, not
+  # the quicksight: user ARN: a live deploy showed all five failing with AccessDenied while the
+  # Role grants succeeded.
+  UserCatalogPermissions:
+    Type: AWS::LakeFormation::PrincipalPermissions
+    Condition: HasLakeFormationPrincipal
+    Metadata:
+      cfn-lint:
+        config:
+          ignore_checks:
+            - E3012
+    Properties:
+      Principal:
+        DataLakePrincipalIdentifier: !Ref QuickSightLakeFormationPrincipalArn
+      Resource:
+        Catalog:
+          Id: !Sub '${AWS::AccountId}:${AthenaCatalogName}'
+      Permissions: [DESCRIBE]
+      PermissionsWithGrantOption: []
+
+  RoleCurrentDatabasePermissions:
+    Type: AWS::LakeFormation::PrincipalPermissions
+    Properties:
+      Principal:
+        DataLakePrincipalIdentifier: !GetAtt QuickSightRole.Arn
+      Resource:
+        Database:
+          CatalogId: !Sub '${AWS::AccountId}:${AthenaCatalogName}'
+          Name: current
+      Permissions: [DESCRIBE]
+      PermissionsWithGrantOption: []
+
+  UserCurrentDatabasePermissions:
+    Type: AWS::LakeFormation::PrincipalPermissions
+    Condition: HasLakeFormationPrincipal
+    Properties:
+      Principal:
+        DataLakePrincipalIdentifier: !Ref QuickSightLakeFormationPrincipalArn
+      Resource:
+        Database:
+          CatalogId: !Sub '${AWS::AccountId}:${AthenaCatalogName}'
+          Name: current
+      Permissions: [DESCRIBE]
+      PermissionsWithGrantOption: []
+
+  RoleAggregateDatabasePermissions:
+    Type: AWS::LakeFormation::PrincipalPermissions
+    Properties:
+      Principal:
+        DataLakePrincipalIdentifier: !GetAtt QuickSightRole.Arn
+      Resource:
+        Database:
+          CatalogId: !Sub '${AWS::AccountId}:${AthenaCatalogName}'
+          Name: aggregate
+      Permissions: [DESCRIBE]
+      PermissionsWithGrantOption: []
+
+  UserAggregateDatabasePermissions:
+    Type: AWS::LakeFormation::PrincipalPermissions
+    Condition: HasLakeFormationPrincipal
+    Properties:
+      Principal:
+        DataLakePrincipalIdentifier: !Ref QuickSightLakeFormationPrincipalArn
+      Resource:
+        Database:
+          CatalogId: !Sub '${AWS::AccountId}:${AthenaCatalogName}'
+          Name: aggregate
+      Permissions: [DESCRIBE]
+      PermissionsWithGrantOption: []
+
+  RoleCurrentTablePermissions:
+    Type: AWS::LakeFormation::PrincipalPermissions
+    Properties:
+      Principal:
+        DataLakePrincipalIdentifier: !GetAtt QuickSightRole.Arn
+      Resource:
+        Table:
+          CatalogId: !Sub '${AWS::AccountId}:${AthenaCatalogName}'
+          DatabaseName: current
+          TableWildcard: {}
+      Permissions: [SELECT, DESCRIBE]
+      PermissionsWithGrantOption: []
+
+  UserCurrentTablePermissions:
+    Type: AWS::LakeFormation::PrincipalPermissions
+    Condition: HasLakeFormationPrincipal
+    Properties:
+      Principal:
+        DataLakePrincipalIdentifier: !Ref QuickSightLakeFormationPrincipalArn
+      Resource:
+        Table:
+          CatalogId: !Sub '${AWS::AccountId}:${AthenaCatalogName}'
+          DatabaseName: current
+          TableWildcard: {}
+      Permissions: [SELECT, DESCRIBE]
+      PermissionsWithGrantOption: []
+
+  RoleAggregateTablePermissions:
+    Type: AWS::LakeFormation::PrincipalPermissions
+    Properties:
+      Principal:
+        DataLakePrincipalIdentifier: !GetAtt QuickSightRole.Arn
+      Resource:
+        Table:
+          CatalogId: !Sub '${AWS::AccountId}:${AthenaCatalogName}'
+          DatabaseName: aggregate
+          TableWildcard: {}
+      Permissions: [SELECT, DESCRIBE]
+      PermissionsWithGrantOption: []
+
+  UserAggregateTablePermissions:
+    Type: AWS::LakeFormation::PrincipalPermissions
+    Condition: HasLakeFormationPrincipal
+    Properties:
+      Principal:
+        DataLakePrincipalIdentifier: !Ref QuickSightLakeFormationPrincipalArn
+      Resource:
+        Table:
+          CatalogId: !Sub '${AWS::AccountId}:${AthenaCatalogName}'
+          DatabaseName: aggregate
+          TableWildcard: {}
+      Permissions: [SELECT, DESCRIBE]
+      PermissionsWithGrantOption: []
+
+  # -------------------------------------------------------------------------------------
+  # Data source
+  # -------------------------------------------------------------------------------------
+
+  # DependsOn names the five Role grants and not the five User ones, for two reasons that point
+  # the same way.
+  #
+  # Correctness: the User grants are now conditional, and DependsOn does not support an intrinsic
+  # function, so the list cannot be made conditional with it. CloudFormation does not drop a
+  # dependency on a resource a false condition excluded -- it skips the depending resource as
+  # well. Naming one here would therefore delete this data source, and every dataset and the
+  # dashboard that reference it, whenever QuickSightLakeFormationPrincipalArn was left empty.
+  #
+  # Meaning: this data source reads through the role, because AthenaParameters.RoleArn below names
+  # it. The Role grants are the ones that must exist first. The User grants are for a human in the
+  # Athena console and have no bearing on whether a dataset validates, so waiting for them never
+  # bought anything.
+  AthenaDataSource:
+    Type: AWS::QuickSight::DataSource
+    DependsOn:
+      - RoleCatalogPermissions
+      - RoleCurrentDatabasePermissions
+      - RoleAggregateDatabasePermissions
+      - RoleCurrentTablePermissions
+      - RoleAggregateTablePermissions
+    Properties:
+      AwsAccountId: !Ref AWS::AccountId
+      DataSourceId: !Sub '${DeploymentName}-athena'
+      Name: !Sub '${DeploymentName} staging layer (Athena)'
+      Type: ATHENA
+      DataSourceParameters:
+        AthenaParameters:
+          RoleArn: !GetAtt QuickSightRole.Arn
+          WorkGroup: !Ref AthenaWorkGroup
+      SslProperties:
+        DisableSsl: false
+      Permissions:
+        - Principal: !Ref QuickSightUserArn
+          Actions:
+            - 'quicksight:DescribeDataSource'
+            - 'quicksight:DescribeDataSourcePermissions'
+            - 'quicksight:PassDataSource'
+            - 'quicksight:UpdateDataSource'
+            - 'quicksight:DeleteDataSource'
+            - 'quicksight:UpdateDataSourcePermissions'
+
+  # -------------------------------------------------------------------------------------
+  # Datasets
+  #
+  # "date.value" is stored as a string, because that is how it is delivered. It is cast to a date
+  # here so QuickSight treats it as a time axis rather than as a category; left as a string, a
+  # line chart orders it lexicographically and any date filter is a string comparison.
+  # -------------------------------------------------------------------------------------
+
+  CampaignDayDataSet:
+    Type: AWS::QuickSight::DataSet
+    Properties:
+      AwsAccountId: !Ref AWS::AccountId
+      DataSetId: !Sub '${DeploymentName}-campaign-day'
+      Name: !Sub '${DeploymentName} — campaign by day (SPICE)'
+      ImportMode: SPICE
+      PhysicalTableMap:
+        campaign-day:
+          CustomSql:
+            DataSourceArn: !GetAtt AthenaDataSource.Arn
+            Name: campaign_day
+            SqlQuery: !Sub |
+              SELECT CAST("date.value" AS DATE)  AS event_date,
+                     "advertiseraccount.id",
+                     "adproduct.value",
+                     "campaign.id",
+                     "metric.impressions",
+                     "metric.clicks",
+                     "metric.totalcost"
+              FROM "${AthenaCatalogName}"."aggregate"."${PerformanceDatasetId}_campaign_day"
+            Columns:
+              - Name: event_date
+                Type: DATETIME
+              - Name: "advertiseraccount.id"
+                Type: STRING
+              - Name: "adproduct.value"
+                Type: STRING
+              - Name: "campaign.id"
+                Type: STRING
+              - Name: "metric.impressions"
+                Type: INTEGER
+              - Name: "metric.clicks"
+                Type: INTEGER
+              # DECIMAL, not INTEGER. 119 of this dataset's metrics are delivered as
+              # decimal128(18,8) and carry money; read as integers they truncate to zero.
+              - Name: "metric.totalcost"
+                Type: DECIMAL
+      Permissions:
+        - Principal: !Ref QuickSightUserArn
+          Actions:
+            - 'quicksight:DescribeDataSet'
+            - 'quicksight:DescribeDataSetPermissions'
+            - 'quicksight:PassDataSet'
+            - 'quicksight:DescribeIngestion'
+            - 'quicksight:ListIngestions'
+            - 'quicksight:UpdateDataSet'
+            - 'quicksight:DeleteDataSet'
+            - 'quicksight:CreateIngestion'
+            - 'quicksight:CancelIngestion'
+            - 'quicksight:UpdateDataSetPermissions'
+
+  ProductDayDataSet:
+    Type: AWS::QuickSight::DataSet
+    Properties:
+      AwsAccountId: !Ref AWS::AccountId
+      DataSetId: !Sub '${DeploymentName}-product-day'
+      Name: !Sub '${DeploymentName} — product by day (SPICE)'
+      ImportMode: SPICE
+      PhysicalTableMap:
+        product-day:
+          CustomSql:
+            DataSourceArn: !GetAtt AthenaDataSource.Arn
+            Name: product_day
+            # The grain this dataset exists for. It groups by "convertedproduct.id", a column the
+            # hourly dataset does not have, which is why grains are declared per dataset.
+            SqlQuery: !Sub |
+              SELECT CAST("date.value" AS DATE)  AS event_date,
+                     "advertiseraccount.id",
+                     "convertedproduct.id",
+                     "metric.combinedpurchases",
+                     "metric.combinedunitssold",
+                     "metric.combinedsales"
+              FROM "${AthenaCatalogName}"."aggregate"."${ConvertedProductDatasetId}_product_day"
+            Columns:
+              - Name: event_date
+                Type: DATETIME
+              - Name: "advertiseraccount.id"
+                Type: STRING
+              - Name: "convertedproduct.id"
+                Type: STRING
+              - Name: "metric.combinedpurchases"
+                Type: INTEGER
+              - Name: "metric.combinedunitssold"
+                Type: INTEGER
+              - Name: "metric.combinedsales"
+                Type: DECIMAL
+      Permissions:
+        - Principal: !Ref QuickSightUserArn
+          Actions:
+            - 'quicksight:DescribeDataSet'
+            - 'quicksight:DescribeDataSetPermissions'
+            - 'quicksight:PassDataSet'
+            - 'quicksight:DescribeIngestion'
+            - 'quicksight:ListIngestions'
+            - 'quicksight:UpdateDataSet'
+            - 'quicksight:DeleteDataSet'
+            - 'quicksight:CreateIngestion'
+            - 'quicksight:CancelIngestion'
+            - 'quicksight:UpdateDataSetPermissions'
+
+  # -------------------------------------------------------------------------------------
+  # Breakdown datasets
+  #
+  # One per additional coarse grain. Each drops "campaign.id" and groups by a single attribute
+  # instead, so each answers "where did the spend go" across the account rather than being a
+  # finer cut of campaign_day. They are separate datasets rather than one wide one because
+  # they come from separate tables: combining them would mean a join in QuickSight over
+  # aggregates that were computed independently, and the totals would multiply.
+  # -------------------------------------------------------------------------------------
+
+  CampaignHourDataSet:
+    Type: AWS::QuickSight::DataSet
+    Properties:
+      AwsAccountId: !Ref AWS::AccountId
+      DataSetId: !Sub '${DeploymentName}-campaign-hour'
+      Name: !Sub '${DeploymentName} — campaign by hour (SPICE)'
+      ImportMode: SPICE
+      PhysicalTableMap:
+        campaign-hour:
+          CustomSql:
+            DataSourceArn: !GetAtt AthenaDataSource.Arn
+            Name: campaign_hour
+            # The only grain that keeps hour.value. The hourly dataset is delivered with
+            # intraday detail that every other grain here sums away, and a day total cannot be
+            # un-summed back into hours.
+            SqlQuery: !Sub |
+              SELECT CAST("date.value" AS DATE)  AS event_date,
+                     "hour.value",
+                     "advertiseraccount.id",
+                     "adproduct.value",
+                     "campaign.id",
+                     "metric.impressions",
+                     "metric.clicks",
+                     "metric.totalcost"
+              FROM "${AthenaCatalogName}"."aggregate"."${PerformanceDatasetId}_campaign_hour"
+            Columns:
+              - Name: event_date
+                Type: DATETIME
+              # An integer, not a string. As a string the hour axis sorts 0, 1, 10, 11, 2 —
+              # the same lexicographic trap that the date cast avoids.
+              - Name: "hour.value"
+                Type: INTEGER
+              - Name: "advertiseraccount.id"
+                Type: STRING
+              - Name: "adproduct.value"
+                Type: STRING
+              - Name: "campaign.id"
+                Type: STRING
+              - Name: "metric.impressions"
+                Type: INTEGER
+              - Name: "metric.clicks"
+                Type: INTEGER
+              - Name: "metric.totalcost"
+                Type: DECIMAL
+      Permissions:
+        - Principal: !Ref QuickSightUserArn
+          Actions:
+            - 'quicksight:DescribeDataSet'
+            - 'quicksight:DescribeDataSetPermissions'
+            - 'quicksight:PassDataSet'
+            - 'quicksight:DescribeIngestion'
+            - 'quicksight:ListIngestions'
+            - 'quicksight:UpdateDataSet'
+            - 'quicksight:DeleteDataSet'
+            - 'quicksight:CreateIngestion'
+            - 'quicksight:CancelIngestion'
+            - 'quicksight:UpdateDataSetPermissions'
+
+  DeviceDayDataSet:
+    Type: AWS::QuickSight::DataSet
+    Properties:
+      AwsAccountId: !Ref AWS::AccountId
+      DataSetId: !Sub '${DeploymentName}-device-day'
+      Name: !Sub '${DeploymentName} — device by day (SPICE)'
+      ImportMode: SPICE
+      PhysicalTableMap:
+        device-day:
+          CustomSql:
+            DataSourceArn: !GetAtt AthenaDataSource.Arn
+            Name: device_day
+            SqlQuery: !Sub |
+              SELECT CAST("date.value" AS DATE)  AS event_date,
+                     "advertiseraccount.id",
+                     "adproduct.value",
+                     "devicetype.value",
+                     "environment.value",
+                     "metric.impressions",
+                     "metric.clicks",
+                     "metric.totalcost"
+              FROM "${AthenaCatalogName}"."aggregate"."${PerformanceDatasetId}_device_day"
+            Columns:
+              - Name: event_date
+                Type: DATETIME
+              - Name: "advertiseraccount.id"
+                Type: STRING
+              - Name: "adproduct.value"
+                Type: STRING
+              - Name: "devicetype.value"
+                Type: STRING
+              - Name: "environment.value"
+                Type: STRING
+              - Name: "metric.impressions"
+                Type: INTEGER
+              - Name: "metric.clicks"
+                Type: INTEGER
+              - Name: "metric.totalcost"
+                Type: DECIMAL
+      Permissions:
+        - Principal: !Ref QuickSightUserArn
+          Actions:
+            - 'quicksight:DescribeDataSet'
+            - 'quicksight:DescribeDataSetPermissions'
+            - 'quicksight:PassDataSet'
+            - 'quicksight:DescribeIngestion'
+            - 'quicksight:ListIngestions'
+            - 'quicksight:UpdateDataSet'
+            - 'quicksight:DeleteDataSet'
+            - 'quicksight:CreateIngestion'
+            - 'quicksight:CancelIngestion'
+            - 'quicksight:UpdateDataSetPermissions'
+
+  GeoDayDataSet:
+    Type: AWS::QuickSight::DataSet
+    Properties:
+      AwsAccountId: !Ref AWS::AccountId
+      DataSetId: !Sub '${DeploymentName}-geo-day'
+      Name: !Sub '${DeploymentName} — geography by day (SPICE)'
+      ImportMode: SPICE
+      PhysicalTableMap:
+        geo-day:
+          CustomSql:
+            DataSourceArn: !GetAtt AthenaDataSource.Arn
+            Name: geo_day
+            # Both country columns are carried: the code is what a map geocodes against, the
+            # name is what a chart should label. Deriving either from the other would put a
+            # country lookup in the dashboard, where nobody maintains it.
+            SqlQuery: !Sub |
+              SELECT CAST("date.value" AS DATE)  AS event_date,
+                     "advertiseraccount.id",
+                     "adproduct.value",
+                     "country.code",
+                     "country.name",
+                     "region.name",
+                     "metric.impressions",
+                     "metric.clicks",
+                     "metric.totalcost"
+              FROM "${AthenaCatalogName}"."aggregate"."${PerformanceDatasetId}_geo_day"
+            Columns:
+              - Name: event_date
+                Type: DATETIME
+              - Name: "advertiseraccount.id"
+                Type: STRING
+              - Name: "adproduct.value"
+                Type: STRING
+              - Name: "country.code"
+                Type: STRING
+              - Name: "country.name"
+                Type: STRING
+              - Name: "region.name"
+                Type: STRING
+              - Name: "metric.impressions"
+                Type: INTEGER
+              - Name: "metric.clicks"
+                Type: INTEGER
+              - Name: "metric.totalcost"
+                Type: DECIMAL
+      Permissions:
+        - Principal: !Ref QuickSightUserArn
+          Actions:
+            - 'quicksight:DescribeDataSet'
+            - 'quicksight:DescribeDataSetPermissions'
+            - 'quicksight:PassDataSet'
+            - 'quicksight:DescribeIngestion'
+            - 'quicksight:ListIngestions'
+            - 'quicksight:UpdateDataSet'
+            - 'quicksight:DeleteDataSet'
+            - 'quicksight:CreateIngestion'
+            - 'quicksight:CancelIngestion'
+            - 'quicksight:UpdateDataSetPermissions'
+
+  PlacementDayDataSet:
+    Type: AWS::QuickSight::DataSet
+    Properties:
+      AwsAccountId: !Ref AWS::AccountId
+      DataSetId: !Sub '${DeploymentName}-placement-day'
+      Name: !Sub '${DeploymentName} — placement by day (SPICE)'
+      ImportMode: SPICE
+      PhysicalTableMap:
+        placement-day:
+          CustomSql:
+            DataSourceArn: !GetAtt AthenaDataSource.Arn
+            Name: placement_day
+            SqlQuery: !Sub |
+              SELECT CAST("date.value" AS DATE)  AS event_date,
+                     "advertiseraccount.id",
+                     "adproduct.value",
+                     "placement.name",
+                     "placementclassification.value",
+                     "metric.impressions",
+                     "metric.clicks",
+                     "metric.totalcost"
+              FROM "${AthenaCatalogName}"."aggregate"."${PerformanceDatasetId}_placement_day"
+            Columns:
+              - Name: event_date
+                Type: DATETIME
+              - Name: "advertiseraccount.id"
+                Type: STRING
+              - Name: "adproduct.value"
+                Type: STRING
+              - Name: "placement.name"
+                Type: STRING
+              - Name: "placementclassification.value"
+                Type: STRING
+              - Name: "metric.impressions"
+                Type: INTEGER
+              - Name: "metric.clicks"
+                Type: INTEGER
+              - Name: "metric.totalcost"
+                Type: DECIMAL
+      Permissions:
+        - Principal: !Ref QuickSightUserArn
+          Actions:
+            - 'quicksight:DescribeDataSet'
+            - 'quicksight:DescribeDataSetPermissions'
+            - 'quicksight:PassDataSet'
+            - 'quicksight:DescribeIngestion'
+            - 'quicksight:ListIngestions'
+            - 'quicksight:UpdateDataSet'
+            - 'quicksight:DeleteDataSet'
+            - 'quicksight:CreateIngestion'
+            - 'quicksight:CancelIngestion'
+            - 'quicksight:UpdateDataSetPermissions'
+
+  HaloDayDataSet:
+    Type: AWS::QuickSight::DataSet
+    Properties:
+      AwsAccountId: !Ref AWS::AccountId
+      DataSetId: !Sub '${DeploymentName}-halo-day'
+      Name: !Sub '${DeploymentName} — promoted and halo by day (SPICE)'
+      ImportMode: SPICE
+      PhysicalTableMap:
+        halo-day:
+          CustomSql:
+            DataSourceArn: !GetAtt AthenaDataSource.Arn
+            Name: halo_day
+            # The attribution split is computed here rather than as a QuickSight calculated
+            # field, so it is visible in version control and identical to the SQL in
+            # queries/coarse-grain.sql. Both product columns are still projected, so the
+            # underlying ids remain available for drill-down.
+            #
+            # The product grain keeps only the converted side, so this comparison cannot be made
+            # from it without reading the fine-grain table. The halo_day grain keeps both.
+            SqlQuery: !Sub |
+              SELECT CAST("date.value" AS DATE)  AS event_date,
+                     "advertiseraccount.id",
+                     "advertisedproduct.id",
+                     "convertedproduct.id",
+                     CASE WHEN "advertisedproduct.id" = "convertedproduct.id" THEN 'promoted' ELSE 'halo' END AS attribution,
+                     "metric.combinedunitssold",
+                     "metric.combinedsales"
+              FROM "${AthenaCatalogName}"."aggregate"."${ConvertedProductDatasetId}_halo_day"
+            Columns:
+              - Name: event_date
+                Type: DATETIME
+              - Name: "advertiseraccount.id"
+                Type: STRING
+              - Name: "advertisedproduct.id"
+                Type: STRING
+              - Name: "convertedproduct.id"
+                Type: STRING
+              - Name: attribution
+                Type: STRING
+              - Name: "metric.combinedunitssold"
+                Type: INTEGER
+              - Name: "metric.combinedsales"
+                Type: DECIMAL
+      Permissions:
+        - Principal: !Ref QuickSightUserArn
+          Actions:
+            - 'quicksight:DescribeDataSet'
+            - 'quicksight:DescribeDataSetPermissions'
+            - 'quicksight:PassDataSet'
+            - 'quicksight:DescribeIngestion'
+            - 'quicksight:ListIngestions'
+            - 'quicksight:UpdateDataSet'
+            - 'quicksight:DeleteDataSet'
+            - 'quicksight:CreateIngestion'
+            - 'quicksight:CancelIngestion'
+            - 'quicksight:UpdateDataSetPermissions'
+
+  FineGrainDataSet:
+    Type: AWS::QuickSight::DataSet
+    Properties:
+      AwsAccountId: !Ref AWS::AccountId
+      DataSetId: !Sub '${DeploymentName}-fine-grain'
+      Name: !Sub '${DeploymentName} — current state, ad hoc (direct query)'
+      # DIRECT_QUERY, not SPICE. This reads the full-detail table, which is far too large to
+      # import and is queried in ways that are not known in advance.
+      ImportMode: DIRECT_QUERY
+      PhysicalTableMap:
+        fine-grain:
+          CustomSql:
+            DataSourceArn: !GetAtt AthenaDataSource.Arn
+            Name: fine_grain
+            # Reads the current-state table and excludes tombstones here, rather than reading the
+            # _live view, which on S3 Tables does not exist and cannot be created — Spark has no
+            # view-capable catalogue there, and Athena rejects CREATE VIEW on a federated
+            # catalogue. A dashboard written against a view would therefore not work at all, and
+            # had one existed, depending on it would fail by counting deleted records rather than
+            # by breaking. The predicate is one line.
+            #
+            # Carries the dimensions the standard report breakdowns are cut by — target,
+            # search term, placement, creative and advertised product — so each of those
+            # reports is a choice of fields on a visual rather than a separate dataset.
+            # Projecting a column costs nothing at rest: the table is columnar, this is a
+            # row projection with no GROUP BY, and Athena reads only the columns a visual
+            # actually references.
+            #
+            # No lookback-window columns exist to project. Conversions split Promoted from
+            # Halo, which is what the data carries; see queries/report-types.sql.
+            SqlQuery: !Sub |
+              SELECT CAST("date.value" AS DATE)  AS event_date,
+                     "hour.value",
+                     "advertiseraccount.id",
+                     "adproduct.value",
+                     "budgetcurrency.value",
+                     "country.code",
+                     "campaign.id",
+                     "adgroup.id",
+                     "ad.id",
+                     "adgrouptarget.id",
+                     "matchedtarget.value",
+                     "searchterm.value",
+                     "placementclassification.value",
+                     "advertisedproduct.id",
+                     "advertisedproductsku.value",
+                     "advertisedproductmarketplace.value",
+                     "metric.impressions",
+                     "metric.clicks",
+                     "metric.totalcost",
+                     "metric.purchases",
+                     "metric.purchasespromoted",
+                     "metric.purchaseshalo",
+                     "metric.sales",
+                     "metric.salespromoted",
+                     "metric.saleshalo",
+                     "metric.unitssold"
+              FROM "${AthenaCatalogName}"."current"."${PerformanceDatasetId}"
+              WHERE is_deleted = false
+            # Every sales variant is decimal128(18,8) in the delivered Parquet. Declared
+            # INTEGER they truncate to zero with no error raised, so a dashboard shows a
+            # plausible nothing. The unit and purchase counts are genuinely int64.
+            Columns:
+              - Name: event_date
+                Type: DATETIME
+              - Name: "hour.value"
+                Type: INTEGER
+              - Name: "advertiseraccount.id"
+                Type: STRING
+              - Name: "adproduct.value"
+                Type: STRING
+              - Name: "budgetcurrency.value"
+                Type: STRING
+              - Name: "country.code"
+                Type: STRING
+              - Name: "campaign.id"
+                Type: STRING
+              - Name: "adgroup.id"
+                Type: STRING
+              - Name: "ad.id"
+                Type: STRING
+              - Name: "adgrouptarget.id"
+                Type: STRING
+              - Name: "matchedtarget.value"
+                Type: STRING
+              - Name: "searchterm.value"
+                Type: STRING
+              - Name: "placementclassification.value"
+                Type: STRING
+              - Name: "advertisedproduct.id"
+                Type: STRING
+              - Name: "advertisedproductsku.value"
+                Type: STRING
+              - Name: "advertisedproductmarketplace.value"
+                Type: STRING
+              - Name: "metric.impressions"
+                Type: INTEGER
+              - Name: "metric.clicks"
+                Type: INTEGER
+              - Name: "metric.totalcost"
+                Type: DECIMAL
+              - Name: "metric.purchases"
+                Type: INTEGER
+              - Name: "metric.purchasespromoted"
+                Type: INTEGER
+              - Name: "metric.purchaseshalo"
+                Type: INTEGER
+              - Name: "metric.sales"
+                Type: DECIMAL
+              - Name: "metric.salespromoted"
+                Type: DECIMAL
+              - Name: "metric.saleshalo"
+                Type: DECIMAL
+              - Name: "metric.unitssold"
+                Type: INTEGER
+      # The full owner set, including the two ingestion actions, even though this dataset is
+      # DIRECT_QUERY and never ingests. QuickSight validates permissions against a fixed pair of
+      # sets rather than treating them as an arbitrary list, so a set that is merely a subset is
+      # rejected outright: "Resultant state of ResourcePermissions on this resource is not
+      # supported". Trimming the actions that do not apply to a direct-query dataset is the
+      # obvious thing to do and is what fails.
+      Permissions:
+        - Principal: !Ref QuickSightUserArn
+          Actions:
+            - 'quicksight:DescribeDataSet'
+            - 'quicksight:DescribeDataSetPermissions'
+            - 'quicksight:PassDataSet'
+            - 'quicksight:DescribeIngestion'
+            - 'quicksight:ListIngestions'
+            - 'quicksight:UpdateDataSet'
+            - 'quicksight:DeleteDataSet'
+            - 'quicksight:CreateIngestion'
+            - 'quicksight:CancelIngestion'
+            - 'quicksight:UpdateDataSetPermissions'
+
+  ConvertedProductFineGrainDataSet:
+    Type: AWS::QuickSight::DataSet
+    Properties:
+      AwsAccountId: !Ref AWS::AccountId
+      DataSetId: !Sub '${DeploymentName}-converted-product-current'
+      Name: !Sub '${DeploymentName} — converted product, current state (direct query)'
+      # DIRECT_QUERY for the same reason as the hourly one: this is the full-detail table.
+      ImportMode: DIRECT_QUERY
+      PhysicalTableMap:
+        converted-product-current:
+          CustomSql:
+            DataSourceArn: !GetAtt AthenaDataSource.Arn
+            Name: converted_product_current
+            # The daily dataset, at the grain that answers which products a campaign sold
+            # rather than which it advertised. The existing coarse product and halo tables
+            # answer narrower versions of that; this one is not restricted to their grains.
+            #
+            # Both product ids are projected. With only the converted side, "did this click
+            # sell the product it advertised" is unanswerable from this dataset: the halo
+            # metrics say how much was halo, but not which advertised product the halo came
+            # from. The pair is what the brand-halo visual compares.
+            #
+            # There is no spend here to project. The daily dataset delivers no impressions,
+            # no clicks and no cost, so cost per converted product cannot be computed from
+            # this dataset alone — it needs the hourly one, where the cost belongs to the
+            # advertised product rather than the converted one.
+            SqlQuery: !Sub |
+              SELECT CAST("date.value" AS DATE)  AS event_date,
+                     "advertiseraccount.id",
+                     "adproduct.value",
+                     "budgetcurrency.value",
+                     "campaign.id",
+                     "adgroup.id",
+                     "advertisedproduct.id",
+                     "convertedproduct.id",
+                     "convertedproductmarketplace.value",
+                     "productrelevance.value",
+                     "metric.purchases",
+                     "metric.purchasespromoted",
+                     "metric.purchaseshalo",
+                     "metric.sales",
+                     "metric.salespromoted",
+                     "metric.saleshalo",
+                     "metric.unitssold",
+                     "metric.unitssoldpromoted",
+                     "metric.unitssoldhalo"
+              FROM "${AthenaCatalogName}"."current"."${ConvertedProductDatasetId}"
+              WHERE is_deleted = false
+            Columns:
+              - Name: event_date
+                Type: DATETIME
+              - Name: "advertiseraccount.id"
+                Type: STRING
+              - Name: "adproduct.value"
+                Type: STRING
+              - Name: "budgetcurrency.value"
+                Type: STRING
+              - Name: "campaign.id"
+                Type: STRING
+              - Name: "adgroup.id"
+                Type: STRING
+              - Name: "advertisedproduct.id"
+                Type: STRING
+              - Name: "convertedproduct.id"
+                Type: STRING
+              - Name: "convertedproductmarketplace.value"
+                Type: STRING
+              - Name: "productrelevance.value"
+                Type: STRING
+              - Name: "metric.purchases"
+                Type: INTEGER
+              - Name: "metric.purchasespromoted"
+                Type: INTEGER
+              - Name: "metric.purchaseshalo"
+                Type: INTEGER
+              - Name: "metric.sales"
+                Type: DECIMAL
+              - Name: "metric.salespromoted"
+                Type: DECIMAL
+              - Name: "metric.saleshalo"
+                Type: DECIMAL
+              - Name: "metric.unitssold"
+                Type: INTEGER
+              - Name: "metric.unitssoldpromoted"
+                Type: INTEGER
+              - Name: "metric.unitssoldhalo"
+                Type: INTEGER
+      # The full owner set, including the ingestion actions this direct-query dataset will
+      # never use. QuickSight rejects a strict subset outright rather than accepting a
+      # narrower grant — see the note on FineGrainDataSet above.
+      Permissions:
+        - Principal: !Ref QuickSightUserArn
+          Actions:
+            - 'quicksight:DescribeDataSet'
+            - 'quicksight:DescribeDataSetPermissions'
+            - 'quicksight:PassDataSet'
+            - 'quicksight:DescribeIngestion'
+            - 'quicksight:ListIngestions'
+            - 'quicksight:UpdateDataSet'
+            - 'quicksight:DeleteDataSet'
+            - 'quicksight:CreateIngestion'
+            - 'quicksight:CancelIngestion'
+            - 'quicksight:UpdateDataSetPermissions'
+
+  SearchTermDataSet:
+    Type: AWS::QuickSight::DataSet
+    Properties:
+      AwsAccountId: !Ref AWS::AccountId
+      DataSetId: !Sub '${DeploymentName}-search-term-current'
+      Name: !Sub '${DeploymentName} — search terms, targets and placements (direct query)'
+      # DIRECT_QUERY for the same reason as the other two current-state datasets: this is the
+      # full-detail table.
+      ImportMode: DIRECT_QUERY
+      PhysicalTableMap:
+        search-term-current:
+          CustomSql:
+            DataSourceArn: !GetAtt AthenaDataSource.Arn
+            Name: search_term_current
+            # Search term, matched target, placement and hour on one row. The hourly dataset
+            # delivers all four, so the question "which search term, against which target, in
+            # which placement, at which hour" is a projection rather than a four-way join.
+            #
+            # A separate dataset rather than a cut of fine-grain, for one reason: the
+            # IS NOT NULL predicate. Most rows of the hourly dataset carry no search term,
+            # because only keyword-like targeting produces one, and on a shared dataset those
+            # rows collapse into a single null category that outranks every real search term
+            # by spend. Putting the predicate in fine-grain instead would narrow the dataset
+            # that exists to be unnarrowed.
+            #
+            # "budgetcurrency.value" is projected because this view sums money. One delivery
+            # can carry advertisers budgeting in different currencies, and a sum over mixed
+            # currencies is a plausible invalid number. Scope or group by it before reading
+            # spend or sales.
+            #
+            # No ratios here. ACoS, CPC and CVR are quotients of two sums, and a quotient
+            # stored as a column is averaged when the dashboard filters — averaging a ratio
+            # whose numerator and denominator sit on different rows gives a wrong number with
+            # no error. The components are summed and the ratios belong in calculated fields;
+            # docs/quicksight.md carries the expressions.
+            SqlQuery: !Sub |
+              SELECT CAST("date.value" AS DATE)  AS event_date,
+                     "hour.value",
+                     "advertiseraccount.id",
+                     "budgetcurrency.value",
+                     "searchterm.value",
+                     "matchedtarget.value",
+                     "adgrouptarget.id",
+                     "placementclassification.value",
+                     "metric.impressions",
+                     "metric.clicks",
+                     "metric.totalcost",
+                     "metric.purchases",
+                     "metric.sales"
+              FROM "${AthenaCatalogName}"."current"."${PerformanceDatasetId}"
+              WHERE is_deleted = false
+                AND "searchterm.value" IS NOT NULL
+            # "metric.totalcost" and "metric.sales" are decimal128(18,8) in the delivered
+            # Parquet and carry money. Declared INTEGER they truncate to zero with no error,
+            # so the view shows a plausible nothing. Impressions, clicks and purchases are
+            # genuinely int64, and "hour.value" is an integer so an hour axis sorts
+            # numerically rather than 0, 1, 10, 11, 2.
+            Columns:
+              - Name: event_date
+                Type: DATETIME
+              - Name: "hour.value"
+                Type: INTEGER
+              - Name: "advertiseraccount.id"
+                Type: STRING
+              - Name: "budgetcurrency.value"
+                Type: STRING
+              - Name: "searchterm.value"
+                Type: STRING
+              - Name: "matchedtarget.value"
+                Type: STRING
+              - Name: "adgrouptarget.id"
+                Type: STRING
+              - Name: "placementclassification.value"
+                Type: STRING
+              - Name: "metric.impressions"
+                Type: INTEGER
+              - Name: "metric.clicks"
+                Type: INTEGER
+              - Name: "metric.totalcost"
+                Type: DECIMAL
+              - Name: "metric.purchases"
+                Type: INTEGER
+              - Name: "metric.sales"
+                Type: DECIMAL
+      # The full owner set again: a strict subset is rejected outright.
+      Permissions:
+        - Principal: !Ref QuickSightUserArn
+          Actions:
+            - 'quicksight:DescribeDataSet'
+            - 'quicksight:DescribeDataSetPermissions'
+            - 'quicksight:PassDataSet'
+            - 'quicksight:DescribeIngestion'
+            - 'quicksight:ListIngestions'
+            - 'quicksight:UpdateDataSet'
+            - 'quicksight:DeleteDataSet'
+            - 'quicksight:CreateIngestion'
+            - 'quicksight:CancelIngestion'
+            - 'quicksight:UpdateDataSetPermissions'
+
+  # -------------------------------------------------------------------------------------
+  # SPICE refresh
+  #
+  # Only the imported datasets need these. A direct-query dataset has nothing to refresh.
+  # FULL_REFRESH rather than incremental, deliberately: the coarse tables are rebuilt by
+  # partition overwrite, so a corrected value replaces an existing row rather than arriving as a
+  # new one. An incremental refresh keyed on a time window would append the correction and
+  # double-count it.
+  # -------------------------------------------------------------------------------------
+
+  CampaignDayRefresh:
+    Type: AWS::QuickSight::RefreshSchedule
+    DependsOn: CampaignDayDataSet
+    Properties:
+      AwsAccountId: !Ref AWS::AccountId
+      # The literal id, not !Ref on the dataset. !Ref on an AWS::QuickSight::DataSet returns the
+      # composite '<account>|<id>' form that QuickSight uses as a physical resource id, and passing
+      # that here fails with "Invalid DataSetId. Check if it contains invalid characters" — which
+      # points at the characters rather than at the extra account prefix that put them there.
+      #
+      # DependsOn supplies the ordering that !Ref would otherwise provide implicitly: a schedule
+      # cannot be attached to a dataset that does not exist yet.
+      DataSetId: !Sub '${DeploymentName}-campaign-day'
+      Schedule:
+        ScheduleId: !Sub '${DeploymentName}-campaign-day-daily'
+        RefreshType: FULL_REFRESH
+        ScheduleFrequency:
+          Interval: DAILY
+          TimeOfTheDay: !Ref SpiceRefreshTimeOfDay
+          TimeZone: !Ref SpiceRefreshTimeZone
+
+  ProductDayRefresh:
+    Type: AWS::QuickSight::RefreshSchedule
+    DependsOn: ProductDayDataSet
+    Properties:
+      AwsAccountId: !Ref AWS::AccountId
+      DataSetId: !Sub '${DeploymentName}-product-day'
+      Schedule:
+        ScheduleId: !Sub '${DeploymentName}-product-day-daily'
+        RefreshType: FULL_REFRESH
+        ScheduleFrequency:
+          Interval: DAILY
+          TimeOfTheDay: !Ref SpiceRefreshTimeOfDay
+          TimeZone: !Ref SpiceRefreshTimeZone
+
+  # Every imported dataset needs its own schedule. There is no way to refresh a group, and an
+  # imported dataset without one is loaded at creation and then never again — which shows as a
+  # dashboard that was right on the day it was deployed.
+
+  CampaignHourRefresh:
+    Type: AWS::QuickSight::RefreshSchedule
+    DependsOn: CampaignHourDataSet
+    Properties:
+      AwsAccountId: !Ref AWS::AccountId
+      DataSetId: !Sub '${DeploymentName}-campaign-hour'
+      Schedule:
+        ScheduleId: !Sub '${DeploymentName}-campaign-hour-daily'
+        RefreshType: FULL_REFRESH
+        ScheduleFrequency:
+          Interval: DAILY
+          TimeOfTheDay: !Ref SpiceRefreshTimeOfDay
+          TimeZone: !Ref SpiceRefreshTimeZone
+
+  DeviceDayRefresh:
+    Type: AWS::QuickSight::RefreshSchedule
+    DependsOn: DeviceDayDataSet
+    Properties:
+      AwsAccountId: !Ref AWS::AccountId
+      DataSetId: !Sub '${DeploymentName}-device-day'
+      Schedule:
+        ScheduleId: !Sub '${DeploymentName}-device-day-daily'
+        RefreshType: FULL_REFRESH
+        ScheduleFrequency:
+          Interval: DAILY
+          TimeOfTheDay: !Ref SpiceRefreshTimeOfDay
+          TimeZone: !Ref SpiceRefreshTimeZone
+
+  GeoDayRefresh:
+    Type: AWS::QuickSight::RefreshSchedule
+    DependsOn: GeoDayDataSet
+    Properties:
+      AwsAccountId: !Ref AWS::AccountId
+      DataSetId: !Sub '${DeploymentName}-geo-day'
+      Schedule:
+        ScheduleId: !Sub '${DeploymentName}-geo-day-daily'
+        RefreshType: FULL_REFRESH
+        ScheduleFrequency:
+          Interval: DAILY
+          TimeOfTheDay: !Ref SpiceRefreshTimeOfDay
+          TimeZone: !Ref SpiceRefreshTimeZone
+
+  PlacementDayRefresh:
+    Type: AWS::QuickSight::RefreshSchedule
+    DependsOn: PlacementDayDataSet
+    Properties:
+      AwsAccountId: !Ref AWS::AccountId
+      DataSetId: !Sub '${DeploymentName}-placement-day'
+      Schedule:
+        ScheduleId: !Sub '${DeploymentName}-placement-day-daily'
+        RefreshType: FULL_REFRESH
+        ScheduleFrequency:
+          Interval: DAILY
+          TimeOfTheDay: !Ref SpiceRefreshTimeOfDay
+          TimeZone: !Ref SpiceRefreshTimeZone
+
+  HaloDayRefresh:
+    Type: AWS::QuickSight::RefreshSchedule
+    DependsOn: HaloDayDataSet
+    Properties:
+      AwsAccountId: !Ref AWS::AccountId
+      DataSetId: !Sub '${DeploymentName}-halo-day'
+      Schedule:
+        ScheduleId: !Sub '${DeploymentName}-halo-day-daily'
+        RefreshType: FULL_REFRESH
+        ScheduleFrequency:
+          Interval: DAILY
+          TimeOfTheDay: !Ref SpiceRefreshTimeOfDay
+          TimeZone: !Ref SpiceRefreshTimeZone
+
+  # -------------------------------------------------------------------------------------
+  # Dashboard
+  #
+  # Three sheets. Overview proves the chain end to end — S3 Tables through Athena into
+  # QuickSight. Breakdowns exists to show what the additional grains buy: each of its visuals
+  # answers a question the campaign-day table cannot, because the attribute it groups by is not
+  # in that grouping at all. Targeting answers the two questions no grain can: both of its
+  # tables read current state directly, and both pay per view for it.
+  #
+  # Still not a finished reporting suite. Nobody maintains visual definitions by hand, and this
+  # file is not an invitation to try — build further visuals in the console, then export them
+  # with `aws quicksight describe-dashboard-definition` and commit the result if you want them
+  # under version control.
+  #
+  # No geospatial map here, deliberately. geo_day carries "country.code" precisely so one is
+  # possible, but a map needs its geographic role declared as a column tag, and a wrong tag is a
+  # deploy-time failure rather than a chart that looks odd. Add the role in the console and
+  # switch the country bar chart to a map there.
+  # -------------------------------------------------------------------------------------
+
+  Dashboard:
+    Type: AWS::QuickSight::Dashboard
+    Properties:
+      AwsAccountId: !Ref AWS::AccountId
+      DashboardId: !Sub '${DeploymentName}-overview'
+      Name: !Sub '${DeploymentName} — staging layer overview'
+      VersionDescription: Created by CloudFormation.
+      DashboardPublishOptions:
+        AdHocFilteringOption:
+          AvailabilityStatus: ENABLED
+        ExportToCSVOption:
+          AvailabilityStatus: ENABLED
+        SheetControlsOption:
+          VisibilityState: EXPANDED
+      Permissions:
+        - Principal: !Ref QuickSightUserArn
+          Actions:
+            - 'quicksight:DescribeDashboard'
+            - 'quicksight:ListDashboardVersions'
+            - 'quicksight:UpdateDashboardPermissions'
+            - 'quicksight:QueryDashboard'
+            - 'quicksight:UpdateDashboard'
+            - 'quicksight:DeleteDashboard'
+            - 'quicksight:DescribeDashboardPermissions'
+            - 'quicksight:UpdateDashboardPublishedVersion'
+      Definition:
+        DataSetIdentifierDeclarations:
+          - Identifier: campaign_day
+            DataSetArn: !GetAtt CampaignDayDataSet.Arn
+          - Identifier: product_day
+            DataSetArn: !GetAtt ProductDayDataSet.Arn
+          - Identifier: campaign_hour
+            DataSetArn: !GetAtt CampaignHourDataSet.Arn
+          - Identifier: device_day
+            DataSetArn: !GetAtt DeviceDayDataSet.Arn
+          - Identifier: geo_day
+            DataSetArn: !GetAtt GeoDayDataSet.Arn
+          - Identifier: placement_day
+            DataSetArn: !GetAtt PlacementDayDataSet.Arn
+          - Identifier: halo_day
+            DataSetArn: !GetAtt HaloDayDataSet.Arn
+          # The two current-state datasets the Targeting sheet reads. Every other identifier
+          # here is an imported coarse table; these two are direct query, so their tiles are
+          # the only ones on this dashboard that reach Athena when someone opens the sheet.
+          - Identifier: search_term_current
+            DataSetArn: !GetAtt SearchTermDataSet.Arn
+          - Identifier: converted_product_current
+            DataSetArn: !GetAtt ConvertedProductFineGrainDataSet.Arn
+        Sheets:
+          - SheetId: overview
+            Name: Overview
+            Title: Staging layer overview
+            Layouts:
+              - Configuration:
+                  GridLayout:
+                    Elements:
+                      - ElementId: kpi-clicks
+                        ElementType: VISUAL
+                        ColumnIndex: 0
+                        ColumnSpan: 8
+                        RowIndex: 0
+                        RowSpan: 6
+                      - ElementId: line-clicks-by-day
+                        ElementType: VISUAL
+                        ColumnIndex: 8
+                        ColumnSpan: 24
+                        RowIndex: 0
+                        RowSpan: 6
+                      - ElementId: bar-top-campaigns
+                        ElementType: VISUAL
+                        ColumnIndex: 0
+                        ColumnSpan: 16
+                        RowIndex: 6
+                        RowSpan: 10
+                      - ElementId: bar-top-products
+                        ElementType: VISUAL
+                        ColumnIndex: 16
+                        ColumnSpan: 16
+                        RowIndex: 6
+                        RowSpan: 10
+            Visuals:
+              # 1. Total clicks. The simplest possible proof the chain resolves end to end.
+              - KPIVisual:
+                  VisualId: kpi-clicks
+                  Title:
+                    Visibility: VISIBLE
+                    FormatText:
+                      PlainText: Total clicks
+                  ChartConfiguration:
+                    FieldWells:
+                      Values:
+                        - NumericalMeasureField:
+                            FieldId: kpi.clicks
+                            Column:
+                              DataSetIdentifier: campaign_day
+                              ColumnName: "metric.clicks"
+                            AggregationFunction:
+                              SimpleNumericalAggregation: SUM
+
+              # 2. Clicks over time. This is why event_date is cast to a date in the dataset:
+              #    as a string the axis would sort lexicographically.
+              - LineChartVisual:
+                  VisualId: line-clicks-by-day
+                  Title:
+                    Visibility: VISIBLE
+                    FormatText:
+                      PlainText: Clicks by day
+                  ChartConfiguration:
+                    FieldWells:
+                      LineChartAggregatedFieldWells:
+                        Category:
+                          - DateDimensionField:
+                              FieldId: line.date
+                              Column:
+                                DataSetIdentifier: campaign_day
+                                ColumnName: event_date
+                              DateGranularity: DAY
+                        Values:
+                          - NumericalMeasureField:
+                              FieldId: line.clicks
+                              Column:
+                                DataSetIdentifier: campaign_day
+                                ColumnName: "metric.clicks"
+                              AggregationFunction:
+                                SimpleNumericalAggregation: SUM
+                    SortConfiguration:
+                      CategorySort:
+                        - FieldSort:
+                            FieldId: line.date
+                            Direction: ASC
+
+              # 3. Top campaigns by clicks from the campaign grain.
+              - BarChartVisual:
+                  VisualId: bar-top-campaigns
+                  Title:
+                    Visibility: VISIBLE
+                    FormatText:
+                      PlainText: Top campaigns by clicks
+                  ChartConfiguration:
+                    Orientation: HORIZONTAL
+                    FieldWells:
+                      BarChartAggregatedFieldWells:
+                        Category:
+                          - CategoricalDimensionField:
+                              FieldId: campaigns.id
+                              Column:
+                                DataSetIdentifier: campaign_day
+                                ColumnName: "campaign.id"
+                        Values:
+                          - NumericalMeasureField:
+                              FieldId: campaigns.clicks
+                              Column:
+                                DataSetIdentifier: campaign_day
+                                ColumnName: "metric.clicks"
+                              AggregationFunction:
+                                SimpleNumericalAggregation: SUM
+                    SortConfiguration:
+                      CategoryItemsLimit:
+                        ItemsLimit: 10
+                        OtherCategories: EXCLUDE
+                      CategorySort:
+                        - FieldSort:
+                            FieldId: campaigns.clicks
+                            Direction: DESC
+
+              # 4. Top products by purchases, from the other dataset and the other grain. Included
+              #    specifically because it cannot be answered at campaign grain: the product
+              #    column is not in that grouping.
+              - BarChartVisual:
+                  VisualId: bar-top-products
+                  Title:
+                    Visibility: VISIBLE
+                    FormatText:
+                      PlainText: Top products by purchases
+                  ChartConfiguration:
+                    Orientation: HORIZONTAL
+                    FieldWells:
+                      BarChartAggregatedFieldWells:
+                        Category:
+                          - CategoricalDimensionField:
+                              FieldId: products.id
+                              Column:
+                                DataSetIdentifier: product_day
+                                ColumnName: "convertedproduct.id"
+                        Values:
+                          - NumericalMeasureField:
+                              FieldId: products.purchases
+                              Column:
+                                DataSetIdentifier: product_day
+                                ColumnName: "metric.combinedpurchases"
+                              AggregationFunction:
+                                SimpleNumericalAggregation: SUM
+                    SortConfiguration:
+                      CategoryItemsLimit:
+                        ItemsLimit: 10
+                        OtherCategories: EXCLUDE
+                      CategorySort:
+                        - FieldSort:
+                            FieldId: products.purchases
+                            Direction: DESC
+
+          # -----------------------------------------------------------------------------
+          # Breakdowns
+          #
+          # Every visual on this sheet reads a different coarse table, and none of them could
+          # be built from campaign_day: the attribute each groups by is not in that grouping.
+          # That is the argument for declaring more than one grain, made visually.
+          # -----------------------------------------------------------------------------
+          - SheetId: breakdowns
+            Name: Breakdowns
+            Title: Where activity occurred
+            Layouts:
+              - Configuration:
+                  GridLayout:
+                    Elements:
+                      - ElementId: line-clicks-by-hour
+                        ElementType: VISUAL
+                        ColumnIndex: 0
+                        ColumnSpan: 32
+                        RowIndex: 0
+                        RowSpan: 8
+                      - ElementId: pie-clicks-by-device
+                        ElementType: VISUAL
+                        ColumnIndex: 0
+                        ColumnSpan: 16
+                        RowIndex: 8
+                        RowSpan: 10
+                      - ElementId: pie-promoted-vs-halo
+                        ElementType: VISUAL
+                        ColumnIndex: 16
+                        ColumnSpan: 16
+                        RowIndex: 8
+                        RowSpan: 10
+                      - ElementId: bar-top-countries
+                        ElementType: VISUAL
+                        ColumnIndex: 0
+                        ColumnSpan: 16
+                        RowIndex: 18
+                        RowSpan: 10
+                      - ElementId: bar-top-placements
+                        ElementType: VISUAL
+                        ColumnIndex: 16
+                        ColumnSpan: 16
+                        RowIndex: 18
+                        RowSpan: 10
+            Visuals:
+              # 5. Intraday curve. Only the campaign_hour table can answer this: every other
+              #    grain sums the hours away, and a day total cannot be split back into them.
+              - LineChartVisual:
+                  VisualId: line-clicks-by-hour
+                  Title:
+                    Visibility: VISIBLE
+                    FormatText:
+                      PlainText: Clicks by delivered hour
+                  ChartConfiguration:
+                    FieldWells:
+                      LineChartAggregatedFieldWells:
+                        # NumericalDimensionField, not Categorical: "hour.value" is an integer and
+                        # is used here as an axis, so it must sort numerically. As a category the
+                        # axis would read 0, 1, 10, 11, 2.
+                        Category:
+                          - NumericalDimensionField:
+                              FieldId: hourly.hour
+                              Column:
+                                DataSetIdentifier: campaign_hour
+                                ColumnName: "hour.value"
+                        Values:
+                          - NumericalMeasureField:
+                              FieldId: hourly.clicks
+                              Column:
+                                DataSetIdentifier: campaign_hour
+                                ColumnName: "metric.clicks"
+                              AggregationFunction:
+                                SimpleNumericalAggregation: SUM
+                    SortConfiguration:
+                      CategorySort:
+                        - FieldSort:
+                            FieldId: hourly.hour
+                            Direction: ASC
+
+              # 6. Clicks by device. A pie is defensible here only because the categories are
+              #    few and mutually exclusive, which is a property of the grain rather than of
+              #    the chart.
+              - PieChartVisual:
+                  VisualId: pie-clicks-by-device
+                  Title:
+                    Visibility: VISIBLE
+                    FormatText:
+                      PlainText: Clicks by device type
+                  ChartConfiguration:
+                    FieldWells:
+                      PieChartAggregatedFieldWells:
+                        Category:
+                          - CategoricalDimensionField:
+                              FieldId: device.type
+                              Column:
+                                DataSetIdentifier: device_day
+                                ColumnName: "devicetype.value"
+                        Values:
+                          - NumericalMeasureField:
+                              FieldId: device.clicks
+                              Column:
+                                DataSetIdentifier: device_day
+                                ColumnName: "metric.clicks"
+                              AggregationFunction:
+                                SimpleNumericalAggregation: SUM
+                    SortConfiguration:
+                      CategorySort:
+                        - FieldSort:
+                            FieldId: device.clicks
+                            Direction: DESC
+
+              # 7. Promoted versus halo units sold. The split is computed in the dataset's SQL, so
+              #    the same definition serves this chart and queries/coarse-grain.sql. Reading
+              #    it needed the fine-grain table until halo_day existed.
+              - PieChartVisual:
+                  VisualId: pie-promoted-vs-halo
+                  Title:
+                    Visibility: VISIBLE
+                    FormatText:
+                      PlainText: Promoted and halo units sold
+                  ChartConfiguration:
+                    FieldWells:
+                      PieChartAggregatedFieldWells:
+                        Category:
+                          - CategoricalDimensionField:
+                              FieldId: halo.attribution
+                              Column:
+                                DataSetIdentifier: halo_day
+                                ColumnName: attribution
+                        Values:
+                          - NumericalMeasureField:
+                              FieldId: halo.units
+                              Column:
+                                DataSetIdentifier: halo_day
+                                ColumnName: "metric.combinedunitssold"
+                              AggregationFunction:
+                                SimpleNumericalAggregation: SUM
+                    SortConfiguration:
+                      CategorySort:
+                        - FieldSort:
+                            FieldId: halo.units
+                            Direction: DESC
+
+              # 8. Top countries. Labelled by name and ranked by clicks. "country.code" sits in the
+              #    dataset unused by this chart, ready for a map.
+              - BarChartVisual:
+                  VisualId: bar-top-countries
+                  Title:
+                    Visibility: VISIBLE
+                    FormatText:
+                      PlainText: Top countries by clicks
+                  ChartConfiguration:
+                    Orientation: HORIZONTAL
+                    FieldWells:
+                      BarChartAggregatedFieldWells:
+                        Category:
+                          - CategoricalDimensionField:
+                              FieldId: geo.country
+                              Column:
+                                DataSetIdentifier: geo_day
+                                ColumnName: "country.name"
+                        Values:
+                          - NumericalMeasureField:
+                              FieldId: geo.clicks
+                              Column:
+                                DataSetIdentifier: geo_day
+                                ColumnName: "metric.clicks"
+                              AggregationFunction:
+                                SimpleNumericalAggregation: SUM
+                    SortConfiguration:
+                      CategoryItemsLimit:
+                        ItemsLimit: 10
+                        OtherCategories: EXCLUDE
+                      CategorySort:
+                        - FieldSort:
+                            FieldId: geo.clicks
+                            Direction: DESC
+
+              # 9. Top placements. OtherCategories is EXCLUDE rather than INCLUDE throughout:
+              #    an "other" bucket on a ranked bar chart invites reading the total off a chart
+              #    that was filtered to ten rows.
+              - BarChartVisual:
+                  VisualId: bar-top-placements
+                  Title:
+                    Visibility: VISIBLE
+                    FormatText:
+                      PlainText: Top placements by clicks
+                  ChartConfiguration:
+                    Orientation: HORIZONTAL
+                    FieldWells:
+                      BarChartAggregatedFieldWells:
+                        Category:
+                          - CategoricalDimensionField:
+                              FieldId: "placement.name"
+                              Column:
+                                DataSetIdentifier: placement_day
+                                ColumnName: "placement.name"
+                        Values:
+                          - NumericalMeasureField:
+                              FieldId: placement.clicks
+                              Column:
+                                DataSetIdentifier: placement_day
+                                ColumnName: "metric.clicks"
+                              AggregationFunction:
+                                SimpleNumericalAggregation: SUM
+                    SortConfiguration:
+                      CategoryItemsLimit:
+                        ItemsLimit: 10
+                        OtherCategories: EXCLUDE
+                      CategorySort:
+                        - FieldSort:
+                            FieldId: placement.clicks
+                            Direction: DESC
+
+          # -----------------------------------------------------------------------------
+          # Targeting
+          #
+          # The only sheet whose tiles read current state. Both are tables rather than charts
+          # because the point of each is a row: four dimensions side by side in the first, a
+          # pair of product ids in the second. A chart would have to pick one dimension and
+          # sum the others away, which is the join these tables exist to avoid.
+          #
+          # These two tiles cost differently from every other tile here. A direct-query tile
+          # re-reads detail from Athena on every view, so its cost grows with the number of
+          # viewers and the days in range rather than with one scheduled refresh. That is the
+          # price of a grain that does not exist: no coarse table carries search term or
+          # target, and declaring one would mean
+          # editing a schema and the column lockfile. Scope the sheet with a date filter before
+          # sharing it widely.
+          # -----------------------------------------------------------------------------
+          - SheetId: targeting
+            Name: Targeting
+            Title: Search terms, targets and brand halo
+            Layouts:
+              - Configuration:
+                  GridLayout:
+                    Elements:
+                      - ElementId: table-search-terms
+                        ElementType: VISUAL
+                        ColumnIndex: 0
+                        ColumnSpan: 32
+                        RowIndex: 0
+                        RowSpan: 12
+                      - ElementId: table-advertised-vs-converted
+                        ElementType: VISUAL
+                        ColumnIndex: 0
+                        ColumnSpan: 32
+                        RowIndex: 12
+                        RowSpan: 12
+            Visuals:
+              # 10. Search terms, targets and placements. All four dimensions are columns of the
+              #     hourly dataset, so this is one row per combination with no join.
+              #
+              #     "hour.value" is a NumericalDimensionField, as on the hourly line chart: it is
+              #     an integer, and as a category it would sort 0, 1, 10, 11, 2.
+              - TableVisual:
+                  VisualId: table-search-terms
+                  Title:
+                    Visibility: VISIBLE
+                    FormatText:
+                      PlainText: Search terms, targets and placements
+                  ChartConfiguration:
+                    FieldWells:
+                      TableAggregatedFieldWells:
+                        GroupBy:
+                          - CategoricalDimensionField:
+                              FieldId: terms.search_term
+                              Column:
+                                DataSetIdentifier: search_term_current
+                                ColumnName: "searchterm.value"
+                          - CategoricalDimensionField:
+                              FieldId: terms.matched_target
+                              Column:
+                                DataSetIdentifier: search_term_current
+                                ColumnName: "matchedtarget.value"
+                          - CategoricalDimensionField:
+                              FieldId: terms.placement
+                              Column:
+                                DataSetIdentifier: search_term_current
+                                ColumnName: "placementclassification.value"
+                          - NumericalDimensionField:
+                              FieldId: terms.hour
+                              Column:
+                                DataSetIdentifier: search_term_current
+                                ColumnName: "hour.value"
+                        Values:
+                          - NumericalMeasureField:
+                              FieldId: terms.impressions
+                              Column:
+                                DataSetIdentifier: search_term_current
+                                ColumnName: "metric.impressions"
+                              AggregationFunction:
+                                SimpleNumericalAggregation: SUM
+                          - NumericalMeasureField:
+                              FieldId: terms.clicks
+                              Column:
+                                DataSetIdentifier: search_term_current
+                                ColumnName: "metric.clicks"
+                              AggregationFunction:
+                                SimpleNumericalAggregation: SUM
+                          - NumericalMeasureField:
+                              FieldId: terms.spend
+                              Column:
+                                DataSetIdentifier: search_term_current
+                                ColumnName: "metric.totalcost"
+                              AggregationFunction:
+                                SimpleNumericalAggregation: SUM
+                          - NumericalMeasureField:
+                              FieldId: terms.orders
+                              Column:
+                                DataSetIdentifier: search_term_current
+                                ColumnName: "metric.purchases"
+                              AggregationFunction:
+                                SimpleNumericalAggregation: SUM
+                          - NumericalMeasureField:
+                              FieldId: terms.sales
+                              Column:
+                                DataSetIdentifier: search_term_current
+                                ColumnName: "metric.sales"
+                              AggregationFunction:
+                                SimpleNumericalAggregation: SUM
+                    SortConfiguration:
+                      RowSort:
+                        - FieldSort:
+                            FieldId: terms.spend
+                            Direction: DESC
+
+              # 11. Advertised product against converted product. Where the two ids differ, the
+              #     click sold something other than what was advertised — brand halo. The
+              #     promoted and halo sales columns sit side by side so the split is readable
+              #     without deriving it, and the pair of ids says which products it came from.
+              #
+              #     No CASE expression here, unlike halo_day. That grain labels each row
+              #     'promoted' or 'halo' because a pie chart needs one category column; a table
+              #     shows both ids and both measures directly, so the label would add nothing
+              #     and the delivered promoted/halo metrics are authoritative over a comparison
+              #     of ids.
+              - TableVisual:
+                  VisualId: table-advertised-vs-converted
+                  Title:
+                    Visibility: VISIBLE
+                    FormatText:
+                      PlainText: Advertised product sales and brand halo sales
+                  ChartConfiguration:
+                    FieldWells:
+                      TableAggregatedFieldWells:
+                        GroupBy:
+                          - CategoricalDimensionField:
+                              FieldId: halo.advertised
+                              Column:
+                                DataSetIdentifier: converted_product_current
+                                ColumnName: "advertisedproduct.id"
+                          - CategoricalDimensionField:
+                              FieldId: halo.converted
+                              Column:
+                                DataSetIdentifier: converted_product_current
+                                ColumnName: "convertedproduct.id"
+                          - CategoricalDimensionField:
+                              FieldId: halo.relevance
+                              Column:
+                                DataSetIdentifier: converted_product_current
+                                ColumnName: "productrelevance.value"
+                        Values:
+                          - NumericalMeasureField:
+                              FieldId: halo.sales
+                              Column:
+                                DataSetIdentifier: converted_product_current
+                                ColumnName: "metric.sales"
+                              AggregationFunction:
+                                SimpleNumericalAggregation: SUM
+                          - NumericalMeasureField:
+                              FieldId: halo.sales_promoted
+                              Column:
+                                DataSetIdentifier: converted_product_current
+                                ColumnName: "metric.salespromoted"
+                              AggregationFunction:
+                                SimpleNumericalAggregation: SUM
+                          - NumericalMeasureField:
+                              FieldId: halo.sales_halo
+                              Column:
+                                DataSetIdentifier: converted_product_current
+                                ColumnName: "metric.saleshalo"
+                              AggregationFunction:
+                                SimpleNumericalAggregation: SUM
+                          - NumericalMeasureField:
+                              FieldId: halo.orders
+                              Column:
+                                DataSetIdentifier: converted_product_current
+                                ColumnName: "metric.purchases"
+                              AggregationFunction:
+                                SimpleNumericalAggregation: SUM
+                          - NumericalMeasureField:
+                              FieldId: halo.units
+                              Column:
+                                DataSetIdentifier: converted_product_current
+                                ColumnName: "metric.unitssold"
+                              AggregationFunction:
+                                SimpleNumericalAggregation: SUM
+                    SortConfiguration:
+                      RowSort:
+                        - FieldSort:
+                            FieldId: halo.sales
+                            Direction: DESC
+
+Outputs:
+  DashboardId:
+    Description: QuickSight dashboard id.
+    Value: !Ref Dashboard
+
+  DashboardUrl:
+    Description: Direct link to the dashboard.
+    Value: !Sub 'https://${AWS::Region}.quicksight.aws.amazon.com/sn/dashboards/${DeploymentName}-overview'
+
+  DataSourceArn:
+    Description: Athena data source, for building further datasets against.
+    Value: !GetAtt AthenaDataSource.Arn
+
+  SpiceDataSetArns:
+    Description: The imported datasets. These are what the refresh schedules reload.
+    Value: !Sub
+      - '${A} , ${B} , ${C} , ${D} , ${E} , ${F} , ${G}'
+      - A: !GetAtt CampaignDayDataSet.Arn
+        B: !GetAtt ProductDayDataSet.Arn
+        C: !GetAtt CampaignHourDataSet.Arn
+        D: !GetAtt DeviceDayDataSet.Arn
+        E: !GetAtt GeoDayDataSet.Arn
+        F: !GetAtt PlacementDayDataSet.Arn
+        G: !GetAtt HaloDayDataSet.Arn
+
+  DirectQueryDataSetArns:
+    Description: The ad-hoc datasets over current state. Not imported, so never stale.
+    Value: !Sub
+      - '${A} , ${B} , ${C}'
+      - A: !GetAtt FineGrainDataSet.Arn
+        B: !GetAtt ConvertedProductFineGrainDataSet.Arn
+        C: !GetAtt SearchTermDataSet.Arn
+
+  QuickSightRoleArn:
+    Description: Dedicated role assumed only by QuickSight for this stack.
+    Value: !GetAtt QuickSightRole.Arn
+
+  AthenaWorkGroupName:
+    Description: Stack-owned Athena workgroup used by the QuickSight data source.
+    Value: !Ref AthenaWorkGroup
+
+  AthenaResultsBucketName:
+    Description: Versioned bucket containing Athena query results.
+    Value: !Ref AthenaResultsBucket
+
+  AthenaAccessLogBucketName:
+    Description: Versioned bucket containing access logs for the results bucket.
+    Value: !Ref AthenaAccessLogBucket
+
+  AthenaResultsKeyArn:
+    Description: >-
+      Customer-managed key encrypting the Athena results bucket. The access-log bucket uses
+      SSE-S3, which is what server access log delivery supports.
+    Value: !GetAtt AthenaResultsKey.Arn

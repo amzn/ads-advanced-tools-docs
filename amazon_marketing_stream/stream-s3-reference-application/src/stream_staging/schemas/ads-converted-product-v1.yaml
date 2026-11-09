@@ -1,0 +1,841 @@
+# Generated dataset schema. Do not hand-edit field entries.
+#
+# Derived from a delivered Parquet footer. Verify the record key against the dataset guide before relying on it.
+#
+# Regenerate with:
+#   stream-generate-schema --input <delivered.parquet> \
+#       --dataset ads-converted-product-v1 --granularity daily \
+#       --output schemas/ads-converted-product-v1.yaml
+#
+# Fields: 3 metadata, 17 dimensions (15 in the record key), 169 metrics.
+#
+# The record key is 15 of the 17 dimension fields; any others
+# are carried as attributes and are annotated where they are declared. Omitting a key
+# field causes two distinct records that agree on the remainder to be treated as
+# versions of each other, and one of them to be discarded with no error reported.
+#
+# 'type' is an expectation, not a guarantee. It is compared against every
+# delivered file and a lossy difference stops the job.
+
+dataset: ads-converted-product-v1
+granularity: daily
+restatement_days: 70
+version_field: streamBatch.version
+
+# Coarsest first. Date bounds the restatement window; advertiser bounds the
+# many advertisers that accumulate in one delivery destination.
+partition_columns:
+  - date.value
+  - advertiseraccount.id
+
+# Named coarse-grain groupings available to the aggregate job, selected with --grain.
+# Declared here rather than in deployment configuration so that a table's name and its
+# grouping cannot diverge. Every grain must lead with the event-date column, because an
+# aggregate rebuild overwrites whole event-date partitions.
+#
+# product_day is the grain this dataset exists for. It groups by convertedproduct.id, a
+# column the performance dataset does not have — which is why a single deployment-wide
+# grain could never serve both datasets.
+aggregate_grains:
+  campaign_day:
+    - date.value
+    - advertiseraccount.id
+    - adproduct.value
+    - campaign.id
+  product_day:
+    - date.value
+    - advertiseraccount.id
+    - convertedproduct.id
+  # Keeps both product columns, which is what makes the promoted-versus-halo split readable
+  # from a coarse table. advertisedproduct.id and convertedproduct.id differ when an ad for
+  # one product leads to the purchase of another; product_day keeps only the converted side, so
+  # without this grain that comparison has to be run over fine grain.
+  #
+  # Deliberately not partitioned any finer than the others despite being the widest grain
+  # here: the cardinality is bounded by the advertised-and-converted pairs that actually occur,
+  # not by the Cartesian product of the two id sets.
+  halo_day:
+    - date.value
+    - advertiseraccount.id
+    - advertisedproduct.id
+    - convertedproduct.id
+
+fields:
+  # --- metadata: versioning and routing ---
+  - delivered: streamSubscription.id
+    column: streamsubscription.id
+    role: metadata
+    type: string
+  - delivered: streamDataset.id
+    column: streamdataset.id
+    role: metadata
+    type: string
+  - delivered: streamBatch.version
+    column: streambatch.version
+    role: metadata
+    type: int64
+
+  # --- dimensions: together these form the record key ---
+  - delivered: date.value
+    column: date.value
+    role: dimension
+    type: string
+    primary_key: true
+  - delivered: timeZone.value
+    column: timezone.value
+    role: dimension
+    type: string
+    primary_key: true
+  - delivered: ad.id
+    column: ad.id
+    role: dimension
+    type: string
+    primary_key: true
+  - delivered: adGroup.id
+    column: adgroup.id
+    role: dimension
+    type: string
+    primary_key: true
+  - delivered: adProduct.value
+    column: adproduct.value
+    role: dimension
+    type: string
+    primary_key: true
+  - delivered: advertisedProduct.id
+    column: advertisedproduct.id
+    role: dimension
+    type: string
+    primary_key: true
+  - delivered: advertisedProductMarketplace.value
+    column: advertisedproductmarketplace.value
+    role: dimension
+    type: string
+    primary_key: true
+  - delivered: advertisedProductSku.value
+    column: advertisedproductsku.value
+    role: dimension
+    type: string
+    primary_key: true
+  - delivered: advertiserAccount.id
+    column: advertiseraccount.id
+    role: dimension
+    type: string
+    primary_key: true
+  - delivered: advertiserAccountAlternateProfileId.value
+    column: advertiseraccountalternateprofileid.value
+    role: dimension
+    type: string
+    primary_key: false
+  - delivered: advertiserAccountAlternateDspAdvertiserId.value
+    column: advertiseraccountalternatedspadvertiserid.value
+    role: dimension
+    type: string
+    primary_key: false
+  - delivered: budgetCurrency.value
+    column: budgetcurrency.value
+    role: dimension
+    type: string
+    primary_key: true
+  - delivered: campaign.id
+    column: campaign.id
+    role: dimension
+    type: string
+    primary_key: true
+  - delivered: convertedProduct.id
+    column: convertedproduct.id
+    role: dimension
+    type: string
+    primary_key: true
+  - delivered: convertedProductMarketplace.value
+    column: convertedproductmarketplace.value
+    role: dimension
+    type: string
+    primary_key: true
+  - delivered: insertionOrder.id
+    column: insertionorder.id
+    role: dimension
+    type: string
+    primary_key: true
+  - delivered: productRelevance.value
+    column: productrelevance.value
+    role: dimension
+    type: string
+    primary_key: true
+
+  # --- metrics: all null on a row means that row is a delete marker ---
+  - delivered: metric.addToCart
+    column: metric.addtocart
+    role: metric
+    type: int64
+  - delivered: metric.addToCartFromClicks
+    column: metric.addtocartfromclicks
+    role: metric
+    type: int64
+  - delivered: metric.addToCartFromClicksHalo
+    column: metric.addtocartfromclickshalo
+    role: metric
+    type: int64
+  - delivered: metric.addToCartFromClicksPromoted
+    column: metric.addtocartfromclickspromoted
+    role: metric
+    type: int64
+  - delivered: metric.addToCartFromViews
+    column: metric.addtocartfromviews
+    role: metric
+    type: int64
+  - delivered: metric.addToCartFromViewsHalo
+    column: metric.addtocartfromviewshalo
+    role: metric
+    type: int64
+  - delivered: metric.addToCartFromViewsPromoted
+    column: metric.addtocartfromviewspromoted
+    role: metric
+    type: int64
+  - delivered: metric.addToCartHalo
+    column: metric.addtocarthalo
+    role: metric
+    type: int64
+  - delivered: metric.addToCartPromoted
+    column: metric.addtocartpromoted
+    role: metric
+    type: int64
+  - delivered: metric.addToList
+    column: metric.addtolist
+    role: metric
+    type: int64
+  - delivered: metric.addToListFromClicks
+    column: metric.addtolistfromclicks
+    role: metric
+    type: int64
+  - delivered: metric.addToListFromClicksHalo
+    column: metric.addtolistfromclickshalo
+    role: metric
+    type: int64
+  - delivered: metric.addToListFromClicksPromoted
+    column: metric.addtolistfromclickspromoted
+    role: metric
+    type: int64
+  - delivered: metric.addToListFromViews
+    column: metric.addtolistfromviews
+    role: metric
+    type: int64
+  - delivered: metric.addToListFromViewsHalo
+    column: metric.addtolistfromviewshalo
+    role: metric
+    type: int64
+  - delivered: metric.addToListFromViewsPromoted
+    column: metric.addtolistfromviewspromoted
+    role: metric
+    type: int64
+  - delivered: metric.addToListHalo
+    column: metric.addtolisthalo
+    role: metric
+    type: int64
+  - delivered: metric.addToListPromoted
+    column: metric.addtolistpromoted
+    role: metric
+    type: int64
+  - delivered: metric.addToWatchlist
+    column: metric.addtowatchlist
+    role: metric
+    type: int64
+  - delivered: metric.addToWatchlistFromClicks
+    column: metric.addtowatchlistfromclicks
+    role: metric
+    type: int64
+  - delivered: metric.addToWatchlistFromViews
+    column: metric.addtowatchlistfromviews
+    role: metric
+    type: int64
+  - delivered: metric.alexaSkillEnable
+    column: metric.alexaskillenable
+    role: metric
+    type: int64
+  - delivered: metric.alexaSkillEnableFromClicks
+    column: metric.alexaskillenablefromclicks
+    role: metric
+    type: int64
+  - delivered: metric.alexaSkillEnableFromViews
+    column: metric.alexaskillenablefromviews
+    role: metric
+    type: int64
+  - delivered: metric.alexaSkillInvocations
+    column: metric.alexaskillinvocations
+    role: metric
+    type: int64
+  - delivered: metric.alexaSkillInvocationsFromClicks
+    column: metric.alexaskillinvocationsfromclicks
+    role: metric
+    type: int64
+  - delivered: metric.alexaSkillInvocationsFromViews
+    column: metric.alexaskillinvocationsfromviews
+    role: metric
+    type: int64
+  - delivered: metric.appstoreFirstOpens
+    column: metric.appstorefirstopens
+    role: metric
+    type: int64
+  - delivered: metric.appstoreFirstOpensFromClicks
+    column: metric.appstorefirstopensfromclicks
+    role: metric
+    type: int64
+  - delivered: metric.appstoreFirstOpensFromViews
+    column: metric.appstorefirstopensfromviews
+    role: metric
+    type: int64
+  - delivered: metric.appstoreFirstSessionHours
+    column: metric.appstorefirstsessionhours
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.appstoreFirstSessionHoursFromClicks
+    column: metric.appstorefirstsessionhoursfromclicks
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.appstoreFirstSessionHoursFromViews
+    column: metric.appstorefirstsessionhoursfromviews
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.appstoreOpens
+    column: metric.appstoreopens
+    role: metric
+    type: int64
+  - delivered: metric.appstoreOpensFromClicks
+    column: metric.appstoreopensfromclicks
+    role: metric
+    type: int64
+  - delivered: metric.appstoreOpensFromViews
+    column: metric.appstoreopensfromviews
+    role: metric
+    type: int64
+  - delivered: metric.appstoreRepeatOpens
+    column: metric.appstorerepeatopens
+    role: metric
+    type: int64
+  - delivered: metric.appstoreRepeatOpensFromClicks
+    column: metric.appstorerepeatopensfromclicks
+    role: metric
+    type: int64
+  - delivered: metric.appstoreRepeatOpensFromViews
+    column: metric.appstorerepeatopensfromviews
+    role: metric
+    type: int64
+  - delivered: metric.appstoreRepeatSessionHours
+    column: metric.appstorerepeatsessionhours
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.appstoreRepeatSessionHoursFromClicks
+    column: metric.appstorerepeatsessionhoursfromclicks
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.appstoreRepeatSessionHoursFromViews
+    column: metric.appstorerepeatsessionhoursfromviews
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.appstoreUsageHours
+    column: metric.appstoreusagehours
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.appstoreUsageHoursFromClicks
+    column: metric.appstoreusagehoursfromclicks
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.appstoreUsageHoursFromViews
+    column: metric.appstoreusagehoursfromviews
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.appSubscriptionSignUps
+    column: metric.appsubscriptionsignups
+    role: metric
+    type: int64
+  - delivered: metric.appSubscriptionSignUpsFromClicks
+    column: metric.appsubscriptionsignupsfromclicks
+    role: metric
+    type: int64
+  - delivered: metric.appSubscriptionSignUpsFromViews
+    column: metric.appsubscriptionsignupsfromviews
+    role: metric
+    type: int64
+  - delivered: metric.combinedPurchases
+    column: metric.combinedpurchases
+    role: metric
+    type: int64
+  - delivered: metric.combinedPurchasesFromClicks
+    column: metric.combinedpurchasesfromclicks
+    role: metric
+    type: int64
+  - delivered: metric.combinedPurchasesFromViews
+    column: metric.combinedpurchasesfromviews
+    role: metric
+    type: int64
+  - delivered: metric.combinedSales
+    column: metric.combinedsales
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.combinedUnitsSold
+    column: metric.combinedunitssold
+    role: metric
+    type: int64
+  - delivered: metric.detailPageViews
+    column: metric.detailpageviews
+    role: metric
+    type: int64
+  - delivered: metric.detailPageViewsFromClicks
+    column: metric.detailpageviewsfromclicks
+    role: metric
+    type: int64
+  - delivered: metric.detailPageViewsFromClicksHalo
+    column: metric.detailpageviewsfromclickshalo
+    role: metric
+    type: int64
+  - delivered: metric.detailPageViewsFromClicksPromoted
+    column: metric.detailpageviewsfromclickspromoted
+    role: metric
+    type: int64
+  - delivered: metric.detailPageViewsFromViews
+    column: metric.detailpageviewsfromviews
+    role: metric
+    type: int64
+  - delivered: metric.detailPageViewsFromViewsHalo
+    column: metric.detailpageviewsfromviewshalo
+    role: metric
+    type: int64
+  - delivered: metric.detailPageViewsFromViewsPromoted
+    column: metric.detailpageviewsfromviewspromoted
+    role: metric
+    type: int64
+  - delivered: metric.detailPageViewsHalo
+    column: metric.detailpageviewshalo
+    role: metric
+    type: int64
+  - delivered: metric.detailPageViewsPromoted
+    column: metric.detailpageviewspromoted
+    role: metric
+    type: int64
+  - delivered: metric.downloadedVideoPlays
+    column: metric.downloadedvideoplays
+    role: metric
+    type: int64
+  - delivered: metric.downloadedVideoPlaysFromClicks
+    column: metric.downloadedvideoplaysfromclicks
+    role: metric
+    type: int64
+  - delivered: metric.downloadedVideoPlaysFromViews
+    column: metric.downloadedvideoplaysfromviews
+    role: metric
+    type: int64
+  - delivered: metric.freeTrialAppSubscriptionSignUps
+    column: metric.freetrialappsubscriptionsignups
+    role: metric
+    type: int64
+  - delivered: metric.freeTrialAppSubscriptionSignUpsFromClicks
+    column: metric.freetrialappsubscriptionsignupsfromclicks
+    role: metric
+    type: int64
+  - delivered: metric.freeTrialAppSubscriptionSignUpsFromViews
+    column: metric.freetrialappsubscriptionsignupsfromviews
+    role: metric
+    type: int64
+  - delivered: metric.freeTrialSubscriptionSignUps
+    column: metric.freetrialsubscriptionsignups
+    role: metric
+    type: int64
+  - delivered: metric.freeTrialSubscriptionSignUpsFromClicks
+    column: metric.freetrialsubscriptionsignupsfromclicks
+    role: metric
+    type: int64
+  - delivered: metric.freeTrialSubscriptionSignUpsFromViews
+    column: metric.freetrialsubscriptionsignupsfromviews
+    role: metric
+    type: int64
+  - delivered: metric.longTermSales
+    column: metric.longtermsales
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.multiTouchPurchases
+    column: metric.multitouchpurchases
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.multiTouchPurchasesFromClicks
+    column: metric.multitouchpurchasesfromclicks
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.multiTouchPurchasesFromClicksHalo
+    column: metric.multitouchpurchasesfromclickshalo
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.multiTouchPurchasesFromClicksPromoted
+    column: metric.multitouchpurchasesfromclickspromoted
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.multiTouchPurchasesFromViews
+    column: metric.multitouchpurchasesfromviews
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.multiTouchPurchasesFromViewsHalo
+    column: metric.multitouchpurchasesfromviewshalo
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.multiTouchPurchasesFromViewsPromoted
+    column: metric.multitouchpurchasesfromviewspromoted
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.multiTouchPurchasesHalo
+    column: metric.multitouchpurchaseshalo
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.multiTouchPurchasesPromoted
+    column: metric.multitouchpurchasespromoted
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.multiTouchSales
+    column: metric.multitouchsales
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.multiTouchSalesHalo
+    column: metric.multitouchsaleshalo
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.multiTouchSalesPromoted
+    column: metric.multitouchsalespromoted
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.multiTouchUnitsSold
+    column: metric.multitouchunitssold
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.multiTouchUnitsSoldHalo
+    column: metric.multitouchunitssoldhalo
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.multiTouchUnitsSoldPromoted
+    column: metric.multitouchunitssoldpromoted
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.newToBrandDetailPageViews
+    column: metric.newtobranddetailpageviews
+    role: metric
+    type: int64
+  - delivered: metric.newToBrandDetailPageViewsFromClicks
+    column: metric.newtobranddetailpageviewsfromclicks
+    role: metric
+    type: int64
+  - delivered: metric.newToBrandDetailPageViewsFromClicksPromoted
+    column: metric.newtobranddetailpageviewsfromclickspromoted
+    role: metric
+    type: int64
+  - delivered: metric.newToBrandDetailPageViewsFromViews
+    column: metric.newtobranddetailpageviewsfromviews
+    role: metric
+    type: int64
+  - delivered: metric.newToBrandDetailPageViewsFromViewsPromoted
+    column: metric.newtobranddetailpageviewsfromviewspromoted
+    role: metric
+    type: int64
+  - delivered: metric.newToBrandDetailPageViewsPromoted
+    column: metric.newtobranddetailpageviewspromoted
+    role: metric
+    type: int64
+  - delivered: metric.newToBrandPurchases
+    column: metric.newtobrandpurchases
+    role: metric
+    type: int64
+  - delivered: metric.newToBrandPurchasesFromClicks
+    column: metric.newtobrandpurchasesfromclicks
+    role: metric
+    type: int64
+  - delivered: metric.newToBrandPurchasesFromClicksHalo
+    column: metric.newtobrandpurchasesfromclickshalo
+    role: metric
+    type: int64
+  - delivered: metric.newToBrandPurchasesFromClicksPromoted
+    column: metric.newtobrandpurchasesfromclickspromoted
+    role: metric
+    type: int64
+  - delivered: metric.newToBrandPurchasesFromViews
+    column: metric.newtobrandpurchasesfromviews
+    role: metric
+    type: int64
+  - delivered: metric.newToBrandPurchasesFromViewsHalo
+    column: metric.newtobrandpurchasesfromviewshalo
+    role: metric
+    type: int64
+  - delivered: metric.newToBrandPurchasesFromViewsPromoted
+    column: metric.newtobrandpurchasesfromviewspromoted
+    role: metric
+    type: int64
+  - delivered: metric.newToBrandPurchasesHalo
+    column: metric.newtobrandpurchaseshalo
+    role: metric
+    type: int64
+  - delivered: metric.newToBrandPurchasesPromoted
+    column: metric.newtobrandpurchasespromoted
+    role: metric
+    type: int64
+  - delivered: metric.newToBrandSales
+    column: metric.newtobrandsales
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.newToBrandSalesHalo
+    column: metric.newtobrandsaleshalo
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.newToBrandSalesPromoted
+    column: metric.newtobrandsalespromoted
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.newToBrandUnitsSold
+    column: metric.newtobrandunitssold
+    role: metric
+    type: int64
+  - delivered: metric.newToBrandUnitsSoldHalo
+    column: metric.newtobrandunitssoldhalo
+    role: metric
+    type: int64
+  - delivered: metric.newToBrandUnitsSoldPromoted
+    column: metric.newtobrandunitssoldpromoted
+    role: metric
+    type: int64
+  - delivered: metric.paidAppSubscriptionSignUps
+    column: metric.paidappsubscriptionsignups
+    role: metric
+    type: int64
+  - delivered: metric.paidAppSubscriptionSignUpsFromClicks
+    column: metric.paidappsubscriptionsignupsfromclicks
+    role: metric
+    type: int64
+  - delivered: metric.paidAppSubscriptionSignUpsFromViews
+    column: metric.paidappsubscriptionsignupsfromviews
+    role: metric
+    type: int64
+  - delivered: metric.paidSubscriptionSignUps
+    column: metric.paidsubscriptionsignups
+    role: metric
+    type: int64
+  - delivered: metric.paidSubscriptionSignUpsFromClicks
+    column: metric.paidsubscriptionsignupsfromclicks
+    role: metric
+    type: int64
+  - delivered: metric.paidSubscriptionSignUpsFromViews
+    column: metric.paidsubscriptionsignupsfromviews
+    role: metric
+    type: int64
+  - delivered: metric.productReviewPageVisits
+    column: metric.productreviewpagevisits
+    role: metric
+    type: int64
+  - delivered: metric.productReviewPageVisitsFromClicks
+    column: metric.productreviewpagevisitsfromclicks
+    role: metric
+    type: int64
+  - delivered: metric.productReviewPageVisitsFromClicksHalo
+    column: metric.productreviewpagevisitsfromclickshalo
+    role: metric
+    type: int64
+  - delivered: metric.productReviewPageVisitsFromClicksPromoted
+    column: metric.productreviewpagevisitsfromclickspromoted
+    role: metric
+    type: int64
+  - delivered: metric.productReviewPageVisitsFromViews
+    column: metric.productreviewpagevisitsfromviews
+    role: metric
+    type: int64
+  - delivered: metric.productReviewPageVisitsFromViewsHalo
+    column: metric.productreviewpagevisitsfromviewshalo
+    role: metric
+    type: int64
+  - delivered: metric.productReviewPageVisitsFromViewsPromoted
+    column: metric.productreviewpagevisitsfromviewspromoted
+    role: metric
+    type: int64
+  - delivered: metric.productReviewPageVisitsPromoted
+    column: metric.productreviewpagevisitspromoted
+    role: metric
+    type: int64
+  - delivered: metric.purchases
+    column: metric.purchases
+    role: metric
+    type: int64
+  - delivered: metric.purchasesFromClicks
+    column: metric.purchasesfromclicks
+    role: metric
+    type: int64
+  - delivered: metric.purchasesFromClicksHalo
+    column: metric.purchasesfromclickshalo
+    role: metric
+    type: int64
+  - delivered: metric.purchasesFromClicksPromoted
+    column: metric.purchasesfromclickspromoted
+    role: metric
+    type: int64
+  - delivered: metric.purchasesFromViews
+    column: metric.purchasesfromviews
+    role: metric
+    type: int64
+  - delivered: metric.purchasesFromViewsHalo
+    column: metric.purchasesfromviewshalo
+    role: metric
+    type: int64
+  - delivered: metric.purchasesFromViewsPromoted
+    column: metric.purchasesfromviewspromoted
+    role: metric
+    type: int64
+  - delivered: metric.purchasesHalo
+    column: metric.purchaseshalo
+    role: metric
+    type: int64
+  - delivered: metric.purchasesPromoted
+    column: metric.purchasespromoted
+    role: metric
+    type: int64
+  - delivered: metric.rentals
+    column: metric.rentals
+    role: metric
+    type: int64
+  - delivered: metric.rentalsFromClicks
+    column: metric.rentalsfromclicks
+    role: metric
+    type: int64
+  - delivered: metric.rentalsFromViews
+    column: metric.rentalsfromviews
+    role: metric
+    type: int64
+  - delivered: metric.sales
+    column: metric.sales
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.salesFromClicks
+    column: metric.salesfromclicks
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.salesFromClicksPromoted
+    column: metric.salesfromclickspromoted
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.salesFromViews
+    column: metric.salesfromviews
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.salesFromViewsPromoted
+    column: metric.salesfromviewspromoted
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.salesHalo
+    column: metric.saleshalo
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.salesPromoted
+    column: metric.salespromoted
+    role: metric
+    type: decimal128(18, 8)
+  - delivered: metric.subscribeAndSaveSubscriptions
+    column: metric.subscribeandsavesubscriptions
+    role: metric
+    type: int64
+  - delivered: metric.subscribeAndSaveSubscriptionsFromClicks
+    column: metric.subscribeandsavesubscriptionsfromclicks
+    role: metric
+    type: int64
+  - delivered: metric.subscribeAndSaveSubscriptionsFromClicksHalo
+    column: metric.subscribeandsavesubscriptionsfromclickshalo
+    role: metric
+    type: int64
+  - delivered: metric.subscribeAndSaveSubscriptionsFromClicksPromoted
+    column: metric.subscribeandsavesubscriptionsfromclickspromoted
+    role: metric
+    type: int64
+  - delivered: metric.subscribeAndSaveSubscriptionsFromViews
+    column: metric.subscribeandsavesubscriptionsfromviews
+    role: metric
+    type: int64
+  - delivered: metric.subscribeAndSaveSubscriptionsFromViewsHalo
+    column: metric.subscribeandsavesubscriptionsfromviewshalo
+    role: metric
+    type: int64
+  - delivered: metric.subscribeAndSaveSubscriptionsFromViewsPromoted
+    column: metric.subscribeandsavesubscriptionsfromviewspromoted
+    role: metric
+    type: int64
+  - delivered: metric.subscribeAndSaveSubscriptionsHalo
+    column: metric.subscribeandsavesubscriptionshalo
+    role: metric
+    type: int64
+  - delivered: metric.subscribeAndSaveSubscriptionsPromoted
+    column: metric.subscribeandsavesubscriptionspromoted
+    role: metric
+    type: int64
+  - delivered: metric.subscriptionSignUps
+    column: metric.subscriptionsignups
+    role: metric
+    type: int64
+  - delivered: metric.subscriptionSignUpsFromClicks
+    column: metric.subscriptionsignupsfromclicks
+    role: metric
+    type: int64
+  - delivered: metric.subscriptionSignUpsFromViews
+    column: metric.subscriptionsignupsfromviews
+    role: metric
+    type: int64
+  - delivered: metric.trailerPlays
+    column: metric.trailerplays
+    role: metric
+    type: int64
+  - delivered: metric.trailerPlaysFromClicks
+    column: metric.trailerplaysfromclicks
+    role: metric
+    type: int64
+  - delivered: metric.trailerPlaysFromViews
+    column: metric.trailerplaysfromviews
+    role: metric
+    type: int64
+  - delivered: metric.unitsSold
+    column: metric.unitssold
+    role: metric
+    type: int64
+  - delivered: metric.unitsSoldFromClicks
+    column: metric.unitssoldfromclicks
+    role: metric
+    type: int64
+  - delivered: metric.unitsSoldFromClicksPromoted
+    column: metric.unitssoldfromclickspromoted
+    role: metric
+    type: int64
+  - delivered: metric.unitsSoldFromViews
+    column: metric.unitssoldfromviews
+    role: metric
+    type: int64
+  - delivered: metric.unitsSoldFromViewsPromoted
+    column: metric.unitssoldfromviewspromoted
+    role: metric
+    type: int64
+  - delivered: metric.unitsSoldHalo
+    column: metric.unitssoldhalo
+    role: metric
+    type: int64
+  - delivered: metric.unitsSoldPromoted
+    column: metric.unitssoldpromoted
+    role: metric
+    type: int64
+  - delivered: metric.videoStreamPlays
+    column: metric.videostreamplays
+    role: metric
+    type: int64
+  - delivered: metric.videoStreamPlaysFromClicks
+    column: metric.videostreamplaysfromclicks
+    role: metric
+    type: int64
+  - delivered: metric.videoStreamPlaysFromViews
+    column: metric.videostreamplaysfromviews
+    role: metric
+    type: int64
+  - delivered: metric.brandedSearches
+    column: metric.brandedsearches
+    role: metric
+    type: int64
+  - delivered: metric.brandedSearchesFromClicks
+    column: metric.brandedsearchesfromclicks
+    role: metric
+    type: int64
+  - delivered: metric.brandedSearchesFromViews
+    column: metric.brandedsearchesfromviews
+    role: metric
+    type: int64

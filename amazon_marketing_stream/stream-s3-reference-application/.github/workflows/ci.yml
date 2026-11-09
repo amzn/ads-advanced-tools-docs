@@ -1,0 +1,67 @@
+name: ci
+
+on:
+  # main is the default branch of the GitHub repository this workflow runs in. Pull requests are
+  # covered by the trigger below whatever the branch is called; this one matches literally.
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Lower bound is the oldest runtime the managed Spark environments ship.
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      # Required by the Spark integration tests, which execute the real generated MERGE INTO
+      # against a local Iceberg catalog. Without a JDK those tests skip, and the agreement
+      # between the generated SQL and the Python reference implementation goes unverified.
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3  # v4.9.1
+        with:
+          distribution: corretto
+          java-version: '17'
+
+      # The CDK requirements are installed too. Without them every CDK synth test skips through
+      # pytest.importorskip, and the CDK path could drift from the CloudFormation one while CI
+      # stayed green. The import check makes dropping this line fail loudly rather than skip.
+      #
+      # From the lock, with hashes required: every package at the version the lock names, and a
+      # download whose hash differs fails the install. The package itself goes in afterwards with
+      # --no-deps, so it cannot pull in anything the lock did not pin. `make lock` regenerates it.
+      - name: Install
+        run: |
+          python -m pip install --require-hashes -r requirements-lock.txt
+          python -m pip install --no-deps -e .
+          python -m pip check
+          python -c "import aws_cdk"
+
+      # Every step below delegates to a Makefile target rather than repeating the command.
+      # Repeating it lets the two drift: a directory added to the Makefile's lint target and not
+      # here would go unlinted in the only place linting is enforced. Delegating also means a
+      # developer who runs `make check` locally has run what CI runs, which is what the README
+      # claims.
+      - name: Lint
+        run: make lint
+
+      # `make cov` rather than `make test`: same suite, plus coverage. It also writes coverage.xml,
+      # which a reporting step can pick up.
+      - name: Unit and end-to-end tests
+        run: make cov
+
+      - name: Repository hygiene scan
+        run: make scan

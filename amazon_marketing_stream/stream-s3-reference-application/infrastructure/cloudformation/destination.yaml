@@ -1,0 +1,720 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: >-
+  Delivery destination: the S3 bucket and SQS queue a subscription delivers into, with the
+  bucket, queue and KMS key policies the delivery service requires already attached. Deploy
+  this first, create a subscription against its outputs, then deploy staging.yaml to consume
+  from it.
+
+# ---------------------------------------------------------------------------------------
+# Why this is a separate stack
+#
+# Three reasons, in order of how much they would cost to get wrong.
+#
+# 1. Deleting the consumer must never delete the data. If the delivery bucket lived in the
+#    staging stack, `delete-stack` would destroy every delivered object. Separation makes that
+#    structurally impossible rather than dependent on a DeletionPolicy nobody removes.
+#
+# 2. The destination outlives the consumer. A staging layer gets rebuilt, re-profiled and
+#    replaced; the destination is the record of what was delivered and is created once.
+#
+# 3. Cardinality differs. The recommended setup points every subscription at one destination,
+#    so there is one destination and N dataset subscriptions.
+#
+# What this stack removes: the delivery service validates at subscription time that a
+# destination *exists*, not that it is *writable*. A missing write grant leaves the
+# subscription reporting ACTIVE while nothing is ever delivered, and nothing reports a fault.
+# That is the single most common setup failure, and it exists only because the policies are
+# applied by hand. Here they are applied by the same template that creates the resources.
+# ---------------------------------------------------------------------------------------
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Delivery service identity (from your integration guide)
+        Parameters:
+          - PublisherAccountId
+          - PublisherRoleName
+          - ReviewerRoleName
+      - Label:
+          default: Destination region
+        Parameters:
+          - Geo
+      - Label:
+          default: Naming
+        Parameters:
+          - BucketName
+          - QueueName
+      - Label:
+          default: Queue behaviour
+        Parameters:
+          - VisibilityTimeoutSeconds
+          - MaxReceiveCount
+      - Label:
+          default: Retention
+        Parameters:
+          - DeliveredObjectExpirationDays
+      - Label:
+          default: Operations
+        Parameters:
+          - AlarmEmail
+
+    ParameterLabels:
+      PublisherAccountId:
+        default: Publisher AWS account ID
+      Geo:
+        default: Advertising geography this destination serves
+
+# ---------------------------------------------------------------------------------------
+# Region is enforced, not documented
+#
+# The delivery service allows only certain regions per advertising geography, and the bucket
+# and queue must be in the same one as each other. Both are satisfied automatically here,
+# because one stack creates both — but the *region* is chosen by whoever runs the deploy, and
+# getting it wrong is not caught here. It is caught later, somewhere else, twice:
+#
+#   at subscription creation   BAD_REQUEST "invalid destination", which does not say
+#                              "wrong region"
+#   during periodic revalidation  an existing subscription whose destination is in a
+#                              disallowed region is moved to SUSPENDED
+#
+# So a stack deployed into, say, eu-central-1 comes up green and is useless. The Rules section
+# below turns that into a refusal at deploy time with a message naming the allowed regions.
+# Rules are evaluated by CloudFormation before any resource is created, so nothing is built.
+# ---------------------------------------------------------------------------------------
+Rules:
+  NorthAmericaRegion:
+    RuleCondition: !Equals [!Ref Geo, 'NA']
+    Assertions:
+      - Assert:
+          Fn::Contains:
+            - ['us-east-1']
+            - !Ref 'AWS::Region'
+        AssertDescription: >-
+          A North America destination must be deployed in us-east-1. Re-run with
+          --region us-east-1.
+
+  EuropeRegion:
+    RuleCondition: !Equals [!Ref Geo, 'EU']
+    Assertions:
+      - Assert:
+          Fn::Contains:
+            - ['eu-west-1', 'eu-west-2', 'eu-south-2']
+            - !Ref 'AWS::Region'
+        AssertDescription: >-
+          A Europe destination must be deployed in eu-west-1, eu-west-2 or eu-south-2. Note
+          that eu-south-2 must be enabled in your account settings first.
+
+  FarEastRegion:
+    RuleCondition: !Equals [!Ref Geo, 'FE']
+    Assertions:
+      - Assert:
+          Fn::Contains:
+            - ['us-west-2', 'ap-southeast-1']
+            - !Ref 'AWS::Region'
+        AssertDescription: >-
+          A Far East destination must be deployed in us-west-2 or ap-southeast-1.
+
+Parameters:
+  Geo:
+    Type: String
+    AllowedValues: ['NA', 'EU', 'FE']
+    Description: >-
+      The advertising geography this destination serves. This does not change any resource — it
+      selects which regions the deploy is allowed to run in, enforced by the Rules section
+      above. Allowed regions: NA = us-east-1. EU = eu-west-1, eu-west-2 or eu-south-2. FE =
+      us-west-2 or ap-southeast-1.
+
+      Geography here refers to your own infrastructure, not the advertiser's. A subscription for
+      an advertiser in any region can be created against a destination in any allowed region, so
+      one destination can serve all of your advertisers. Pick the region closest to your
+      consumers and keep every subscription pointed at it.
+  # The delivery service's account and role names are defaulted rather than required. They are
+  # fixed properties of the service, published in its integration guide, and identical for every
+  # consumer -- so requiring each one to be supplied would make the commonest deployment fail on a
+  # value nobody can derive, to protect a number that is not a secret.
+  #
+  # A default and not a Mappings block, deliberately: there is one account, with no regional or
+  # geographic variation. A region-keyed map is the right shape when the value varies, which is how
+  # AWS publishes its own log-delivery accounts; here it would be a lookup table with one row.
+  #
+  # AllowedPattern rejects a malformed override, which is the only way this can be wrong.
+  PublisherAccountId:
+    Type: String
+    Default: '926844853897'
+    AllowedPattern: '^[0-9]{12}$'
+    ConstraintDescription: must be a 12-digit AWS account ID
+    Description: >-
+      AWS account ID owning the roles that write to your destination. Defaulted to the delivery
+      service's published account; override only if its integration guide gives you a different
+      one.
+
+  PublisherRoleName:
+    Type: String
+    Default: PublisherRole
+    MinLength: 1
+    Description: >-
+      Role that writes Parquet objects to the bucket and sends notifications to the queue. It
+      is granted PutObject and SendMessage only; it cannot read, list or delete your objects.
+
+  ReviewerRoleName:
+    Type: String
+    Default: ReviewerRole
+    MinLength: 1
+    Description: >-
+      Role that validates the destination exists when a subscription is created. Its ListBucket
+      grant is restricted by an s3:prefix condition, so it can confirm the bucket exists without
+      enumerating its contents.
+
+  BucketName:
+    Type: String
+    Default: ''
+    Description: >-
+      Delivery bucket name. Left empty, one is derived from the stack name, account and region.
+      Bucket names are globally unique, so an explicit name may already be taken.
+
+  QueueName:
+    Type: String
+    Default: ''
+    Description: Notification queue name. Left empty, one is derived from the stack name.
+
+  VisibilityTimeoutSeconds:
+    Type: Number
+    Default: 900
+    MinValue: 30
+    MaxValue: 43200
+    Description: >-
+      Must exceed the time the ingest job takes between receiving a notification and
+      acknowledging it. Set too low, a message becomes visible again while still being
+      processed and the same objects are read twice — deduplication absorbs that, but it wastes
+      the work. Set far too high, recovery after a crashed run is delayed by the same amount.
+
+  MaxReceiveCount:
+    Type: Number
+    Default: 5
+    MinValue: 1
+    MaxValue: 1000
+    Description: >-
+      Receives before a notification moves to the dead-letter queue. A notification that cannot
+      be parsed is deliberately left unacknowledged so that it retries and then dead-letters,
+      which is where you inspect it. Keep this low enough that a permanently bad message stops
+      cycling.
+
+  DeliveredObjectExpirationDays:
+    Type: Number
+    Default: 0
+    MinValue: 0
+    MaxValue: 3650
+    Description: >-
+      Days before a delivered object is expired. 0 keeps them indefinitely, which is the
+      default because these objects are the only replayable record of what was delivered.
+
+      This setting is the rebuild horizon. The staging layer keeps no copy of the delivered
+      rows — it records each object in a manifest and reads the object itself when it merges —
+      so a defect can be corrected only as far back as the objects still exist. Setting this
+      shorter than the 70-day restatement window both shipped dataset schemas declare leaves
+      the older part of that window unrebuildable: corrections can still arrive for it, but
+      the deliveries they would be recomputed from are gone.
+
+      Expiring objects does not corrupt anything already merged, and the manifest still records
+      that they arrived. What is lost is the ability to re-derive current state from them, and a
+      merge asked to replay a window whose objects have expired reports the shortfall rather
+      than quietly merging less than it should.
+
+  AlarmEmail:
+    Type: String
+    Default: ''
+    Description: >-
+      Address notified when a notification dead-letters. Left empty, no subscription is created
+      and the topic is still available to subscribe to later.
+
+Conditions:
+  GenerateBucketName: !Equals [!Ref BucketName, '']
+  GenerateQueueName: !Equals [!Ref QueueName, '']
+  HasAlarmEmail: !Not [!Equals [!Ref AlarmEmail, '']]
+  HasObjectExpiry: !Not [!Equals [!Ref DeliveredObjectExpirationDays, 0]]
+
+Resources:
+  # -------------------------------------------------------------------------------------
+  # Encryption
+  #
+  # A customer-managed key rather than SSE-S3 and SQS-managed encryption. Those need no key
+  # policy, which is simpler, but a customer-managed key is what lets the grants be audited and
+  # revoked, and the reason it is usually avoided — having to add the publisher grant by hand —
+  # does not apply when the same template creates both the key and its policy.
+  #
+  # One key covers the bucket, the queue and the dead-letter queue. They are a single trust
+  # boundary: anything able to read delivered objects can already read the notifications naming
+  # them, so separate keys would add ceremony without adding isolation.
+  # -------------------------------------------------------------------------------------
+
+  DeliveryKey:
+    Type: AWS::KMS::Key
+    # retained on stack deletion. Deleting the key makes every delivered object permanently
+    # unreadable, including objects retained by the policies below.
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      Description: !Sub 'Encrypts delivered objects and notifications for ${AWS::StackName}.'
+      # rotation is available but not enabled by default. KMS key material cannot be exported, so
+      # rotation addresses compliance obligations rather than a material exposure risk. Enable it if
+      # an auditor requires it.
+      EnableKeyRotation: false
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          # Without this, the key becomes unmanageable: IAM policies in this account cannot
+          # grant access to a key whose policy does not delegate to the account.
+          - Sid: AllowAccountAdministration
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:root'
+            Action: 'kms:*'
+            Resource: '*'
+
+          # The grant the integration guide asks you to add by hand. Writing an encrypted object
+          # needs GenerateDataKey; Decrypt is required alongside it for both S3 and SQS.
+          # scoped to two actions and one named external principal.
+          #
+          # The condition restricts the grant to the two services that use it. The publisher
+          # role holds exactly two permissions in this stack -- s3:PutObject on the delivery
+          # bucket and sqs:SendMessage on the notification queue -- and in both cases the
+          # service calls KMS on the role's behalf, which is what kms:ViaService matches. Both
+          # resources are created by this stack, so both are in this region. With the condition
+          # in place the grant cannot be used to call KMS directly, only through those two
+          # services writing to those two resources.
+          - Sid: AllowDeliveryServiceEncryption
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:${AWS::Partition}:iam::${PublisherAccountId}:role/${PublisherRoleName}'
+            Action:
+              - 'kms:GenerateDataKey'
+              - 'kms:Decrypt'
+            # In a key policy, '*' scopes to the key the policy is attached to, not to every key
+            # in the account. It cannot be narrowed to a key ARN.
+            Resource: '*'
+            Condition:
+              StringEquals:
+                'kms:ViaService':
+                  - !Sub 's3.${AWS::Region}.amazonaws.com'
+                  - !Sub 'sqs.${AWS::Region}.amazonaws.com'
+
+          # AlarmTopic is encrypted with this key, and a CloudWatch alarm publishing to an
+          # encrypted topic needs the key itself. Without this the dead-letter alarm enters ALARM
+          # and its notification fails, recorded only in the alarm's history as "CloudWatch
+          # Alarms does not have authorization to access the SNS topic encryption key".
+          # the statement AWS documents for this case, two actions, one service principal. It is
+          # left unconditioned as documented; a condition that CloudWatch does not satisfy would
+          # silently reintroduce the failure it fixes.
+          - Sid: AllowCloudWatchAlarmsToPublish
+            Effect: Allow
+            Principal:
+              Service: cloudwatch.amazonaws.com
+            Action:
+              - 'kms:Decrypt'
+              - 'kms:GenerateDataKey*'
+            Resource: '*'
+
+  DeliveryKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub 'alias/${AWS::StackName}-delivery'
+      TargetKeyId: !Ref DeliveryKey
+
+  # -------------------------------------------------------------------------------------
+  # Access logging
+  #
+  # A separate bucket, because a bucket cannot usefully log to itself.
+  #
+  # SSE-S3, not the customer-managed key. S3 server access log delivery does not support
+  # SSE-KMS on the destination bucket at all — not with a bucket key, and not with a key policy
+  # grant for logging.s3.amazonaws.com. Configured with SSE-KMS the bucket simply stays empty:
+  # no log, no error, and an audit control the stack reports but does not have.
+  # https://docs.aws.amazon.com/AmazonS3/latest/userguide/enable-server-access-logging.html
+  # -------------------------------------------------------------------------------------
+
+  AccessLogBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !If
+        - GenerateBucketName
+        - !Sub '${AWS::StackName}-${AWS::AccountId}-${AWS::Region}-logs'
+        - !Sub '${BucketName}-logs'
+      # ACLs disabled; access is controlled by policy alone.
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      # all four public access controls enabled.
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      # SSE-S3 is mandatory here; see the note above this resource.
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireAccessLogs
+            Status: Enabled
+            ExpirationInDays: 365
+            NoncurrentVersionExpirationInDays: 30
+          - Id: AbortIncompleteUploads
+            Status: Enabled
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 7
+
+  AccessLogBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref AccessLogBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          # only the S3 logging service may write, and only for logs originating from the delivery
+          # bucket in this account.
+          - Sid: AllowLogDelivery
+            Effect: Allow
+            Principal:
+              Service: logging.s3.amazonaws.com
+            Action: 's3:PutObject'
+            Resource: !Sub '${AccessLogBucket.Arn}/logs/*'
+            Condition:
+              StringEquals:
+                'aws:SourceAccount': !Ref AWS::AccountId
+                # aws:SourceArn as well as aws:SourceAccount: the account condition alone lets
+                # any bucket in this account deliver its logs here, which is wider than the
+                # comment above claims.
+                'aws:SourceArn': !GetAtt DeliveryBucket.Arn
+          - Sid: DenyUnencryptedTransport
+            Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource:
+              - !GetAtt AccessLogBucket.Arn
+              - !Sub '${AccessLogBucket.Arn}/*'
+            Condition:
+              Bool:
+                'aws:SecureTransport': false
+
+  # -------------------------------------------------------------------------------------
+  # The delivery bucket
+  # -------------------------------------------------------------------------------------
+
+  DeliveryBucket:
+    Type: AWS::S3::Bucket
+    # retained on stack deletion. These objects are the only replayable record of what was
+    # delivered; SQS discards notifications after fourteen days, so once the objects are gone the
+    # delivery history is unrecoverable.
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !If
+        - GenerateBucketName
+        - !Sub '${AWS::StackName}-${AWS::AccountId}-${AWS::Region}'
+        - !Ref BucketName
+      # ACLs disabled. The publisher writes with PutObject and needs no ACL, so object ownership can
+      # be enforced unconditionally.
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      # all four public access controls enabled. Note that the account-level public access block is
+      # a separate control and is not settable from a bucket-scoped template; confirm it
+      # independently.
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      # SSE-KMS with a customer-managed key.
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: 'aws:kms'
+              KMSMasterKeyID: !GetAtt DeliveryKey.Arn
+            BucketKeyEnabled: true
+      # versioning enabled. Delivered objects are write-once, so this is protection against an
+      # accidental overwrite rather than a feature the pipeline uses.
+      VersioningConfiguration:
+        Status: Enabled
+      # server access logging to a separate bucket, under logs/.
+      LoggingConfiguration:
+        DestinationBucketName: !Ref AccessLogBucket
+        LogFilePrefix: logs/
+      LifecycleConfiguration:
+        Rules:
+          # Always present, so an abandoned multipart upload cannot accrue storage silently.
+          - Id: AbortIncompleteUploads
+            Status: Enabled
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 7
+          # Superseded versions, not current ones. Delivered objects are write-once, so a
+          # noncurrent version exists only where something overwrote one: it is recovery from an
+          # accident, never part of the replayable record. The record is always the current
+          # version, which is what the URI in the staging manifest resolves to. Without this
+          # rule those copies are kept for ever and the bucket only grows.
+          #
+          # Ninety days, and deliberately a fixed number rather than one derived from
+          # DeliveredObjectExpirationDays below. The two bound different things: that parameter
+          # is the rebuild horizon for the record itself, this rule bounds overwrite recovery,
+          # and ninety days clears the 70-day restatement window both dataset schemas declare
+          # with margin. Setting that parameter longer than ninety days leaves the record
+          # untouched and makes this the shorter limit for superseded copies only.
+          - Id: ExpireNoncurrentVersions
+            Status: Enabled
+            NoncurrentVersionExpirationInDays: 90
+          - !If
+            - HasObjectExpiry
+            - Id: ExpireDeliveredObjects
+              Status: Enabled
+              ExpirationInDays: !Ref DeliveredObjectExpirationDays
+            - !Ref AWS::NoValue
+
+      # EventBridge notifications on. Queue and topic notifications still deliberately off,
+      # and the distinction is the whole point.
+      #
+      # The delivery service sends its own SQS notification per batch, and that notification
+      # is the contract: it names the objects in the batch and carries the batch version. A
+      # bucket notification pointed at that same queue would put a second, differently-shaped
+      # message on it for every object, and the consumer would have to tell the two apart.
+      # That remains a bad idea and is not what this is.
+      #
+      # EventBridge puts nothing on the delivery queue. The event is used only to wake the
+      # ingest job, which still reads the queue to learn what to process — so the work list is
+      # unchanged, and the doorbell is separate from the mail. That separation is what makes
+      # a lost event survivable: it costs latency, not data, because the queue still holds the
+      # record of what was delivered.
+      #
+      # Safe to enable before anything consumes it. With no rule subscribed the events are
+      # simply not routed, so this stack stays independently deployable.
+      NotificationConfiguration:
+        EventBridgeConfiguration:
+          EventBridgeEnabled: true
+
+  DeliveryBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref DeliveryBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          # one action, one named external principal, object-scoped. This is the grant whose absence
+          # leaves a subscription ACTIVE and silent.
+          - Sid: AllowDeliveryServiceWrite
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:${AWS::Partition}:iam::${PublisherAccountId}:role/${PublisherRoleName}'
+            Action: 's3:PutObject'
+            Resource: !Sub '${DeliveryBucket.Arn}/*'
+
+          # Existence check only. The s3:prefix condition is what stops this becoming an
+          # enumeration grant: it permits a ListBucket call that names no prefix, which returns
+          # whether the bucket is reachable and nothing about its contents.
+          - Sid: AllowDeliveryServiceValidation
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:${AWS::Partition}:iam::${PublisherAccountId}:role/${ReviewerRoleName}'
+            Action: 's3:ListBucket'
+            Resource: !GetAtt DeliveryBucket.Arn
+            Condition:
+              StringNotLike:
+                's3:prefix': ['*']
+
+          # deny every action not using TLS. Applies to all principals, including the consumer; AWS
+          # SDKs use TLS, so nothing legitimate is affected.
+          - Sid: DenyUnencryptedTransport
+            Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource:
+              - !GetAtt DeliveryBucket.Arn
+              - !Sub '${DeliveryBucket.Arn}/*'
+            Condition:
+              Bool:
+                'aws:SecureTransport': false
+
+  # -------------------------------------------------------------------------------------
+  # Notifications
+  # -------------------------------------------------------------------------------------
+
+  NotificationDeadLetterQueue:
+    Type: AWS::SQS::Queue
+    # retained. A dead-lettered notification names objects that were delivered and not consumed, so
+    # discarding it discards the only pointer to that gap.
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      QueueName: !If
+        - GenerateQueueName
+        - !Sub '${AWS::StackName}-notifications-dlq'
+        - !Sub '${QueueName}-dlq'
+      # Fourteen days, the maximum. SQS defaults to four, which would quietly shorten the window
+      # available to diagnose a dead-lettered notification.
+      MessageRetentionPeriod: 1209600
+      # SSE-KMS with the customer-managed key; SQS-managed encryption explicitly disabled.
+      SqsManagedSseEnabled: false
+      KmsMasterKeyId: !Ref DeliveryKey
+
+  NotificationQueue:
+    Type: AWS::SQS::Queue
+    # retained. The queue is the record of what was delivered; deleting it discards every unconsumed
+    # notification.
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      QueueName: !If
+        - GenerateQueueName
+        - !Sub '${AWS::StackName}-notifications'
+        - !Ref QueueName
+      # Fourteen days, the maximum, and set explicitly because the default of four days is a
+      # data-loss risk here: the ingest design treats the queue as the record of what was
+      # delivered, and a backlog older than the retention period is silently incomplete.
+      MessageRetentionPeriod: 1209600
+      VisibilityTimeout: !Ref VisibilityTimeoutSeconds
+      # SSE-KMS with the customer-managed key.
+      SqsManagedSseEnabled: false
+      KmsMasterKeyId: !Ref DeliveryKey
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt NotificationDeadLetterQueue.Arn
+        maxReceiveCount: !Ref MaxReceiveCount
+
+  # The DLQ needs the TLS deny too. It holds the same notification payloads as the queue it
+  # redrives from, and the CDK path sets enforce_ssl on both queues.
+  NotificationDeadLetterQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref NotificationDeadLetterQueue
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          # deny every action not using TLS.
+          - Sid: DenyUnencryptedTransport
+            Effect: Deny
+            Principal: '*'
+            Action: 'sqs:*'
+            Resource: !GetAtt NotificationDeadLetterQueue.Arn
+            Condition:
+              Bool:
+                'aws:SecureTransport': false
+
+  NotificationQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref NotificationQueue
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          # one action, one named external principal. Never Principal '*' and never sqs:*.
+          - Sid: AllowDeliveryServiceNotifications
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:${AWS::Partition}:iam::${PublisherAccountId}:role/${PublisherRoleName}'
+            Action: 'sqs:SendMessage'
+            Resource: !GetAtt NotificationQueue.Arn
+
+          - Sid: AllowDeliveryServiceValidation
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:${AWS::Partition}:iam::${PublisherAccountId}:role/${ReviewerRoleName}'
+            Action: 'sqs:GetQueueAttributes'
+            Resource: !GetAtt NotificationQueue.Arn
+
+          # deny every action not using TLS.
+          - Sid: DenyUnencryptedTransport
+            Effect: Deny
+            Principal: '*'
+            Action: 'sqs:*'
+            Resource: !GetAtt NotificationQueue.Arn
+            Condition:
+              Bool:
+                'aws:SecureTransport': false
+
+  # -------------------------------------------------------------------------------------
+  # Operations
+  # -------------------------------------------------------------------------------------
+
+  AlarmTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub '${AWS::StackName}-destination-alarms'
+      DisplayName: Delivery destination alarms
+      KmsMasterKeyId: !Ref DeliveryKey
+
+  AlarmSubscription:
+    Type: AWS::SNS::Subscription
+    Condition: HasAlarmEmail
+    Properties:
+      TopicArn: !Ref AlarmTopic
+      Protocol: email
+      Endpoint: !Ref AlarmEmail
+
+  DeadLetterAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-notification-dead-lettered'
+      AlarmDescription: >-
+        A delivery notification could not be processed and has been moved to the dead-letter
+        queue. It names objects that were delivered and are not in the staging layer, so this is
+        a data gap rather than a transient error. Inspect the message body: the usual cause is a
+        notification shape the parser does not recognise, which means the delivery contract has
+        changed.
+      Namespace: AWS/SQS
+      MetricName: ApproximateNumberOfMessagesVisible
+      Dimensions:
+        - Name: QueueName
+          Value: !GetAtt NotificationDeadLetterQueue.QueueName
+      Statistic: Maximum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      AlarmActions:
+        - !Ref AlarmTopic
+
+Outputs:
+  # Three of these are inputs to staging.yaml, and each says so in its own description. The
+  # fourth staging parameter, Geo, is not an output of this stack: it is supplied directly by the
+  # operator to both stacks. Passing the three by hand is deliberate: the two stacks have
+  # different lifecycles, and an import would couple the destination's deletability to the
+  # consumer's existence.
+  DeliveryBucketName:
+    Description: Pass to staging.yaml as DeliveryBucketName.
+    Value: !Ref DeliveryBucket
+    Export:
+      Name: !Sub '${AWS::StackName}-DeliveryBucketName'
+
+  NotificationQueueArn:
+    Description: Pass to staging.yaml as NotificationQueueArn.
+    Value: !GetAtt NotificationQueue.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-NotificationQueueArn'
+
+  NotificationQueueUrl:
+    Description: Queue URL, for the ingest job's --queue-url.
+    Value: !Ref NotificationQueue
+
+  DeliveryKmsKeyArn:
+    Description: Pass to staging.yaml as DeliveryKmsKeyArn.
+    Value: !GetAtt DeliveryKey.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-DeliveryKmsKeyArn'
+
+  DeadLetterQueueUrl:
+    Description: Where unparseable notifications land. Check this before assuming data loss.
+    Value: !Ref NotificationDeadLetterQueue
+
+  SubscriptionDestination:
+    Description: >-
+      The bucket and queue ARNs a subscription is created against. The delivery service treats
+      the pair as one destination, and both must be in the same region.
+    Value: !Sub '${DeliveryBucket.Arn} , ${NotificationQueue.Arn}'

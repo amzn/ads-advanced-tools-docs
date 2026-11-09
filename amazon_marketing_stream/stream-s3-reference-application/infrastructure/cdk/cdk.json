@@ -1,0 +1,11 @@
+{
+  "app": "python3 app.py",
+  "watch": { "exclude": ["**/__pycache__/**", "cdk.out/**", ".venv/**"] },
+  "context": {
+    "@aws-cdk/aws-iam:minimizePolicies": true,
+    "@aws-cdk/core:checkSecretUsage": true,
+    "@aws-cdk/core:validateSnapshotRemovalPolicy": true,
+    "@aws-cdk/aws-s3:serverAccessLogsUseBucketPolicy": true,
+    "datasetIds": "ads-performance-v1"
+  }
+}
