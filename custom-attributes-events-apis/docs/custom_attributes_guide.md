@@ -25,14 +25,16 @@ For the full conceptual guide and use case explanations, see the companion blog 
 - Keep names descriptive but concise
 
 ### Data Type Encoding
-All values are sent as strings regardless of their semantic type:
+`value` is always sent as a string, but `dataType` must be one of `STRING`, `INTEGER`, or
+`TIMESTAMP`, and `value` accepts only letters, numbers, and underscores, so decimal points
+are rejected:
 
 | Semantic Type | dataType Field | Value Format |
 |---------------|---------------|--------------|
 | Text | `STRING` | `"premium"` |
-| Number | `STRING` | `"49.99"` |
+| Decimal number | `INTEGER` | Scale to an integer unit such as cents: `"4999"` for $49.99 |
 | Boolean | `STRING` | `"true"` / `"false"` |
-| Integer | `STRING` | `"12"` |
+| Integer | `INTEGER` | `"12"` |
 
 ### Reserved Attributes
 
